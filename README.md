@@ -20,6 +20,28 @@ Chakravyuh provides an end-to-end analytical workbench designed around three fou
 
 ---
 
+## 💡 Problem Statement & Operational Impact
+
+### The Challenge: The Coordinated Influence Triad
+Modern digital threats to public discourse, democratic processes, and national security rarely operate as isolated false statements. Advanced threat actors deploy a coordinated triad:
+1. **Algorithmic Manipulation via Micro-Coordinated Amplification:** Botnets and sockpuppet rings leverage split-second synchronization across accounts to game recommendation algorithms and trending feeds.
+2. **Synthetic & Spliced Media Fabrication:** Manipulated, out-of-context, or re-compressed visual media is deployed to provide visceral, emotional "proof" for unverified claims.
+3. **Geographic Astroturfing:** External or non-local actors mimic authentic grassroots sentiment, feigning organic local outrage while concealing their non-local origins.
+
+### The Operational Gap in Existing Tools
+- **The Black-Box Failure:** Most conventional tools yield uninterpretable "AI risk scores" that cannot survive judicial scrutiny, lack forensic provenance trails, and generate false alarms during authentic viral breaking news.
+- **Privacy & Operational Security (OPSEC):** Sensitive law-enforcement investigations, internal intelligence briefings, and fact-checking workflows cannot risk leaking target observations to cloud-hosted SaaS tools.
+- **Fragmented Toolchains:** Analysts often jump between disjointed graph viewers, image ELA utilities, GIS maps, and word processors—breaking evidence chains and losing temporal correlation.
+
+### The Chakravyuh Solution
+Chakravyuh unifies these dimensions into an **air-gapped, local-first intelligence platform**:
+- **Tamper-Evident Evidence Ledger:** Cryptographic SHA-256 anchoring guarantees end-to-end chain of custody from raw capture to final dossier.
+- **Evidence-Gated Alerts:** Analytical gates suppress false alarms on organic breaking news, alerting only when strict multi-vector thresholds are satisfied.
+- **Bilingual & Indic Context:** Native support for Indian linguistic nuances (Hindi, Hinglish, regional harm lexicons) and Devanagari typography in court-ready PDF briefings.
+- **Actionable CTI Export:** Direct export to STIX 2.1 CTI bundles allows immediate ingestion into Security Operations Centers (SOCs) and incident management systems.
+
+---
+
 ## 🔬 Core Capabilities & Analytical Engines
 
 Chakravyuh synthesizes raw data streams into multi-dimensional intelligence across dedicated analytical engines:
@@ -94,6 +116,25 @@ Public / Replay / Injected Streams
 │ & Verified Dossier Exporter    │   PDF / STIX 2.1 Cryptographic Bundles
 └────────────────────────────────┘
 ```
+
+---
+
+## 🛠️ Technology Stack & Engineering Highlights
+
+Chakravyuh is engineered with an uncompromising focus on local computational efficiency, deterministic execution, and zero mandatory external dependencies:
+
+| Layer / Domain | Technologies | Engineering Rationale |
+|---|---|---|
+| **Core Backend & Async Engine** | Python 3.12 / 3.13, FastAPI, Uvicorn, Pydantic v2 | High-throughput asynchronous event-loop architecture with strict compile-time and runtime type validation. |
+| **High-Performance Graphing** | Rustworkx (Rust engine), NetworkX | Rustworkx provides native Rust Brandes betweenness centrality calculations; NetworkX drives Louvain community clustering. |
+| **Geospatial Processing** | Uber H3 (Resolution 5), GeoJSON | Hexagonal discrete global grid system enabling exact spatial clustering, boundary-independent density analysis, and rapid GMR computation. |
+| **Computer Vision Forensics** | OpenCV Headless, Pillow, ImageHash | Deterministic 64-bit perceptual hashing (`pHash`) and custom JPEG Error Level Analysis (ELA) with anomaly bounding box generation. |
+| **Semantic & Harm NLP** | Scikit-learn, Sentence-Transformers (multilingual MiniLM) | Fast frozen TF-IDF clustering with fallback vectors; bilingual Hindi/Hinglish harm indicator lexicons for regional threat detection. |
+| **Cryptographic Custody** | SQLite 3 (WAL mode), SHA-256 content addressing | Append-only event store and audit anchors guaranteeing tamper-evident analytical run manifests. |
+| **Reporting & Standards** | ReportLab, STIX 2.1 | Generation of cryptographically verified, court-admissible PDF dossiers with embedded Noto Sans Devanagari fonts, HTML, and JSON STIX 2.1 bundles. |
+| **Frontend Workbench** | Next.js 16 (Turbopack, App Router), React 19, TypeScript | Strict type safety generated directly from backend schemas; hardware-accelerated Canvas & WebGL map renderers with SVG fallback. |
+
+---
 
 ## Start on Windows
 
@@ -266,6 +307,20 @@ Windows measurements after optimization (100-event batch with one retained JPEG)
 
 These are local synthetic workloads, not network latency or sustained throughput claims.
 The unmodified before/after measurements are retained under `evaluation/results`.
+
+---
+
+## 🚀 Strategic Roadmap
+
+Chakravyuh's modular 7-layer architecture is designed to expand across emerging threat vectors:
+
+- [ ] **Live Ingestion Adapters:** Native streaming connectors for Telegram MTProto and Reddit public feeds with rate-limited consumer queues.
+- [ ] **Video & Deepfake Forensics:** Keyframe extraction pipeline with optical flow analysis, spatial frequency error mapping, and C2PA Content Credentials cryptographic validation.
+- [ ] **Audio Manipulation Detection:** Acoustic spectral analysis, formant dispersion inspection, and synthetic voice artifact detection for audio leaks.
+- [ ] **Distributed Graph Processing:** Scaling beyond single-machine in-memory graphs to distributed GPU-accelerated CuGraph for million-node campaigns.
+- [ ] **Decentralized Audit Attestation:** Optional cryptographic anchoring of investigation manifests onto distributed ledgers for multi-agency federation.
+
+---
 
 ## Evidence and current limits
 
