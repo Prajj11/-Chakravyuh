@@ -17,12 +17,34 @@ def png() -> bytes:
     return stream.getvalue()
 
 
+def test_chunked_upload_body_is_bounded_before_spooling(tmp_path: Path) -> None:
+    app = create_app(Settings(data_dir=tmp_path, session_token=TOKEN, upload_limit_bytes=1024))
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        response = client.post(
+            "/api/v1/media",
+            headers={
+                "Authorization": "Bearer " + TOKEN,
+                "Content-Type": "multipart/form-data; boundary=boundary",
+            },
+            content=iter(
+                [
+                    b"--boundary\r\nContent-Disposition: form-data; "
+                    b'name="file"; filename="big.png"\r\nContent-Type: image/png\r\n\r\n',
+                    b"x" * 70000,
+                    b"\r\n--boundary--\r\n",
+                ]
+            ),
+        )
+        assert response.status_code == 413
+        assert response.json()["code"] == "UPLOAD_TOO_LARGE"
+
+
 def test_health_auth_upload_download_and_cors(tmp_path: Path) -> None:
     app = create_app(Settings(data_dir=tmp_path, session_token=TOKEN))
     with TestClient(app, base_url="http://127.0.0.1") as client:
         health = client.get("/api/v1/health")
         assert health.status_code == 200
-        assert health.json()["layer_status"]["coordination"] == "PENDING"
+        assert health.json()["layer_status"]["coordination"] == "AVAILABLE"
         assert TOKEN not in health.text
         assert client.get("/api/v1/campaigns").json()["code"] == "SESSION_REQUIRED"
         client.headers["Authorization"] = f"Bearer {TOKEN}"

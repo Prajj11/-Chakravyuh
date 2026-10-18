@@ -1,7 +1,9 @@
 """Loopback FastAPI entry point for the evidence foundation."""
 
+import asyncio
 import logging
 import secrets
+import wave
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from io import BytesIO
@@ -15,17 +17,21 @@ from PIL import Image, UnidentifiedImageError
 from starlette.exceptions import HTTPException
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from app.api.routes import mount_routes
+from app.api.security import UploadBodyLimit
 from app.config import Parameters, Settings
 from app.evidence.canonical import sha256
 from app.evidence.store import IntegrityMismatch
+from app.jobs.worker import Worker
+from app.pipeline import Pipeline
 from app.repositories.evidence import EvidenceRepository
+from app.repositories.state import StateRepository
 from app.schemas.models import (
     AnalysisStatus,
     APIError,
     DataOrigin,
     HealthStatusResponse,
     MediaUploadResponse,
-    NarrativeCampaignSummary,
 )
 
 logger = logging.getLogger("chakravyuh")
@@ -45,8 +51,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         repository = EvidenceRepository(runtime.data_dir, parameters)
         application.state.repository = repository
+        state = StateRepository(repository, scope)
+        pipeline = await asyncio.to_thread(Pipeline, state)
+        worker = Worker(pipeline)
+        application.state.workbench = state
+        application.state.worker = worker
+        worker.start()
         application.state.layer_status = {
-            name: AnalysisStatus.AVAILABLE if name == "ingestion" else AnalysisStatus.PENDING
+            name: AnalysisStatus.AVAILABLE
             for name in (
                 "ingestion",
                 "nlp_engine",
@@ -64,6 +76,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             yield
         finally:
+            await worker.close()
             repository.close()
             if token_file.exists() and token_file.read_text(encoding="utf-8") == token:
                 token_file.unlink()
@@ -76,6 +89,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["Authorization", "Content-Type"],
     )
     application.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost"])
+    application.add_middleware(UploadBodyLimit, limit=runtime.upload_limit_bytes + 65536)
 
     @application.middleware("http")
     async def request_context(
@@ -142,6 +156,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             request, 409, "EVIDENCE_INTEGRITY_MISMATCH", "Evidence integrity verification failed"
         )
 
+    @application.exception_handler(OverflowError)
+    async def queue_full(request: Request, exc: OverflowError) -> JSONResponse:
+        return error(
+            request, 429, "QUEUE_FULL", "Local job queue is full; retry after current jobs finish"
+        )
+
     @application.exception_handler(Exception)
     async def unexpected_error(request: Request, exc: Exception) -> JSONResponse:
         logger.error(
@@ -170,18 +190,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 for status in request.app.state.layer_status.values()
             )
             else "degraded",
-            active_campaigns_count=0,
+            active_campaigns_count=len(request.app.state.workbench.list_campaigns()),
             total_ingested_events=repository.event_count(scope),
             layer_status=request.app.state.layer_status,
         )
-
-    @application.get(
-        "/api/v1/campaigns",
-        response_model=list[NarrativeCampaignSummary],
-        dependencies=[Depends(session)],
-    )
-    def campaigns() -> list[NarrativeCampaignSummary]:
-        return []
 
     @application.post("/api/v1/media", response_model=MediaUploadResponse, status_code=201)
     def upload_media(
@@ -191,6 +203,32 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if len(data) > runtime.upload_limit_bytes:
             raise HTTPException(413, "Upload exceeds the 25 MiB limit")
         formats = {"JPEG": "image/jpeg", "PNG": "image/png", "WEBP": "image/webp"}
+        # Retain structurally valid WAV containers; absence of an audio model remains UNSUPPORTED.
+        if data.startswith(b"RIFF") and data[8:12] == b"WAVE":
+            try:
+                with wave.open(BytesIO(data), "rb") as audio:
+                    expected = audio.getnframes() * audio.getnchannels() * audio.getsampwidth()
+                    if expected <= 0 or len(audio.readframes(audio.getnframes())) != expected:
+                        raise ValueError("Truncated WAV")
+            except (wave.Error, EOFError, ValueError) as exc:
+                raise HTTPException(415, "Malformed WAV audio") from exc
+            if file.content_type not in {"audio/wav", "audio/x-wav", "application/octet-stream"}:
+                raise HTTPException(415, "Declared MIME type does not match WAV container")
+            audio_repository: EvidenceRepository = request.app.state.repository
+            with audio_repository.transaction() as db:
+                artifact_id, digest = audio_repository.put_artifact(
+                    db, data, "MEDIA", "audio/wav", DataOrigin.USER_INJECTED, scope
+                )
+                audio_repository.append_audit(
+                    db,
+                    action="MEDIA_COLLECTED",
+                    origin=DataOrigin.USER_INJECTED,
+                    actor_id=actor,
+                    media_sha256=[digest],
+                )
+            return MediaUploadResponse(
+                media_artifact_id=artifact_id, sha256_hash=digest, media_type="audio"
+            )
         try:
             with Image.open(BytesIO(data)) as image:
                 mime = formats.get(image.format or "")
@@ -238,6 +276,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             },
         )
 
+    mount_routes(application, session, token, runtime.frontend_origin)
     return application
 
 

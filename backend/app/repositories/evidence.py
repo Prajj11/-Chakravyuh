@@ -218,11 +218,16 @@ class EvidenceRepository:
         origin: DataOrigin,
         scope: str,
     ) -> str:
-        from app.schemas.models import AnalyticalReport
+        from app.schemas.models import AnalyticalReport, NarrativeCampaignDetail
 
         if (
-            not isinstance(report, AnalyticalReport)
-            or report.parameter_set_id != self.parameters.parameter_set_id
+            not isinstance(report, (AnalyticalReport, NarrativeCampaignDetail))
+            or (
+                report.cti_assessment.parameter_set_id
+                if isinstance(report, NarrativeCampaignDetail)
+                else report.parameter_set_id
+            )
+            != self.parameters.parameter_set_id
         ):
             raise ValueError("Analysis must carry this repository's parameter set")
         with self.transaction() as db:

@@ -21,6 +21,10 @@ dependencies = [
   "networkx==3.5",
   "opencv-python-headless==4.12.0.88",
   "ImageHash==4.3.2",
+  "reportlab==4.4.4",
+  "stix2==3.0.2",
+  "uharfbuzz==0.56.3",
+  "websockets==15.0.1",
 ]
 
 [project.optional-dependencies]
@@ -29,6 +33,9 @@ dev = ["pytest==9.1.1", "ruff==0.17.1", "httpx2==2.13.1", "mypy==2.4.0"]
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.setuptools.package-data]
+"app.reporting" = ["fonts/*.ttf", "fonts/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

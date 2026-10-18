@@ -24,7 +24,7 @@
 ## Phase 2: Narrative and coordination analytics
 
 - [x] **T-2.1:** Versioned multilingual embedder and frozen TF-IDF fallback, separate vector indexes and 24-hour clustering.
-- [/] **T-2.2:** Typed claim registry, source snapshots, candidate retrieval and human contextual review/audit; reject synthetic cross-origin verification.
+- [x] **T-2.2:** Typed claim registry, source snapshots, candidate retrieval and human contextual review/audit; reject synthetic cross-origin verification.
 - [x] **T-2.3:** Explainable multilingual lexicon harm indicators with supported-language coverage.
 - [x] **T-2.4:** Content-linked disjoint event pairing, repeated buckets, q_uv normalization and account/campaign synchronization.
 - [x] **T-2.5:** Explicit bot feature scaling, availability weights, additive contributions and null/sufficiency rules.
@@ -40,12 +40,12 @@
 
 ## Phase 4: API, CTI and reporting
 
-- [ ] **T-4.1:** Available-component CTI, effective weights, provisional tiers, eligibility gates, cooldown and rearm.
-- [ ] **T-4.2:** FastAPI REST endpoints, typed async jobs, upload/artifact store, generation-safe mutations and safe error envelope.
-- [ ] **T-4.3:** WebSocket sequence retention/resync, polling, snapshot revision consistency and session-scoped access.
-- [ ] **T-4.4:** Integrity-verified ZIP exports containing dossier, HTML/PDF, manifest, STIX and authorized derivatives.
-- [ ] **T-4.5:** Consistent organic/unclassified redaction across every representation; hash derivatives and omit restricted originals.
-- [/] **T-4.6:** CORS, loopback defaults, upload size/type/dimension guards and reviewer identity from session. Local session/CORS/image guards implemented; claim-review integration and remaining media adapters pending.
+- [x] **T-4.1:** Available-component CTI, effective weights, provisional tiers, eligibility gates, cooldown and rearm.
+- [x] **T-4.2:** FastAPI REST endpoints, typed async jobs, upload/artifact store, generation-safe mutations and safe error envelope.
+- [/] **T-4.3:** WebSocket sequence retention/resync, polling, snapshot revision consistency and session-scoped access.
+- [x] **T-4.4:** Integrity-verified ZIP exports containing dossier, HTML/PDF, manifest, STIX and authorized derivatives.
+- [x] **T-4.5:** Consistent organic/unclassified redaction across every representation; hash derivatives and omit restricted originals.
+- [x] **T-4.6:** CORS, loopback defaults, upload size/type/dimension guards and reviewer identity from session. Local session/CORS/image guards implemented; claim-review integration and remaining media adapters pending.
 
 ## Phase 5: Complete investigation frontend
 

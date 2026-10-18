@@ -222,7 +222,7 @@ class StateRepository:
                         detail.campaign_id,
                         detail.snapshot_revision,
                         detail.model_dump_json(),
-                        sha256(canonical_bytes(detail.cti_assessment)),
+                        sha256(canonical_bytes(detail)),
                     ),
                 )
 
@@ -259,7 +259,11 @@ class StateRepository:
         revision: int,
     ) -> None:
         with self.mutation(partition, generation):
-            if event_id not in {event.event_id for event in self.list_events(partition)}:
+            if not self.evidence._db.execute(
+                "SELECT 1 FROM active_events WHERE scope=? AND partition_id=? "
+                "AND generation=? AND event_id=?",
+                (self.scope, partition.key, generation, event_id),
+            ).fetchone():
                 raise ValueError("Membership event is outside active partition")
             with self.evidence.transaction() as db:
                 db.execute(
