@@ -1,12 +1,104 @@
-# Chakravyuh
+# Chakravyuh (चक्रव्यूह)
 
-A local investigation workbench for observed coordination, image anomalies and geographic
-context. Raw observations become immutable evidence, explainable campaign snapshots and
-integrity-checked investigative dossiers. The active specification is in [`docs v2`](docs%20v2/).
+> **A Local-First Investigation Workbench for Observed Coordination, Image Forensics, and Geographic Narrative Analysis.**
+
+Chakravyuh is an open-source, forensics-grade intelligence workbench built for cyber-threat analysts, OSINT investigators, digital forensic units, and fact-checkers. It transforms unverified digital streams into immutable evidence, explainable campaign snapshots, and tamper-evident investigative dossiers.
+
+The complete active technical specification is documented in [`docs v2`](docs%20v2/).
+
+---
+
+## 🎯 What is Chakravyuh?
+
+Modern online influence operations and digital disinformation campaigns rarely rely on a single vector. They combine coordinated micro-burst amplification, manipulated or spliced media assets, and synthetic astroturfing to fabricate local grassroots momentum.
+
+Chakravyuh provides an end-to-end analytical workbench designed around three foundational principles:
+
+1. **Explainable Indicators Over Black-Box AI:** Every analytical metric provides granular attribution, confidence weights, parameter provenance, and explicit coverage metrics. Missing evidence remains explicitly `null` rather than masquerading as false certainty or zero.
+2. **Cryptographic Chain of Custody:** Ingested observations, raw media payloads, and normalized canonical events are hashed via SHA-256 and anchored in an append-only audit ledger to ensure tamper-evident provenance.
+3. **Local-First & Air-Gapped Privacy:** Operates entirely on standard local analyst hardware (`127.0.0.1`) without external cloud telemetry, third-party tile servers, or mandatory cloud APIs.
+
+---
+
+## 🔬 Core Capabilities & Analytical Engines
+
+Chakravyuh synthesizes raw data streams into multi-dimensional intelligence across dedicated analytical engines:
+
+### 1. ⚡ Coordination & Inauthentic Behavior Engine
+- **Micro-Window Co-Posting:** Detects non-random coordinated bursts across sliding 60-second temporal windows by requiring content/semantic linkage across multiple time buckets (avoiding false positives on viral breaking news).
+- **Explainable Bot Scoring:** Assesses account automation using an additive feature breakdown across posting cadence, content repetition, and behavioral signals.
+- **Graph & Community Modeling:** Constructs directed interaction and synchronization graphs, applying **Louvain community detection** and exact directed **betweenness centrality** (accelerated by Rustworkx).
+- **Evidence-Bounded Role Classification:** Categorizes participants without assuming unobserved intent:
+  - `EARLIEST_OBSERVED_SEED`: The initial recorded broadcast in collection scope.
+  - `BOT_AMPLIFIER`: High automation indicator (≥70) and high synchronization (≥0.65).
+  - `BRIDGE_INFLUENCER`: High cross-community centrality bridging separate clusters.
+  - `ORGANIC_USER`: Verified baseline behavior with low coordination signals.
+  - `UNCLASSIFIED`: Inconclusive or insufficient observation history.
+
+### 2. 🖼️ Multi-Layer Media Forensics
+- **Error Level Analysis (ELA):** Performs authentic JPEG recompression difference mapping to expose digital splicing, cloning, and manipulated regions.
+- **Perceptual Hashing (64-bit pHash):** Tracks near-duplicate visual memes, rescaled images, and crop modifications across channels.
+- **Metadata & Provenance Inspection:** Extracts EXIF telemetry and queries C2PA Content Credentials (`VALID`, `INVALID`, `MISSING`, or `UNSUPPORTED`).
+- **Visual Anomaly Inspection:** Highlights detected manipulation zones with interactive heatmaps and bounding boxes in the analyst UI.
+
+### 3. 🌐 Geospatial Astroturfing & Anomaly Engine
+- **Uber H3 Hexagonal Spatial Indexing:** Projects geographic event densities at H3 resolution 5.
+- **Source vs. Subject Separation:** Strictly distinguishes between the author's physical/declared location and the target geographic location mentioned in content.
+- **Geographic Mismatch Ratio (GMR):** Flags synthetic astroturfing campaigns where non-local coordinated clusters artificially amplify regional topics.
+
+### 4. 📝 Semantic Clustering & Contextual Fact-Checking
+- **Multilingual Narrative Clustering:** Groups observations using character/word TF-IDF and optional cached multilingual Sentence-Transformers (`paraphrase-multilingual-MiniLM-L12-v2`).
+- **Claim Reference Retrieval:** Matches observed statements against a registry of known claims, supported by English, Hindi, and Hinglish harm indicator lexicons.
+- **Human-in-the-Loop Review:** Enforces the investigative safeguard that similarity does not equal verification—analysts review and record authenticated findings (`CORROBORATED`, `CONTRADICTED_BY_SOURCE`, `CONTEXT_MISSING`, or `UNVERIFIED`).
+
+### 5. 🛡️ Campaign Threat Index (CTI) & Alert Gating
+- Synthesizes coordination, media manipulation, and claim severity into a composite Campaign Threat Index (0–100).
+- **Evidence Gating:** Suppresses automated alerts on benign viral mobilization through minimum author count, signal coverage, and temporal persistence gates.
+
+### 6. 📑 Tamper-Evident Dossier Export
+- Generates publication-ready investigative dossiers in **PDF** (featuring embedded Noto Sans Devanagari typography for bilingual Hindi/English reports), **HTML**, **JSON**, and **STIX 2.1** threat intelligence packages.
+- Features configurable privacy redactions that automatically mask unclassified or organic participants before distribution.
+
+---
+
+## 🏗️ Architecture at a Glance
+
+```text
+Public / Replay / Injected Streams
+                │
+┌───────────────▼────────────────┐
+│   L1: Ingestion & Evidence     │ ➔ SHA-256 Ledger, Canonical Normalization, Audit Chain
+└───────────────┬────────────────┘
+                ▼
+┌────────────────────────────────┐
+│    L2: NLP & Claim Engine      │ ➔ Multilingual Embeddings, Narrative Clustering, Harm Lexicon
+└───────────────┬────────────────┘
+        ┌───────┴───────┐
+        ▼               ▼
+┌───────────────┐┌───────────────┐
+│ L3: Media     ││ L4-L5: Graph  │ ➔ ELA Heatmaps, 64-bit pHash, Louvain Communities,
+│ Forensics     ││ & Coordination│   Brandes Centrality, Role Classification
+└───────┬───────┘└───────┬───────┘
+        └───────┬───────┘
+                ▼
+┌────────────────────────────────┐
+│  L6: Geospatial & Astroturf    │ ➔ H3 Resolution 5, Source/Subject GMR Disparity
+└───────────────┬────────────────┘
+                ▼
+┌────────────────────────────────┐
+│   L7: CTI & Alert Gatekeeper   │ ➔ Composite Threat Scoring, Evidence-Gated Alerts
+└───────────────┬────────────────┘
+                ▼
+┌────────────────────────────────┐
+│ Next.js Interactive Workbench  │ ➔ Timeline Replay, Graph Inspector, WebGL GeoMap,
+│ & Verified Dossier Exporter    │   PDF / STIX 2.1 Cryptographic Bundles
+└────────────────────────────────┘
+```
 
 ## Start on Windows
 
-1. Install Python 3.12 and Node.js 24, then double-click **`start.bat`**.
+1. Install Python 3.12 or 3.13 (64-bit) and Node.js 24 (or 20.9+), then double-click **`start.bat`**.
+   *(Note: Python 3.14 is not currently supported as precompiled binary wheels for dependencies such as NumPy 2.2 are not yet published for it).*
 2. Wait for the backend and frontend terminals to become ready. The launcher opens
    [the workbench](http://127.0.0.1:3000) automatically. You can also open that address manually.
 3. Read `.runtime/local-session-token` locally and paste it into **Local session token**.
@@ -14,10 +106,10 @@ integrity-checked investigative dossiers. The active specification is in [`docs 
 4. Select a replay scenario and click **Load raw scenario**. Default 100× replay completes
    the longest scenario in about a minute, plus calculation time.
 
-The launcher creates `.venv`, installs missing or changed locked dependencies and starts both loopback services
+The launcher creates `.venv` (automatically detecting Python 3.12 or 3.13 via the `py` launcher or `python` in PATH), installs missing or changed locked dependencies, and starts both loopback services
 in separate terminals. Initial installation requires internet access; the installed application,
 fixtures, fonts and default map work offline. Stop both terminals with Ctrl+C before relaunching.
-`start.bat --setup` refreshes locked dependencies; `start.bat --check` checks prerequisites.
+`start.bat --setup` (or `setup.bat`) refreshes locked dependencies; `start.bat --check` (or `check.bat`) checks prerequisites.
 The default ports are **8001** for the API and **3000** for the UI.
 Use port **3000** to use the app. The backend root on port **8001** provides links to the
 workbench, API documentation and health status. Starting only the backend requires starting
@@ -30,15 +122,14 @@ services before opening the browser. If the app is already running, open port 30
 | `start.bat` | Install missing/changed dependencies and start both services |
 | `start-backend.bat` | Check prerequisites and run only the backend on port 8001 |
 | `start-frontend.bat` | Check prerequisites and run only the frontend on port 3000 |
-| `setup.bat` | Install or refresh dependencies |
-| `check.bat` | Check prerequisites without starting services |
+| `setup.bat` | Install or refresh dependencies without starting services |
+| `check.bat` | Check prerequisites and run tests without starting services |
 
 Use `start.bat` for normal startup, or run both service launchers separately. For unattended
 checks, use `check.bat --no-pause`; the individual launchers support `--check` without starting
 a service. `setup.bat --no-pause` installs dependencies without waiting for a keypress.
 
-Tested locally on Windows 11, Python 3.12.10, Node.js 24.18.0 and Microsoft Edge. The declared
-minimums are Python 3.11 and Node.js 20.9; other combinations have not been verified.
+Tested locally on Windows 11 with Python 3.12.10 and Python 3.13.x, Node.js 24.18.x, and Microsoft Edge. Supported versions are Python 3.11 through 3.13 (Python 3.12 or 3.13 recommended; Python 3.14 lacks precompiled binary wheels for key scientific dependencies) and Node.js 20.9+.
 Linux entry point: `./scripts/dev.sh`. Linux/Windows CI is configured; remote CI and Linux
 runtime results have not been observed here.
 
@@ -98,7 +189,11 @@ different browser origin. API documentation is at [port 8001/docs](http://127.0.
 From the root in PowerShell:
 
 ```powershell
-python -m venv .venv
+# Create virtual environment (Python 3.13 or 3.12)
+py -3.13 -m venv .venv
+# Or: py -3.12 -m venv .venv
+
+# Install locked dependencies and backend in editable mode
 .\.venv\Scripts\python.exe -m pip install -c backend/requirements.lock -e './backend[dev]'
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --loop asyncio
 ```

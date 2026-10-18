@@ -119,10 +119,16 @@ if exist ".venv\bin\python" (
 where py.exe >nul 2>&1
 if errorlevel 1 goto python_fallback
 py -3.12 -c "import sys" >nul 2>&1
-if errorlevel 1 goto python_fallback
-py -3.12 -m venv .venv
-if errorlevel 1 exit /b 1
-goto install_dependencies
+if not errorlevel 1 (
+    py -3.12 -m venv .venv
+    if not errorlevel 1 goto install_dependencies
+)
+py -3.13 -c "import sys" >nul 2>&1
+if not errorlevel 1 (
+    py -3.13 -m venv .venv
+    if not errorlevel 1 goto install_dependencies
+)
+goto python_fallback
 
 :python_fallback
 where python.exe >nul 2>&1
