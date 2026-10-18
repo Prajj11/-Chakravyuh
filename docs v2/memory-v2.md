@@ -171,3 +171,5 @@ The documentation revision checked all ten file versions, 18 relative links, Pyt
 | ELA evaluation mask | `fdc53f916bebeb2d57f32b030ac6329c334ed170f78e67500cf3a2b1b0f7072d` |
 
 Full evaluation protocol, raw metrics, limitations and reproduction commands are in [evaluation/README.md](../evaluation/README.md). README now describes the implemented workbench, Windows/Linux entry points, optional weights, a five-minute demonstration and actual release gaps.
+
+- Live launch verification: backend healthy and frontend HTTP 200 through the Windows launcher subcommands. Followed bundled Next.js 16.4 guidance: keep next-env.d.ts generated/gitignored, run next typegen before typechecking a fresh checkout, and retain the framework-generated AGENTS.md. Development startup no longer changes tracked framework type declarations.

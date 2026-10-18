@@ -128,6 +128,9 @@ changes, run `.\.venv\Scripts\python.exe backend/scripts/generate_types.py`, the
 generated files. Engine outputs pass typed validators; HTTP and WebSocket responses are checked
 again at the frontend boundary.
 
+Next.js owns `frontend/next-env.d.ts`; it is generated and gitignored. The typecheck command
+runs `next typegen` before TypeScript, so fresh checkouts do not require a prior build.
+
 Local release verification: **124 backend tests and three Edge browser journeys pass**,
 along with the complete phase gate, a locked reinstall, startup prerequisite check and npm
 audit (zero reported vulnerabilities). The actual seven-page English/Hindi dossier and desktop/
