@@ -2,7 +2,7 @@
 
 **Contract version:** 2.1.0  
 **Updated:** October 18, 2026  
-**Status:** Implementation specification; no backend has been implemented yet.
+**Status:** Authoritative contract. Models and evidence foundation implemented; analytical services and full API remain pending (see tasks-v2.md).
 
 This file owns wire names, enums, response shapes, and storage contracts. [trd-v2.md](trd-v2.md) owns algorithms and constants. All v2 files supersede v1; no implicit inheritance is required. Keep existing v2 filenames.
 

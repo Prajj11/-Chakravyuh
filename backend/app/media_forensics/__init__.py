@@ -1,0 +1,1 @@
+"""Media indicator adapters (pending)."""
