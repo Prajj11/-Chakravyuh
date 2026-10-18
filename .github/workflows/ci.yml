@@ -57,6 +57,13 @@ jobs:
           npm run build
       - name: Offline CLI smoke
         run: python scripts/smoke.py
+      - name: Install Linux browser
+        if: runner.os == 'Linux'
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+      - name: Browser investigation journeys
+        working-directory: frontend
+        run: npm run test:e2e
       - name: Check POSIX launcher syntax
         run: |
           bash -n scripts/setup.sh

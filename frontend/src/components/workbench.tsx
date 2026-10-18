@@ -1,510 +1,590 @@
 "use client";
-
-import { useCallback, useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Activity,
   ArrowDownToLine,
-  ArrowRight,
-  Check,
-  ChevronRight,
-  Database,
-  FileCheck2,
   Fingerprint,
-  GitBranch,
   Globe2,
-  Image,
-  Layers3,
-  LockKeyhole,
   Network,
   Plus,
   Radio,
   RefreshCw,
-  Search,
   ShieldCheck,
-  Terminal,
-  Waypoints,
 } from "lucide-react";
-import { connectSession, getHealth } from "@/lib/api";
-import type { HealthStatusResponse } from "@/types/chakravyuh";
-
-const tabs = [
-  {
-    label: "Coordination",
-    icon: Network,
-    detail:
-      "Repeated content-linked activity will appear here after the coordination engine is implemented.",
-  },
-  {
-    label: "Geography",
-    icon: Globe2,
-    detail:
-      "Source geography, collection coverage and scoped historical baselines are planned. No locations have been inferred.",
-  },
-  {
-    label: "Media",
-    icon: Image,
-    detail:
-      "Image uploads are available through the API. Computed ELA, pHash and provenance inspection are planned.",
-  },
-  {
-    label: "Claims",
-    icon: FileCheck2,
-    detail:
-      "Candidate references and contextual analyst review are planned. No claim has been verified.",
-  },
-] as const;
-
-const layers = [
-  {
-    id: "ingestion",
-    name: "Evidence & ingestion",
-    note: "Exact bytes · SHA-256 · audit chain",
-  },
-  {
-    id: "nlp_engine",
-    name: "Narrative analytics",
-    note: "Clustering & reference retrieval",
-  },
-  {
-    id: "coordination",
-    name: "Coordination",
-    note: "Repeated pairs & bot indicators",
-  },
-  {
-    id: "graph_engine",
-    name: "Graph investigation",
-    note: "Communities & observed roles",
-  },
-  {
-    id: "geo_engine",
-    name: "Geographic context",
-    note: "Source coverage & baselines",
-  },
-  {
-    id: "media_forensics",
-    name: "Media indicators",
-    note: "Computed ELA & perceptual hashes",
-  },
-  {
-    id: "reporting",
-    name: "CTI & dossiers",
-    note: "Coverage gates & verified exports",
-  },
-];
-
+import { useWorkbench } from "@/lib/use-workbench";
+import { label, privateText, score } from "@/lib/privacy";
+import type { GraphEdge } from "@/types/chakravyuh";
+import { GraphPanel } from "./graph/graph-panel";
+import { Inspector } from "./graph/inspector";
+import { GeoPanel } from "./map/geo-panel";
+import { MediaPanel } from "./forensics/media-panel";
+import { ClaimPanel } from "./claims/claim-panel";
+import { TimelinePanel } from "./timeline/timeline-panel";
+import { Assessment } from "./alerts/assessment";
+import { ExportDialog, InjectDialog, Modal } from "./alerts/dialogs";
+const tabs = ["Graph", "Geography", "Media", "Claims"] as const;
 export function Workbench() {
-  const [health, setHealth] = useState<HealthStatusResponse | null>(null);
-  const [connection, setConnection] = useState<
-    "checking" | "connected" | "offline"
-  >("checking");
-  const [activeTab, setActiveTab] = useState(0);
-  const [token, setToken] = useState("");
-  const [authorized, setAuthorized] = useState(false);
-  const [authorizing, setAuthorizing] = useState(false);
-  const [sessionError, setSessionError] = useState("");
-  const [refresh, setRefresh] = useState(0);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const update = async () => {
-      try {
-        const result = await getHealth(
-          AbortSignal.any([controller.signal, AbortSignal.timeout(5000)]),
+  const work = useWorkbench();
+  const [tokenInput, setTokenInput] = useState(""),
+    [connecting, setConnecting] = useState(false),
+    [tab, setTab] = useState<(typeof tabs)[number]>("Graph");
+  const [scenario, setScenario] = useState("cmp_electoral_01"),
+    [seed, setSeed] = useState(42),
+    [speed, setSpeed] = useState(100),
+    [reset, setReset] = useState(true),
+    [confirmReset, setConfirmReset] = useState(false);
+  const [dialog, setDialog] = useState<"inject" | "export" | null>(null),
+    [privacy, setPrivacy] = useState(true),
+    [selectedNode, setSelectedNode] = useState(""),
+    [edge, setEdge] = useState<GraphEdge | null>(null),
+    [cell, setCell] = useState(""),
+    [cursor, setCursor] = useState<number | null>(null);
+  const [postLimit, setPostLimit] = useState(100);
+  const detail =
+    work.detail?.campaign_id === work.selected ? work.detail : null;
+  const highlight = useMemo(() => {
+    const ids = new Set<string>();
+    if (!detail) return ids;
+    if (selectedNode) ids.add(selectedNode);
+    if (edge) {
+      ids.add(edge.source);
+      ids.add(edge.target);
+    }
+    if (cell)
+      for (const event of detail.sample_posts) {
+        const report = detail.geo_anomalies.find(
+          (report) => report.h3_index === cell,
         );
-        if (!controller.signal.aborted) {
-          setHealth(result);
-          setConnection("connected");
-        }
-      } catch {
-        if (!controller.signal.aborted) {
-          setHealth(null);
-          setConnection("offline");
-        }
+        if (
+          event.geospatial.target_h3_index === cell ||
+          (report?.region_name &&
+            event.text.toLowerCase().includes(report.region_name.toLowerCase()))
+        )
+          ids.add(event.account.account_id);
       }
-    };
-    void update();
-    const timer = setInterval(() => void update(), 10000);
-    return () => {
-      controller.abort();
-      clearInterval(timer);
-    };
-  }, [refresh]);
-
-  const authorize = useCallback(
-    async (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      setAuthorizing(true);
-      setSessionError("");
-      try {
-        await connectSession(token);
-        setAuthorized(true);
-        setToken("");
-      } catch (error: unknown) {
-        setSessionError(
-          error instanceof Error ? error.message : "Session connection failed.",
-        );
-      } finally {
-        setAuthorizing(false);
-      }
-    },
-    [token],
-  );
-
-  const available = Object.values(health?.layer_status ?? {}).filter(
-    (status) => status === "AVAILABLE",
-  ).length;
-  const selected = tabs[activeTab];
-
+    return ids;
+  }, [detail, selectedNode, edge, cell]);
+  const clear = () => {
+    setSelectedNode("");
+    setEdge(null);
+    setCell("");
+    setCursor(null);
+    setPostLimit(100);
+  };
+  const start = async () => {
+    setConfirmReset(false);
+    clear();
+    try {
+      await work.run(
+        "/api/v1/simulate/scenario",
+        {
+          scenario_id: scenario,
+          reset_state: reset,
+          seed,
+          speed_multiplier: speed,
+        },
+        "Replay",
+      );
+    } catch {
+      /* Shared job error is rendered below. */
+    }
+  };
+  const posts =
+    detail?.sample_posts.filter(
+      (event) =>
+        (!highlight.size || highlight.has(event.account.account_id)) &&
+        (cursor == null || Date.parse(event.timestamp_utc) <= cursor),
+    ) ?? [];
+  const authorize = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setConnecting(true);
+    try {
+      await work.authorize(tokenInput);
+      setTokenInput("");
+    } catch (e) {
+      work.setError(
+        e instanceof Error ? e.message : "Session authorization failed",
+      );
+    } finally {
+      setConnecting(false);
+    }
+  };
   return (
-    <div className="workbench">
-      <a href="#main-content" className="skip-link">
+    <>
+      <a className="skip-link" href="#investigation">
         Skip to investigation
       </a>
       <header className="topbar">
-        <a className="brand" href="/" aria-label="Chakravyuh home">
-          <span className="brand-mark">
-            <Waypoints size={25} />
-          </span>
-          <span>
-            CHAKRAVYUH<small>INVESTIGATION WORKBENCH</small>
-          </span>
-        </a>
-        <div className="topbar-divider" />
-        <span className="preview-label">
-          FOUNDATION PREVIEW <span>v0.1</span>
-        </span>
-        <div className="header-actions">
-          <span className="local-label">
-            <LockKeyhole size={13} /> Local workspace
-          </span>
-          <button disabled title="Scenario replay is planned in Sprint 2">
-            <Radio size={15} /> Scenarios
-          </button>
-          <button disabled title="Queued injection is not implemented yet">
-            <Plus size={15} /> Inject
+        <div className="brand">
+          <div className="brand-symbol">
+            <Fingerprint size={28} />
+          </div>
+          <div>
+            <h1>CHAKRAVYUH</h1>
+            <span>Evidence & coordination workbench</span>
+          </div>
+        </div>
+        <div className="stream-status">
+          <i
+            className={
+              work.stream === "Stream connected" ? "live-dot" : "idle-dot"
+            }
+          />
+          {work.stream}
+        </div>
+        <div className="top-actions">
+          <button
+            disabled={!work.token || !!work.busy}
+            onClick={() => setDialog("inject")}
+          >
+            <Plus size={15} />
+            Inject event
           </button>
           <button
-            disabled
-            title="Verified dossier exports are not implemented yet"
+            disabled={!detail || !!work.busy}
+            onClick={() => setDialog("export")}
           >
-            <ArrowDownToLine size={15} /> Export
+            <ArrowDownToLine size={15} />
+            Export dossier
+          </button>
+          <button
+            aria-label="Refresh snapshots"
+            onClick={() => void work.refresh()}
+          >
+            <RefreshCw size={15} />
           </button>
         </div>
       </header>
-
-      <div className="workspace-body">
-        <aside className="campaign-sidebar" aria-label="Campaign feed">
-          <div className="sidebar-heading">
-            <span>CAMPAIGNS</span>
-            <span className="count">
-              {health?.active_campaigns_count ?? "—"}
-            </span>
-          </div>
-          <div className="search-placeholder">
-            <Search size={14} /> Search available after analytics
-          </div>
-          <div className="feed-label">
-            <span className="status-dot muted" /> NO ACTIVE COLLECTION
-          </div>
-          <div className="feed-empty">
-            <Layers3 size={25} strokeWidth={1.3} />
-            <strong>No campaigns yet</strong>
-            <p>
-              Captured evidence will become investigable campaigns as the
-              analytical pipeline comes online.
-            </p>
-          </div>
-          <div className="sidebar-note">
-            <ShieldCheck size={18} />
-            <p>
-              Evidence first.
+      <div className="telemetry">
+        <span>
+          <Activity size={13} />
+          {work.health?.status ?? "Checking backend"}
+        </span>
+        <span>
+          {work.health?.active_campaigns_count ?? "—"} active narratives
+        </span>
+        <span>{work.health?.total_ingested_events ?? "—"} retained events</span>
+        <span>CPU · local · frozen lexical fallback</span>
+        <span className="mono">
+          PIPELINE {work.health?.pipeline_version ?? "2.1.0"}
+        </span>
+      </div>
+      {!work.token ? (
+        <main className="welcome">
+          <div className="welcome-copy">
+            <span className="eyebrow">LOCAL-FIRST INVESTIGATION</span>
+            <h2>
+              Follow the evidence.
               <br />
-              <span>
-                Indicators support investigation. They do not establish intent
-                or claim truth.
-              </span>
+              <em>Keep uncertainty visible.</em>
+            </h2>
+            <p>
+              Inspect repeated amplification, observed networks, media
+              compression anomalies and geographic context. Claim verification
+              remains a separate human review.
             </p>
+            <div className="welcome-icons">
+              <Network />
+              <Globe2 />
+              <ShieldCheck />
+            </div>
           </div>
-          <div className="workspace-footer">
-            <Database size={13} /> SQLite · local evidence store
-          </div>
-        </aside>
-
-        <main id="main-content" className="main-panel">
-          <div className="breadcrumb">
-            Workspace <ChevronRight size={13} />
-            <span>Overview</span>
-            <span className="origin-tag">LOCAL / OFFLINE CAPABLE</span>
-          </div>
-          <div className="page-heading">
-            <div>
-              <p className="eyebrow">OBSERVE. TRACE. VERIFY.</p>
-              <h1>Your investigation starts with evidence.</h1>
-              <p className="subtitle">
-                A local foundation for examining coordinated activity, media and
-                context.
+          <section className="session-card">
+            <h2>Connect your local session</h2>
+            <p>
+              The backend saves a fresh token in{" "}
+              <code>.runtime/local-session-token</code>. Read it locally and
+              paste it below.
+            </p>
+            <form onSubmit={authorize}>
+              <label>
+                Local session token
+                <input
+                  autoComplete="off"
+                  type="password"
+                  required
+                  value={tokenInput}
+                  onChange={(e) => setTokenInput(e.target.value)}
+                  placeholder="Paste the current launch token"
+                />
+              </label>
+              <button className="primary-button" disabled={connecting}>
+                {connecting ? "Validating…" : "Connect session"}
+              </button>
+            </form>
+            <p className="subtle">
+              The token stays in memory for this tab and is cleared from the
+              input after authorization.
+            </p>
+            {work.error && (
+              <p role="alert" className="error">
+                {work.error}
               </p>
-            </div>
-            <div className="version-stamp">
-              CONTRACT<span>2.1.0</span>
-            </div>
-          </div>
-
-          <div className="telemetry" aria-label="Live backend telemetry">
-            <div>
-              <span className="metric-label">
-                <Activity size={14} /> API CONNECTION
-              </span>
-              <strong
-                className={
-                  connection === "connected" ? "text-success" : "text-muted"
-                }
+            )}
+          </section>
+        </main>
+      ) : (
+        <>
+          <div className="replay-controls">
+            <span className="eyebrow">
+              <Radio size={14} /> RAW REPLAY
+            </span>
+            <label>
+              Scenario
+              <select
+                aria-label="Scenario"
+                value={scenario}
+                onChange={(e) => setScenario(e.target.value)}
               >
-                {connection === "connected"
-                  ? "Connected"
-                  : connection === "checking"
-                    ? "Checking…"
-                    : "Offline"}
-              </strong>
-              <span>
-                {connection === "connected"
-                  ? "Loopback · native asyncio"
-                  : "Start the backend on port 8001"}
-              </span>
-            </div>
-            <div>
-              <span className="metric-label">
-                <Database size={14} /> RETAINED EVENTS
-              </span>
-              <strong className="numeric">
-                {health?.total_ingested_events.toLocaleString() ?? "—"}
-              </strong>
-              <span>Immutable source evidence</span>
-            </div>
-            <div>
-              <span className="metric-label">
-                <GitBranch size={14} /> PIPELINE READINESS
-              </span>
-              <strong className="numeric">
-                {health ? `${available}` : "—"}
-                <em> / 7 layers</em>
-              </strong>
-              <span>Analytical engines pending</span>
-            </div>
+                <option value="cmp_electoral_01">
+                  Electoral amplification
+                </option>
+                <option value="cmp_geo_astroturf_02">
+                  Geographic mismatch
+                </option>
+                <option value="cmp_organic_03">Natural discussion</option>
+                <option value="all">All three scenarios</option>
+              </select>
+            </label>
+            <label>
+              Seed
+              <input
+                type="number"
+                value={seed}
+                onChange={(e) => setSeed(Number(e.target.value))}
+              />
+            </label>
+            <label>
+              Speed
+              <select
+                value={speed}
+                onChange={(e) => setSpeed(Number(e.target.value))}
+              >
+                {[1, 10, 25, 50, 100].map((value) => (
+                  <option key={value} value={value}>
+                    {value}× event time
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={reset}
+                onChange={(e) => setReset(e.target.checked)}
+              />
+              Reset active replay
+            </label>
             <button
-              className="refresh-button"
-              onClick={() => setRefresh((value) => value + 1)}
-              aria-label="Refresh backend status"
+              className="primary-button"
+              disabled={!!work.busy}
+              onClick={() =>
+                reset &&
+                work.campaigns.some((c) => c.data_origin === "SYNTHETIC_REPLAY")
+                  ? setConfirmReset(true)
+                  : void start()
+              }
             >
-              <RefreshCw size={16} />
+              Load raw scenario
             </button>
+            <label className="check privacy-check">
+              <input
+                type="checkbox"
+                checked={privacy}
+                onChange={(e) => setPrivacy(e.target.checked)}
+              />
+              Mask low-indicator / unclassified identities
+            </label>
           </div>
-
-          <section
-            className="investigation-surface"
-            aria-label="Investigation views"
-          >
+          {(work.busy || work.error || work.notice) && (
             <div
-              className="view-tabs"
-              role="tablist"
-              aria-label="Investigation view"
+              className={work.error ? "status-banner error" : "status-banner"}
+              role={work.error ? "alert" : "status"}
             >
-              {tabs.map((tab, index) => (
-                <button
-                  key={tab.label}
-                  role="tab"
-                  id={`tab-${index}`}
-                  aria-selected={activeTab === index}
-                  aria-controls="view-panel"
-                  tabIndex={activeTab === index ? 0 : -1}
-                  onKeyDown={(event) => {
-                    const next =
-                      event.key === "ArrowRight"
-                        ? (index + 1) % tabs.length
-                        : event.key === "ArrowLeft"
-                          ? (index + tabs.length - 1) % tabs.length
-                          : event.key === "Home"
-                            ? 0
-                            : event.key === "End"
-                              ? tabs.length - 1
-                              : null;
-                    if (next !== null) {
-                      event.preventDefault();
-                      setActiveTab(next);
-                      document.getElementById(`tab-${next}`)?.focus();
+              {work.error || work.busy || work.notice}
+              {work.lastJob?.status === "SUCCEEDED" &&
+                work.lastJob.artifact_download_url && (
+                  <button
+                    onClick={() =>
+                      void work.download(work.lastJob!.artifact_download_url!)
                     }
+                  >
+                    Download completed package
+                  </button>
+                )}
+            </div>
+          )}
+          <div className="workspace">
+            <aside className="campaign-feed">
+              <div className="panel-heading">
+                <span className="eyebrow">NARRATIVE FEED</span>
+                <span>{work.campaigns.length}</span>
+              </div>
+              {!work.campaigns.length && (
+                <div className="empty">
+                  No active campaigns. Load a raw replay or inject an event to
+                  begin.
+                </div>
+              )}
+              {work.campaigns.map((campaign) => (
+                <button
+                  key={campaign.campaign_id}
+                  className={`campaign-card ${work.selected === campaign.campaign_id ? "active" : ""}`}
+                  onClick={() => {
+                    clear();
+                    work.setSelected(campaign.campaign_id);
                   }}
-                  onClick={() => setActiveTab(index)}
                 >
-                  <tab.icon size={16} />
-                  {tab.label}
+                  <div>
+                    <span
+                      className={`tier ${campaign.cti_assessment.threat_level?.toLowerCase() ?? "unknown"}`}
+                    >
+                      {campaign.cti_assessment.threat_level ?? "INSUFFICIENT"}
+                    </span>
+                    <b>{score(campaign.cti_assessment.cti_score)}</b>
+                  </div>
+                  <h3>
+                    {detail?.campaign_id === campaign.campaign_id
+                      ? privateText(campaign.title, detail, privacy)
+                      : campaign.title.replace(
+                          /@[\p{L}\p{N}_]+/gu,
+                          "[participant]",
+                        )}
+                  </h3>
+                  <span className="origin-badge">
+                    {campaign.data_origin.replaceAll("_", " ")}
+                  </span>
+                  <small>
+                    {campaign.total_posts} posts · {campaign.total_accounts}{" "}
+                    accounts
+                  </small>
+                  <small>
+                    Sync {score(campaign.coordination_assessment.sync_score, 3)}{" "}
+                    · rev {campaign.snapshot_revision}
+                  </small>
                 </button>
               ))}
-              <span className="no-snapshot">NO SNAPSHOT</span>
-            </div>
-            <div
-              className="view-empty"
-              role="tabpanel"
-              id="view-panel"
-              aria-labelledby={`tab-${activeTab}`}
-              tabIndex={0}
-            >
-              <div className="empty-orbit">
-                <span />
-                <span />
-                <Fingerprint size={38} strokeWidth={1.1} />
-              </div>
-              <span className="outlined-label">EVIDENCE FOUNDATION</span>
-              <h2>
-                {activeTab === 0
-                  ? "Ready to retain. Built to verify."
-                  : `${selected.label} is awaiting implementation.`}
-              </h2>
-              <p>{selected.detail}</p>
-              <div className="evidence-flow">
-                <span>
-                  <Database size={14} /> Raw capture
-                </span>
-                <ArrowRight size={13} />
-                <span>
-                  <Fingerprint size={14} /> Canonical event
-                </span>
-                <ArrowRight size={13} />
-                <span>
-                  <ShieldCheck size={14} /> Chained audit
-                </span>
-              </div>
-              <div className="empty-footnote">
-                No calculated scores or inferred findings are displayed in this
-                preview.
-              </div>
-            </div>
-          </section>
-
-          <section className="getting-started">
-            <div className="section-title">
-              <Terminal size={16} />
-              <h2>Capture your first local event</h2>
-              <span>DEVELOPER WORKFLOW</span>
-            </div>
-            <p>
-              From the repository root, with the Python environment installed:
-            </p>
-            <code>
-              .venv\Scripts\python.exe -m app.cli ingest
-              sample_data/raw/local-example.json
-            </code>
-            <div className="command-note">
-              <Check size={13} /> Retains raw input and canonical bytes, then
-              appends an INGEST audit entry.
-            </div>
-          </section>
-          <footer className="main-footer">
-            <span>
-              Coordination ≠ intent. Media anomalies ≠ verified manipulation.
-            </span>
-            <span>CHAKRAVYUH / LOCAL FIRST</span>
-          </footer>
-        </main>
-
-        <aside
-          className="readiness-sidebar"
-          aria-label="Pipeline status and session"
-        >
-          <div className="sidebar-heading">
-            <span>PIPELINE STATUS</span>
-            <span className="status-dot" />
-          </div>
-          <p className="readiness-intro">
-            A testable foundation.
-            <br />
-            <span>One layer at a time.</span>
-          </p>
-          <ol className="layer-list">
-            {layers.map((layer, index) => {
-              const ready = health?.layer_status[layer.id] === "AVAILABLE";
-              return (
-                <li key={layer.id}>
-                  <span className={`layer-number ${ready ? "ready" : ""}`}>
-                    {ready ? (
-                      <Check size={13} />
-                    ) : (
-                      String(index + 1).padStart(2, "0")
-                    )}
-                  </span>
-                  <div>
-                    <strong>{layer.name}</strong>
-                    <p>{layer.note}</p>
-                    <span className={ready ? "layer-ready" : "layer-pending"}>
-                      {ready
-                        ? "AVAILABLE"
-                        : health
-                          ? "PENDING"
-                          : "AWAITING API"}
-                    </span>
+            </aside>
+            <main id="investigation" className="investigation" tabIndex={-1}>
+              {detail ? (
+                <>
+                  <div className="campaign-header">
+                    <div className="badge-row">
+                      <span className="origin-badge">
+                        {detail.data_origin.replaceAll("_", " ")}
+                      </span>
+                      <span className="chip">
+                        {detail.languages.join(" / ")}
+                      </span>
+                      <span className="chip">
+                        Snapshot {detail.snapshot_revision}
+                      </span>
+                    </div>
+                    <h2>{privateText(detail.title, detail, privacy)}</h2>
+                    <p className="mono subtle">
+                      {detail.first_detected_utc} → {detail.last_updated_utc}{" "}
+                      UTC
+                    </p>
+                    <p className="subtle">
+                      {detail.collection_window.coverage_completeness_note}
+                    </p>
                   </div>
-                </li>
-              );
-            })}
-          </ol>
-          <section className="session-panel">
-            <LockKeyhole size={18} />
-            <h2>Local session</h2>
-            <p>
-              {authorized
-                ? "Session authorized for this backend launch."
-                : "Use the token in .runtime/local-session-token to authorize this browser."}
-            </p>
-            {authorized ? (
-              <span className="session-connected">
-                <Check size={13} /> AUTHORIZED
-              </span>
+                  <Assessment detail={detail} />
+                  <div
+                    className="view-tabs"
+                    role="tablist"
+                    aria-label="Investigation views"
+                  >
+                    {tabs.map((name, index) => (
+                      <button
+                        role="tab"
+                        id={`tab-${name}`}
+                        aria-selected={tab === name}
+                        aria-controls="active-panel"
+                        tabIndex={tab === name ? 0 : -1}
+                        key={name}
+                        onClick={() => setTab(name)}
+                        onKeyDown={(e) => {
+                          if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                            e.preventDefault();
+                            const next =
+                              tabs[
+                                (index +
+                                  (e.key === "ArrowRight"
+                                    ? 1
+                                    : tabs.length - 1)) %
+                                  tabs.length
+                              ];
+                            setTab(next);
+                            document.getElementById(`tab-${next}`)?.focus();
+                          }
+                        }}
+                      >
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                  <div
+                    className="active-panel"
+                    role="tabpanel"
+                    id="active-panel"
+                    aria-labelledby={`tab-${tab}`}
+                  >
+                    {tab === "Graph" && (
+                      <GraphPanel
+                        detail={detail}
+                        privacy={privacy}
+                        selected={selectedNode}
+                        onSelect={setSelectedNode}
+                        onEdge={setEdge}
+                        cursor={cursor}
+                        highlight={highlight}
+                      />
+                    )}
+                    {tab === "Geography" && (
+                      <GeoPanel
+                        detail={detail}
+                        selected={cell}
+                        onSelect={setCell}
+                      />
+                    )}
+                    {tab === "Media" && (
+                      <MediaPanel detail={detail} token={work.token} />
+                    )}
+                    {tab === "Claims" && (
+                      <ClaimPanel
+                        key={detail.campaign_id}
+                        detail={detail}
+                        token={work.token}
+                        privacy={privacy}
+                        onRefresh={work.refresh}
+                      />
+                    )}
+                  </div>
+                  <TimelinePanel
+                    detail={detail}
+                    cursor={cursor}
+                    onCursor={setCursor}
+                    highlight={highlight}
+                  />
+                  <section className="observations">
+                    <div className="panel-heading">
+                      <h2>Linked observations</h2>
+                      <button onClick={clear}>Clear cross-filters</button>
+                    </div>
+                    <p className="subtle">
+                      {posts.length} of {detail.total_posts} retained
+                      observations · exact evidence text, with optional
+                      participant masking
+                    </p>
+                    <div className="post-list">
+                      {posts.slice(0, postLimit).map((event) => {
+                        const node = detail.nodes.find(
+                          (node) => node.id === event.account.account_id,
+                        );
+                        return (
+                          <article key={event.event_id}>
+                            <div>
+                              <strong>
+                                {node
+                                  ? label(node, privacy)
+                                  : "Observed account"}
+                              </strong>
+                              <time>{event.timestamp_utc}</time>
+                            </div>
+                            <p>{privateText(event.text, detail, privacy)}</p>
+                            <details>
+                              <summary>
+                                Evidence hashes and capture lineage
+                              </summary>
+                              <code className="hash">
+                                Raw SHA-256: {event.raw_payload_sha256}
+                              </code>
+                              <code className="hash">
+                                Canonical SHA-256:{" "}
+                                {event.canonical_event_sha256}
+                              </code>
+                              <p>
+                                Captured {event.collection_timestamp_utc} ·{" "}
+                                {event.collector_id} ·{" "}
+                                {event.raw_capture_format}
+                              </p>
+                            </details>
+                          </article>
+                        );
+                      })}
+                    </div>
+                    {posts.length > postLimit && (
+                      <button
+                        onClick={() => setPostLimit((limit) => limit + 100)}
+                      >
+                        Show next {Math.min(100, posts.length - postLimit)}{" "}
+                        observations ({Math.min(postLimit, posts.length)} shown)
+                      </button>
+                    )}
+                  </section>
+                </>
+              ) : (
+                <div className="empty large-empty">
+                  {work.campaigns.length
+                    ? "Loading one coherent campaign snapshot…"
+                    : "Load a scenario to compute the first narrative snapshots. Results are derived from retained inputs."}
+                </div>
+              )}
+            </main>
+            {detail ? (
+              <Inspector
+                detail={detail}
+                selected={selectedNode}
+                edge={edge}
+                privacy={privacy}
+                onClear={clear}
+              />
             ) : (
-              <form onSubmit={(event) => void authorize(event)}>
-                <label htmlFor="session-token">Session token</label>
-                <input
-                  id="session-token"
-                  type="password"
-                  value={token}
-                  onChange={(event) => setToken(event.target.value)}
-                  autoComplete="off"
-                  placeholder="Paste local token"
-                  required
-                  minLength={32}
-                />
-                <button
-                  className="connect-button"
-                  disabled={authorizing || !token}
-                  type="submit"
-                >
-                  {authorizing ? "Connecting…" : "Connect session"}
-                  <ArrowRight size={14} />
-                </button>
-              </form>
+              <aside className="inspector">
+                <span className="eyebrow">EVIDENCE, BEFORE ATTRIBUTION</span>
+                <p className="subtle">
+                  Synchrony does not establish automation, intent or claim
+                  falsity. Missing measurements remain unavailable.
+                </p>
+              </aside>
             )}
-            <p className="session-error" role="alert">
-              {sessionError}
-            </p>
-          </section>
-        </aside>
-      </div>
-      <div className="statusbar">
-        <span>
-          <span
-            className={`status-dot ${connection === "connected" ? "" : "muted"}`}
-          />
-          {connection === "connected"
-            ? "API connected"
-            : connection === "checking"
-              ? "Checking API"
-              : "API offline"}
-          <span className="status-separator">/</span>Analytical stream not
-          implemented
-        </span>
-        <span>
-          CPU READY<span className="status-separator">/</span>NO CLOUD REQUIRED
-        </span>
-      </div>
-    </div>
+          </div>
+        </>
+      )}
+      <footer>
+        Chakravyuh · local computed indicators · evidence stays on this machine
+        · no external dispatch
+      </footer>
+      {dialog === "inject" && (
+        <InjectDialog
+          token={work.token}
+          run={work.run}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog === "export" && detail && (
+        <ExportDialog
+          detail={detail}
+          run={work.run}
+          download={work.download}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {confirmReset && (
+        <Modal
+          title="Replace active replay state?"
+          onClose={() => setConfirmReset(false)}
+        >
+          <p>
+            Existing replay jobs will fail with GENERATION_RESET. Retained
+            evidence and injected/public partitions remain available.
+          </p>
+          <button className="primary-button" onClick={() => void start()}>
+            Reset replay and load scenario
+          </button>
+        </Modal>
+      )}
+    </>
   );
 }

@@ -1,0 +1,3431 @@
+{
+  "$defs": {
+    "APIError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "request_id"
+      ],
+      "title": "APIError",
+      "type": "object"
+    },
+    "AccountProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "title": "Account Id",
+          "type": "string"
+        },
+        "created_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created At"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Name"
+        },
+        "followers_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Followers Count"
+        },
+        "following_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Following Count"
+        },
+        "handle": {
+          "title": "Handle",
+          "type": "string"
+        },
+        "is_verified": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Is Verified"
+        },
+        "profile_location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile Location"
+        }
+      },
+      "required": [
+        "account_id",
+        "handle"
+      ],
+      "title": "AccountProfile",
+      "type": "object"
+    },
+    "AccountRole": {
+      "enum": [
+        "EARLIEST_OBSERVED_SEED",
+        "BOT_AMPLIFIER",
+        "BRIDGE_INFLUENCER",
+        "ORGANIC_USER",
+        "UNCLASSIFIED"
+      ],
+      "title": "AccountRole",
+      "type": "string"
+    },
+    "AccountSyncAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "matched_peer_count": {
+          "minimum": 0,
+          "title": "Matched Peer Count",
+          "type": "integer"
+        },
+        "mean_matched_delta_sec": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mean Matched Delta Sec"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "repeated_bucket_count": {
+          "minimum": 0,
+          "title": "Repeated Bucket Count",
+          "type": "integer"
+        },
+        "sync_score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sync Score"
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons",
+        "matched_peer_count",
+        "repeated_bucket_count"
+      ],
+      "title": "AccountSyncAssessment",
+      "type": "object"
+    },
+    "AnalysisStatus": {
+      "enum": [
+        "AVAILABLE",
+        "INSUFFICIENT_DATA",
+        "UNSUPPORTED",
+        "FAILED",
+        "PENDING"
+      ],
+      "title": "AnalysisStatus",
+      "type": "string"
+    },
+    "AnalyticalReport": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons"
+      ],
+      "title": "AnalyticalReport",
+      "type": "object"
+    },
+    "AuditTrailEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "INGEST",
+            "MEDIA_COLLECTED",
+            "ANALYZE",
+            "CLAIM_REVIEW",
+            "EXPORT",
+            "VERIFY"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "artifact_sha256": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Artifact Sha256",
+          "type": "array"
+        },
+        "canonical_event_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Canonical Event Sha256"
+        },
+        "collection_timestamp_utc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Collection Timestamp Utc"
+        },
+        "collector_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Collector Id"
+        },
+        "entry_id": {
+          "title": "Entry Id",
+          "type": "string"
+        },
+        "entry_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Entry Sha256",
+          "type": "string"
+        },
+        "event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Event Id"
+        },
+        "input_data_origin": {
+          "$ref": "#/$defs/DataOrigin"
+        },
+        "media_sha256": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Media Sha256",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "previous_entry_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Previous Entry Sha256"
+        },
+        "raw_payload_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Payload Sha256"
+        },
+        "timestamp_utc": {
+          "title": "Timestamp Utc",
+          "type": "string"
+        },
+        "verification_status": {
+          "enum": [
+            "NOT_CHECKED",
+            "VERIFIED",
+            "MISMATCH",
+            "UNAVAILABLE"
+          ],
+          "title": "Verification Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entry_id",
+        "action",
+        "timestamp_utc",
+        "actor_id",
+        "entry_sha256",
+        "parameter_set_id",
+        "input_data_origin",
+        "verification_status"
+      ],
+      "title": "AuditTrailEntry",
+      "type": "object"
+    },
+    "BotAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "available_feature_weights": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Available Feature Weights",
+          "type": "object"
+        },
+        "bot_indicator_score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bot Indicator Score"
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "observation_seconds": {
+          "minimum": 0,
+          "title": "Observation Seconds",
+          "type": "number"
+        },
+        "observed_posts": {
+          "minimum": 0,
+          "title": "Observed Posts",
+          "type": "integer"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons",
+        "observed_posts",
+        "observation_seconds",
+        "available_feature_weights"
+      ],
+      "title": "BotAssessment",
+      "type": "object"
+    },
+    "C2PAStatus": {
+      "enum": [
+        "NOT_CHECKED",
+        "MISSING",
+        "VALID",
+        "INVALID",
+        "UNSUPPORTED"
+      ],
+      "title": "C2PAStatus",
+      "type": "string"
+    },
+    "CampaignAlert": {
+      "additionalProperties": false,
+      "properties": {
+        "assessment": {
+          "$ref": "#/$defs/CampaignThreatBreakdown"
+        },
+        "campaign_id": {
+          "title": "Campaign Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "campaign_id",
+        "assessment"
+      ],
+      "title": "CampaignAlert",
+      "type": "object"
+    },
+    "CampaignThreatBreakdown": {
+      "additionalProperties": false,
+      "properties": {
+        "alert_eligible": {
+          "title": "Alert Eligible",
+          "type": "boolean"
+        },
+        "alert_suppression_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Alert Suppression Reasons",
+          "type": "array"
+        },
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "bot_density_component": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bot Density Component"
+        },
+        "component_modes": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ComputationMode"
+          },
+          "title": "Component Modes",
+          "type": "object"
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "cti_score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cti Score"
+        },
+        "effective_weights": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Effective Weights",
+          "type": "object"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "geo_anomaly_component": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Geo Anomaly Component"
+        },
+        "harm_severity_component": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Harm Severity Component"
+        },
+        "media_forensics_component": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Media Forensics Component"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "scored_post_coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Scored Post Coverage Ratio",
+          "type": "number"
+        },
+        "sync_component": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sync Component"
+        },
+        "threat_level": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ThreatLevel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons",
+        "component_modes",
+        "effective_weights",
+        "scored_post_coverage_ratio",
+        "alert_eligible"
+      ],
+      "title": "CampaignThreatBreakdown",
+      "type": "object"
+    },
+    "ClaimReference": {
+      "additionalProperties": false,
+      "properties": {
+        "applicable_region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applicable Region"
+        },
+        "claim_text": {
+          "title": "Claim Text",
+          "type": "string"
+        },
+        "finding": {
+          "$ref": "#/$defs/ClaimVerificationStatus"
+        },
+        "languages": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Languages",
+          "type": "array"
+        },
+        "published_at_utc": {
+          "title": "Published At Utc",
+          "type": "string"
+        },
+        "reference_id": {
+          "title": "Reference Id",
+          "type": "string"
+        },
+        "retrieved_at_utc": {
+          "title": "Retrieved At Utc",
+          "type": "string"
+        },
+        "snapshot_ref": {
+          "title": "Snapshot Ref",
+          "type": "string"
+        },
+        "snapshot_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Snapshot Sha256",
+          "type": "string"
+        },
+        "source_title": {
+          "title": "Source Title",
+          "type": "string"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Url"
+        },
+        "synthetic_reference": {
+          "default": false,
+          "title": "Synthetic Reference",
+          "type": "boolean"
+        },
+        "valid_until_utc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Utc"
+        }
+      },
+      "required": [
+        "reference_id",
+        "claim_text",
+        "finding",
+        "source_title",
+        "published_at_utc",
+        "retrieved_at_utc",
+        "snapshot_sha256",
+        "snapshot_ref",
+        "languages"
+      ],
+      "title": "ClaimReference",
+      "type": "object"
+    },
+    "ClaimReviewRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "analyst_note": {
+          "minLength": 1,
+          "title": "Analyst Note",
+          "type": "string"
+        },
+        "reference_id": {
+          "title": "Reference Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ClaimVerificationStatus"
+        }
+      },
+      "required": [
+        "reference_id",
+        "status",
+        "analyst_note"
+      ],
+      "title": "ClaimReviewRequest",
+      "type": "object"
+    },
+    "ClaimVerificationAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "analyst_note": {
+          "default": "Coordination indicators do not establish claim falsity.",
+          "title": "Analyst Note",
+          "type": "string"
+        },
+        "candidate_reference": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ClaimReference"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "reviewed_at_utc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewed At Utc"
+        },
+        "reviewed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewed By"
+        },
+        "similarity_to_known_claim": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Similarity To Known Claim"
+        },
+        "status": {
+          "$ref": "#/$defs/ClaimVerificationStatus",
+          "default": "UNVERIFIED"
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons"
+      ],
+      "title": "ClaimVerificationAssessment",
+      "type": "object"
+    },
+    "ClaimVerificationStatus": {
+      "enum": [
+        "UNVERIFIED",
+        "CONTRADICTED_BY_SOURCE",
+        "CORROBORATED",
+        "CONTEXT_MISSING"
+      ],
+      "title": "ClaimVerificationStatus",
+      "type": "string"
+    },
+    "CollectionWindowMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "collector_sources": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Collector Sources",
+          "type": "array"
+        },
+        "coverage_completeness_note": {
+          "default": "Seed attribution is bounded by collected data; no global origin is established.",
+          "title": "Coverage Completeness Note",
+          "type": "string"
+        },
+        "window_end_utc": {
+          "title": "Window End Utc",
+          "type": "string"
+        },
+        "window_start_utc": {
+          "title": "Window Start Utc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window_start_utc",
+        "window_end_utc",
+        "collector_sources"
+      ],
+      "title": "CollectionWindowMetadata",
+      "type": "object"
+    },
+    "ComputationMode": {
+      "enum": [
+        "COMPUTED_PIPELINE",
+        "COMPUTED_ELA_PHASH",
+        "HEURISTIC_INDICATOR",
+        "MODEL_INFERENCE",
+        "SIMULATED_FIXTURE_METADATA"
+      ],
+      "title": "ComputationMode",
+      "type": "string"
+    },
+    "ContractModel": {
+      "additionalProperties": false,
+      "properties": {},
+      "title": "ContractModel",
+      "type": "object"
+    },
+    "CoordinationAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "burst_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Burst Index"
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coordinated_account_count": {
+          "minimum": 0,
+          "title": "Coordinated Account Count",
+          "type": "integer"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "eligible_pair_count": {
+          "minimum": 0,
+          "title": "Eligible Pair Count",
+          "type": "integer"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "hawkes_branching_ratio": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hawkes Branching Ratio"
+        },
+        "hawkes_status": {
+          "$ref": "#/$defs/AnalysisStatus",
+          "default": "UNSUPPORTED"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "sync_score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sync Score"
+        },
+        "total_account_count": {
+          "minimum": 0,
+          "title": "Total Account Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons",
+        "eligible_pair_count",
+        "coordinated_account_count",
+        "total_account_count"
+      ],
+      "title": "CoordinationAssessment",
+      "type": "object"
+    },
+    "DataOrigin": {
+      "enum": [
+        "PUBLIC_OSINT",
+        "USER_INJECTED",
+        "SYNTHETIC_REPLAY"
+      ],
+      "title": "DataOrigin",
+      "type": "string"
+    },
+    "EventInjectRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Account Id"
+        },
+        "handle": {
+          "default": "@Custom_Test_Account",
+          "title": "Handle",
+          "type": "string"
+        },
+        "language": {
+          "default": "und",
+          "title": "Language",
+          "type": "string"
+        },
+        "media_artifact_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Media Artifact Ids",
+          "type": "array"
+        },
+        "profile_location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile Location"
+        },
+        "source_lat": {
+          "anyOf": [
+            {
+              "maximum": 90,
+              "minimum": -90,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Lat"
+        },
+        "source_lon": {
+          "anyOf": [
+            {
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Lon"
+        },
+        "target_region_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Region Name"
+        },
+        "text": {
+          "maxLength": 20000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "timestamp_utc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestamp Utc"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "EventInjectRequest",
+      "type": "object"
+    },
+    "EvidenceArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "artifact_kind": {
+          "enum": [
+            "RAW_PAYLOAD",
+            "CANONICAL_EVENT",
+            "MEDIA",
+            "ANALYSIS",
+            "REFERENCE",
+            "REPORT"
+          ],
+          "title": "Artifact Kind",
+          "type": "string"
+        },
+        "evidence_ref": {
+          "title": "Evidence Ref",
+          "type": "string"
+        },
+        "original_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Original Sha256"
+        },
+        "representation": {
+          "enum": [
+            "ORIGINAL",
+            "REDACTED_DERIVATIVE"
+          ],
+          "title": "Representation",
+          "type": "string"
+        },
+        "sha256_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256 Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "artifact_kind",
+        "sha256_hash",
+        "evidence_ref",
+        "representation"
+      ],
+      "title": "EvidenceArtifact",
+      "type": "object"
+    },
+    "EvidenceDossierBundle": {
+      "additionalProperties": false,
+      "properties": {
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/EvidenceArtifact"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "audit_manifest": {
+          "items": {
+            "$ref": "#/$defs/AuditTrailEntry"
+          },
+          "title": "Audit Manifest",
+          "type": "array"
+        },
+        "campaign_summary": {
+          "$ref": "#/$defs/NarrativeCampaignSummary"
+        },
+        "dossier_id": {
+          "title": "Dossier Id",
+          "type": "string"
+        },
+        "generated_at_utc": {
+          "title": "Generated At Utc",
+          "type": "string"
+        },
+        "integrity_disclaimer": {
+          "default": "Hashes detect changes relative to this manifest. They establish neither content truth nor legal admissibility; external anchoring is outside the MVP.",
+          "title": "Integrity Disclaimer",
+          "type": "string"
+        },
+        "key_coordination_findings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Key Coordination Findings",
+          "type": "array"
+        },
+        "media_forensic_reports": {
+          "items": {
+            "$ref": "#/$defs/ForensicMediaReport"
+          },
+          "title": "Media Forensic Reports",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "redacted_pii": {
+          "title": "Redacted Pii",
+          "type": "boolean"
+        },
+        "stix2_bundle_json": {
+          "additionalProperties": true,
+          "title": "Stix2 Bundle Json",
+          "type": "object"
+        }
+      },
+      "required": [
+        "dossier_id",
+        "generated_at_utc",
+        "parameter_set_id",
+        "redacted_pii",
+        "campaign_summary",
+        "key_coordination_findings",
+        "media_forensic_reports",
+        "audit_manifest",
+        "artifacts",
+        "stix2_bundle_json"
+      ],
+      "title": "EvidenceDossierBundle",
+      "type": "object"
+    },
+    "ExportRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "default": "bundle",
+          "enum": [
+            "bundle",
+            "pdf",
+            "html",
+            "stix"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "redact_pii": {
+          "default": true,
+          "title": "Redact Pii",
+          "type": "boolean"
+        }
+      },
+      "title": "ExportRequest",
+      "type": "object"
+    },
+    "ForensicMediaReport": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "audio_sync_drift_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audio Sync Drift Ms"
+        },
+        "c2pa_status": {
+          "$ref": "#/$defs/C2PAStatus",
+          "default": "NOT_CHECKED"
+        },
+        "calibration_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Calibration Id"
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "deepfake_visual_score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deepfake Visual Score"
+        },
+        "duplicate_matches_count": {
+          "minimum": 0,
+          "title": "Duplicate Matches Count",
+          "type": "integer"
+        },
+        "ela_anomaly_score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ela Anomaly Score"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "exif_present": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exif Present"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "heatmap_artifact_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Heatmap Artifact Ref"
+        },
+        "heatmap_regions": {
+          "items": {
+            "$ref": "#/$defs/HeatmapRegion"
+          },
+          "title": "Heatmap Regions",
+          "type": "array"
+        },
+        "manipulation_indicator_score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manipulation Indicator Score"
+        },
+        "media_id": {
+          "title": "Media Id",
+          "type": "string"
+        },
+        "media_type": {
+          "enum": [
+            "image",
+            "video",
+            "audio"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Id"
+        },
+        "model_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Revision"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "phash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{16}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Phash"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons",
+        "media_id",
+        "media_type",
+        "duplicate_matches_count"
+      ],
+      "title": "ForensicMediaReport",
+      "type": "object"
+    },
+    "ForensicsVerifyRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "media_artifact_id": {
+          "title": "Media Artifact Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "media_artifact_id"
+      ],
+      "title": "ForensicsVerifyRequest",
+      "type": "object"
+    },
+    "GeoHexAnomaly": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "baseline_bucket_count": {
+          "minimum": 0,
+          "title": "Baseline Bucket Count",
+          "type": "integer"
+        },
+        "baseline_data_origin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DataOrigin"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "baseline_mean_1hr": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Baseline Mean 1Hr"
+        },
+        "baseline_scope_id": {
+          "title": "Baseline Scope Id",
+          "type": "string"
+        },
+        "baseline_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "baseline_std_1hr": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Baseline Std 1Hr"
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coordination_sync_score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Coordination Sync Score"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "current_velocity_1hr": {
+          "minimum": 0,
+          "title": "Current Velocity 1Hr",
+          "type": "integer"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "geospatial_mismatch_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Geospatial Mismatch Ratio"
+        },
+        "h3_index": {
+          "title": "H3 Index",
+          "type": "string"
+        },
+        "h3_resolution": {
+          "const": 5,
+          "default": 5,
+          "title": "H3 Resolution",
+          "type": "integer"
+        },
+        "is_astroturfing_alert": {
+          "title": "Is Astroturfing Alert",
+          "type": "boolean"
+        },
+        "known_source_accounts": {
+          "minimum": 0,
+          "title": "Known Source Accounts",
+          "type": "integer"
+        },
+        "known_source_posts": {
+          "minimum": 0,
+          "title": "Known Source Posts",
+          "type": "integer"
+        },
+        "latitude": {
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "title": "Longitude",
+          "type": "number"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "region_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Region Name"
+        },
+        "source_location_coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Source Location Coverage Ratio",
+          "type": "number"
+        },
+        "target_campaign_posts_1hr": {
+          "minimum": 0,
+          "title": "Target Campaign Posts 1Hr",
+          "type": "integer"
+        },
+        "top_source_origins": {
+          "items": {
+            "$ref": "#/$defs/SourceOrigin"
+          },
+          "title": "Top Source Origins",
+          "type": "array"
+        },
+        "window_end_utc": {
+          "title": "Window End Utc",
+          "type": "string"
+        },
+        "z_score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Z Score"
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons",
+        "h3_index",
+        "baseline_scope_id",
+        "window_end_utc",
+        "latitude",
+        "longitude",
+        "current_velocity_1hr",
+        "target_campaign_posts_1hr",
+        "baseline_bucket_count",
+        "baseline_status",
+        "source_location_coverage_ratio",
+        "known_source_posts",
+        "known_source_accounts",
+        "is_astroturfing_alert"
+      ],
+      "title": "GeoHexAnomaly",
+      "type": "object"
+    },
+    "GeospatialContext": {
+      "additionalProperties": false,
+      "properties": {
+        "source_h3_index": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source H3 Index"
+        },
+        "source_lat": {
+          "anyOf": [
+            {
+              "maximum": 90,
+              "minimum": -90,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Lat"
+        },
+        "source_location_confidence": {
+          "$ref": "#/$defs/LocationConfidence",
+          "default": "UNAVAILABLE"
+        },
+        "source_lon": {
+          "anyOf": [
+            {
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Lon"
+        },
+        "source_region_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Region Name"
+        },
+        "target_h3_index": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target H3 Index"
+        },
+        "target_region_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Region Name"
+        }
+      },
+      "title": "GeospatialContext",
+      "type": "object"
+    },
+    "GraphEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "interaction_type": {
+          "enum": [
+            "CO_POST_SYNC",
+            "REPOST_CASCADE",
+            "BRIDGE_TRANSFER",
+            "ORGANIC_REPLY"
+          ],
+          "title": "Interaction Type",
+          "type": "string"
+        },
+        "matched_event_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Matched Event Ids",
+          "type": "array"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "sync_weight": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sync Weight"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "time_delta_sec": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Time Delta Sec"
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons",
+        "source",
+        "target",
+        "interaction_type",
+        "matched_event_ids"
+      ],
+      "title": "GraphEdge",
+      "type": "object"
+    },
+    "GraphNode": {
+      "additionalProperties": false,
+      "properties": {
+        "account_created_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Account Created At"
+        },
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "betweenness_centrality": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Betweenness Centrality",
+          "type": "number"
+        },
+        "bot_assessment": {
+          "$ref": "#/$defs/BotAssessment"
+        },
+        "cascade_out_degree": {
+          "minimum": 0,
+          "title": "Cascade Out Degree",
+          "type": "integer"
+        },
+        "community_id": {
+          "title": "Community Id",
+          "type": "integer"
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "first_observed_utc": {
+          "title": "First Observed Utc",
+          "type": "string"
+        },
+        "handle": {
+          "title": "Handle",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "posts_in_campaign": {
+          "minimum": 1,
+          "title": "Posts In Campaign",
+          "type": "integer"
+        },
+        "region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Region"
+        },
+        "role": {
+          "$ref": "#/$defs/AccountRole"
+        },
+        "sync_assessment": {
+          "$ref": "#/$defs/AccountSyncAssessment"
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons",
+        "id",
+        "handle",
+        "role",
+        "bot_assessment",
+        "sync_assessment",
+        "posts_in_campaign",
+        "community_id",
+        "betweenness_centrality",
+        "cascade_out_degree",
+        "first_observed_utc"
+      ],
+      "title": "GraphNode",
+      "type": "object"
+    },
+    "HarmAssessment": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "category": {
+          "$ref": "#/$defs/HarmCategory"
+        },
+        "computation_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "coverage_ratio": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Coverage Ratio",
+          "type": "number"
+        },
+        "evidence_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Reasons",
+          "type": "array"
+        },
+        "feature_contributions": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Feature Contributions",
+          "type": "object"
+        },
+        "harm_indicator_score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Harm Indicator Score"
+        },
+        "missing_signals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing Signals",
+          "type": "array"
+        },
+        "parameter_set_id": {
+          "title": "Parameter Set Id",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "computation_mode",
+        "analysis_status",
+        "parameter_set_id",
+        "coverage_ratio",
+        "evidence_reasons",
+        "category"
+      ],
+      "title": "HarmAssessment",
+      "type": "object"
+    },
+    "HarmCategory": {
+      "enum": [
+        "COMMUNAL_INCITEMENT",
+        "ELECTORAL_MANIPULATION",
+        "PUBLIC_PANIC",
+        "INSTITUTIONAL_DISCREDIT",
+        "BENIGN"
+      ],
+      "title": "HarmCategory",
+      "type": "string"
+    },
+    "HealthStatusResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "active_campaigns_count": {
+          "minimum": 0,
+          "title": "Active Campaigns Count",
+          "type": "integer"
+        },
+        "execution_mode": {
+          "const": "local_computed",
+          "default": "local_computed",
+          "title": "Execution Mode",
+          "type": "string"
+        },
+        "layer_status": {
+          "additionalProperties": {
+            "$ref": "#/$defs/AnalysisStatus"
+          },
+          "title": "Layer Status",
+          "type": "object"
+        },
+        "pipeline_version": {
+          "default": "2.1.0",
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "healthy",
+            "degraded"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "total_ingested_events": {
+          "minimum": 0,
+          "title": "Total Ingested Events",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "status",
+        "active_campaigns_count",
+        "total_ingested_events",
+        "layer_status"
+      ],
+      "title": "HealthStatusResponse",
+      "type": "object"
+    },
+    "HeatmapRegion": {
+      "additionalProperties": false,
+      "properties": {
+        "h": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "H",
+          "type": "number"
+        },
+        "intensity": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Intensity",
+          "type": "number"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "w": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "W",
+          "type": "number"
+        },
+        "x": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "w",
+        "h",
+        "intensity",
+        "label"
+      ],
+      "title": "HeatmapRegion",
+      "type": "object"
+    },
+    "InteractionType": {
+      "enum": [
+        "original_post",
+        "repost",
+        "quote",
+        "reply",
+        "co_hashtag"
+      ],
+      "title": "InteractionType",
+      "type": "string"
+    },
+    "JobAccepted": {
+      "additionalProperties": false,
+      "properties": {
+        "job_id": {
+          "title": "Job Id",
+          "type": "string"
+        },
+        "status_url": {
+          "title": "Status Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "status_url"
+      ],
+      "title": "JobAccepted",
+      "type": "object"
+    },
+    "JobNotification": {
+      "additionalProperties": false,
+      "properties": {
+        "job_id": {
+          "title": "Job Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "SUCCEEDED",
+            "FAILED"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "status"
+      ],
+      "title": "JobNotification",
+      "type": "object"
+    },
+    "JobStatusResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_download_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Download Url"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        },
+        "job_id": {
+          "title": "Job Id",
+          "type": "string"
+        },
+        "job_type": {
+          "enum": [
+            "SCENARIO",
+            "INJECT",
+            "FORENSICS",
+            "EXPORT"
+          ],
+          "title": "Job Type",
+          "type": "string"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScenarioSwitchResponse"
+            },
+            {
+              "$ref": "#/$defs/UnifiedSocialEventEnriched"
+            },
+            {
+              "$ref": "#/$defs/ForensicMediaReport"
+            },
+            {
+              "$ref": "#/$defs/EvidenceDossierBundle"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result"
+        },
+        "status": {
+          "enum": [
+            "QUEUED",
+            "RUNNING",
+            "SUCCEEDED",
+            "FAILED"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "job_type",
+        "status"
+      ],
+      "title": "JobStatusResponse",
+      "type": "object"
+    },
+    "LocationConfidence": {
+      "enum": [
+        "EXPLICIT_GPS",
+        "PROFILE_DECLARED",
+        "UNAVAILABLE"
+      ],
+      "title": "LocationConfidence",
+      "type": "string"
+    },
+    "MediaAttachment": {
+      "additionalProperties": false,
+      "properties": {
+        "collection_status": {
+          "enum": [
+            "COLLECTED",
+            "UNAVAILABLE",
+            "PENDING"
+          ],
+          "title": "Collection Status",
+          "type": "string"
+        },
+        "evidence_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Ref"
+        },
+        "media_id": {
+          "title": "Media Id",
+          "type": "string"
+        },
+        "media_type": {
+          "enum": [
+            "image",
+            "video",
+            "audio"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "sha256_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256 Hash"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "media_id",
+        "media_type",
+        "collection_status"
+      ],
+      "title": "MediaAttachment",
+      "type": "object"
+    },
+    "MediaUploadResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "media_artifact_id": {
+          "title": "Media Artifact Id",
+          "type": "string"
+        },
+        "media_type": {
+          "enum": [
+            "image",
+            "video",
+            "audio"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "sha256_hash": {
+          "title": "Sha256 Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "media_artifact_id",
+        "sha256_hash",
+        "media_type"
+      ],
+      "title": "MediaUploadResponse",
+      "type": "object"
+    },
+    "NarrativeCampaignDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "bot_accounts_count": {
+          "minimum": 0,
+          "title": "Bot Accounts Count",
+          "type": "integer"
+        },
+        "campaign_id": {
+          "title": "Campaign Id",
+          "type": "string"
+        },
+        "claim_verification": {
+          "$ref": "#/$defs/ClaimVerificationAssessment"
+        },
+        "collection_window": {
+          "$ref": "#/$defs/CollectionWindowMetadata"
+        },
+        "coordination_assessment": {
+          "$ref": "#/$defs/CoordinationAssessment"
+        },
+        "cti_assessment": {
+          "$ref": "#/$defs/CampaignThreatBreakdown"
+        },
+        "data_origin": {
+          "$ref": "#/$defs/DataOrigin"
+        },
+        "earliest_seed_handle": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Earliest Seed Handle"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/GraphEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "first_detected_utc": {
+          "title": "First Detected Utc",
+          "type": "string"
+        },
+        "geo_anomalies": {
+          "items": {
+            "$ref": "#/$defs/GeoHexAnomaly"
+          },
+          "title": "Geo Anomalies",
+          "type": "array"
+        },
+        "harm_assessment": {
+          "$ref": "#/$defs/HarmAssessment"
+        },
+        "has_geo_astroturfing": {
+          "title": "Has Geo Astroturfing",
+          "type": "boolean"
+        },
+        "has_media_indicators": {
+          "title": "Has Media Indicators",
+          "type": "boolean"
+        },
+        "languages": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Languages",
+          "type": "array"
+        },
+        "last_updated_utc": {
+          "title": "Last Updated Utc",
+          "type": "string"
+        },
+        "media_reports": {
+          "items": {
+            "$ref": "#/$defs/ForensicMediaReport"
+          },
+          "title": "Media Reports",
+          "type": "array"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/GraphNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "primary_narrative_claim": {
+          "title": "Primary Narrative Claim",
+          "type": "string"
+        },
+        "sample_posts": {
+          "items": {
+            "$ref": "#/$defs/UnifiedSocialEvent"
+          },
+          "title": "Sample Posts",
+          "type": "array"
+        },
+        "snapshot_revision": {
+          "minimum": 1,
+          "title": "Snapshot Revision",
+          "type": "integer"
+        },
+        "timeline": {
+          "items": {
+            "$ref": "#/$defs/TimelineBucket"
+          },
+          "title": "Timeline",
+          "type": "array"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "total_accounts": {
+          "minimum": 0,
+          "title": "Total Accounts",
+          "type": "integer"
+        },
+        "total_posts": {
+          "minimum": 0,
+          "title": "Total Posts",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "campaign_id",
+        "snapshot_revision",
+        "title",
+        "primary_narrative_claim",
+        "data_origin",
+        "claim_verification",
+        "collection_window",
+        "languages",
+        "first_detected_utc",
+        "last_updated_utc",
+        "total_posts",
+        "total_accounts",
+        "bot_accounts_count",
+        "coordination_assessment",
+        "cti_assessment",
+        "has_media_indicators",
+        "has_geo_astroturfing",
+        "sample_posts",
+        "nodes",
+        "edges",
+        "timeline",
+        "geo_anomalies",
+        "media_reports",
+        "harm_assessment"
+      ],
+      "title": "NarrativeCampaignDetail",
+      "type": "object"
+    },
+    "NarrativeCampaignSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "bot_accounts_count": {
+          "minimum": 0,
+          "title": "Bot Accounts Count",
+          "type": "integer"
+        },
+        "campaign_id": {
+          "title": "Campaign Id",
+          "type": "string"
+        },
+        "claim_verification": {
+          "$ref": "#/$defs/ClaimVerificationAssessment"
+        },
+        "collection_window": {
+          "$ref": "#/$defs/CollectionWindowMetadata"
+        },
+        "coordination_assessment": {
+          "$ref": "#/$defs/CoordinationAssessment"
+        },
+        "cti_assessment": {
+          "$ref": "#/$defs/CampaignThreatBreakdown"
+        },
+        "data_origin": {
+          "$ref": "#/$defs/DataOrigin"
+        },
+        "earliest_seed_handle": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Earliest Seed Handle"
+        },
+        "first_detected_utc": {
+          "title": "First Detected Utc",
+          "type": "string"
+        },
+        "has_geo_astroturfing": {
+          "title": "Has Geo Astroturfing",
+          "type": "boolean"
+        },
+        "has_media_indicators": {
+          "title": "Has Media Indicators",
+          "type": "boolean"
+        },
+        "languages": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Languages",
+          "type": "array"
+        },
+        "last_updated_utc": {
+          "title": "Last Updated Utc",
+          "type": "string"
+        },
+        "primary_narrative_claim": {
+          "title": "Primary Narrative Claim",
+          "type": "string"
+        },
+        "snapshot_revision": {
+          "minimum": 1,
+          "title": "Snapshot Revision",
+          "type": "integer"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "total_accounts": {
+          "minimum": 0,
+          "title": "Total Accounts",
+          "type": "integer"
+        },
+        "total_posts": {
+          "minimum": 0,
+          "title": "Total Posts",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "campaign_id",
+        "snapshot_revision",
+        "title",
+        "primary_narrative_claim",
+        "data_origin",
+        "claim_verification",
+        "collection_window",
+        "languages",
+        "first_detected_utc",
+        "last_updated_utc",
+        "total_posts",
+        "total_accounts",
+        "bot_accounts_count",
+        "coordination_assessment",
+        "cti_assessment",
+        "has_media_indicators",
+        "has_geo_astroturfing"
+      ],
+      "title": "NarrativeCampaignSummary",
+      "type": "object"
+    },
+    "NarrativeCluster": {
+      "additionalProperties": false,
+      "properties": {
+        "campaign_id": {
+          "title": "Campaign Id",
+          "type": "string"
+        },
+        "centroid": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Centroid",
+          "type": "array"
+        },
+        "embedding_mode": {
+          "$ref": "#/$defs/ComputationMode"
+        },
+        "embedding_model_id": {
+          "title": "Embedding Model Id",
+          "type": "string"
+        },
+        "embedding_revision": {
+          "title": "Embedding Revision",
+          "type": "string"
+        },
+        "event_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Event Ids",
+          "type": "array"
+        },
+        "first_detected_utc": {
+          "title": "First Detected Utc",
+          "type": "string"
+        },
+        "last_updated_utc": {
+          "title": "Last Updated Utc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "campaign_id",
+        "event_ids",
+        "embedding_mode",
+        "embedding_model_id",
+        "embedding_revision",
+        "centroid",
+        "first_detected_utc",
+        "last_updated_utc"
+      ],
+      "title": "NarrativeCluster",
+      "type": "object"
+    },
+    "PlatformType": {
+      "enum": [
+        "x_twitter",
+        "telegram",
+        "reddit",
+        "youtube",
+        "instagram",
+        "simulator"
+      ],
+      "title": "PlatformType",
+      "type": "string"
+    },
+    "ScenarioSwitchRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "reset_state": {
+          "default": true,
+          "title": "Reset State",
+          "type": "boolean"
+        },
+        "scenario_id": {
+          "enum": [
+            "cmp_electoral_01",
+            "cmp_geo_astroturf_02",
+            "cmp_organic_03",
+            "all"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "seed": {
+          "default": 42,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "speed_multiplier": {
+          "default": 1,
+          "exclusiveMinimum": 0,
+          "maximum": 100,
+          "title": "Speed Multiplier",
+          "type": "number"
+        }
+      },
+      "required": [
+        "scenario_id"
+      ],
+      "title": "ScenarioSwitchRequest",
+      "type": "object"
+    },
+    "ScenarioSwitchResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "loaded_campaign_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Loaded Campaign Ids",
+          "type": "array"
+        },
+        "reset_state": {
+          "title": "Reset State",
+          "type": "boolean"
+        },
+        "scenario_id": {
+          "title": "Scenario Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "loaded_campaign_ids",
+        "reset_state"
+      ],
+      "title": "ScenarioSwitchResponse",
+      "type": "object"
+    },
+    "SourceOrigin": {
+      "additionalProperties": false,
+      "properties": {
+        "latitude": {
+          "title": "Latitude",
+          "type": "number"
+        },
+        "longitude": {
+          "title": "Longitude",
+          "type": "number"
+        },
+        "post_count": {
+          "minimum": 1,
+          "title": "Post Count",
+          "type": "integer"
+        },
+        "source_h3_index": {
+          "title": "Source H3 Index",
+          "type": "string"
+        },
+        "source_location_confidence": {
+          "$ref": "#/$defs/LocationConfidence"
+        },
+        "source_region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Region"
+        }
+      },
+      "required": [
+        "source_h3_index",
+        "source_location_confidence",
+        "latitude",
+        "longitude",
+        "post_count"
+      ],
+      "title": "SourceOrigin",
+      "type": "object"
+    },
+    "ThreatLevel": {
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "title": "ThreatLevel",
+      "type": "string"
+    },
+    "TimelineBucket": {
+      "additionalProperties": false,
+      "properties": {
+        "burst_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Burst Index"
+        },
+        "coordinated_volume": {
+          "minimum": 0,
+          "title": "Coordinated Volume",
+          "type": "integer"
+        },
+        "low_indicator_volume": {
+          "minimum": 0,
+          "title": "Low Indicator Volume",
+          "type": "integer"
+        },
+        "timestamp_utc": {
+          "title": "Timestamp Utc",
+          "type": "string"
+        },
+        "unclassified_volume": {
+          "minimum": 0,
+          "title": "Unclassified Volume",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "timestamp_utc",
+        "coordinated_volume",
+        "low_indicator_volume",
+        "unclassified_volume"
+      ],
+      "title": "TimelineBucket",
+      "type": "object"
+    },
+    "UnifiedSocialEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "$ref": "#/$defs/AccountProfile"
+        },
+        "canonical_event_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Canonical Event Sha256",
+          "type": "string"
+        },
+        "canonicalization_version": {
+          "const": "canonical-json-v1",
+          "default": "canonical-json-v1",
+          "title": "Canonicalization Version",
+          "type": "string"
+        },
+        "collection_timestamp_utc": {
+          "title": "Collection Timestamp Utc",
+          "type": "string"
+        },
+        "collector_id": {
+          "title": "Collector Id",
+          "type": "string"
+        },
+        "data_origin": {
+          "$ref": "#/$defs/DataOrigin"
+        },
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "geospatial": {
+          "$ref": "#/$defs/GeospatialContext"
+        },
+        "hashtags": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Hashtags",
+          "type": "array"
+        },
+        "interaction_type": {
+          "$ref": "#/$defs/InteractionType",
+          "default": "original_post"
+        },
+        "language": {
+          "default": "und",
+          "title": "Language",
+          "type": "string"
+        },
+        "media_attachments": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/MediaAttachment"
+          },
+          "title": "Media Attachments",
+          "type": "array"
+        },
+        "parent_event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Event Id"
+        },
+        "platform": {
+          "$ref": "#/$defs/PlatformType"
+        },
+        "raw_capture_format": {
+          "enum": [
+            "HTTP_ENTITY_BYTES",
+            "CANONICAL_JSON_V1"
+          ],
+          "title": "Raw Capture Format",
+          "type": "string"
+        },
+        "raw_capture_manifest_ref": {
+          "title": "Raw Capture Manifest Ref",
+          "type": "string"
+        },
+        "raw_payload_ref": {
+          "title": "Raw Payload Ref",
+          "type": "string"
+        },
+        "raw_payload_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Raw Payload Sha256",
+          "type": "string"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Url"
+        },
+        "target_account_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Account Id"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "timestamp_utc": {
+          "title": "Timestamp Utc",
+          "type": "string"
+        },
+        "urls": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Urls",
+          "type": "array"
+        }
+      },
+      "required": [
+        "event_id",
+        "platform",
+        "data_origin",
+        "timestamp_utc",
+        "collection_timestamp_utc",
+        "collector_id",
+        "raw_payload_sha256",
+        "raw_payload_ref",
+        "raw_capture_manifest_ref",
+        "raw_capture_format",
+        "canonical_event_sha256",
+        "account",
+        "text"
+      ],
+      "title": "UnifiedSocialEvent",
+      "type": "object"
+    },
+    "UnifiedSocialEventEnriched": {
+      "additionalProperties": false,
+      "properties": {
+        "assigned_campaign_id": {
+          "title": "Assigned Campaign Id",
+          "type": "string"
+        },
+        "bot_assessment": {
+          "$ref": "#/$defs/BotAssessment"
+        },
+        "event": {
+          "$ref": "#/$defs/UnifiedSocialEvent"
+        },
+        "sync_assessment": {
+          "$ref": "#/$defs/AccountSyncAssessment"
+        },
+        "triggered_critical_alert": {
+          "title": "Triggered Critical Alert",
+          "type": "boolean"
+        },
+        "updated_campaign_cti": {
+          "$ref": "#/$defs/CampaignThreatBreakdown"
+        }
+      },
+      "required": [
+        "event",
+        "assigned_campaign_id",
+        "bot_assessment",
+        "sync_assessment",
+        "updated_campaign_cti",
+        "triggered_critical_alert"
+      ],
+      "title": "UnifiedSocialEventEnriched",
+      "type": "object"
+    },
+    "WebSocketStreamMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "campaign_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Campaign Id"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        },
+        "message_type": {
+          "enum": [
+            "NEW_EVENT",
+            "CTI_ALERT",
+            "SCENARIO_RESET",
+            "JOB_UPDATED"
+          ],
+          "title": "Message Type",
+          "type": "string"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UnifiedSocialEventEnriched"
+            },
+            {
+              "$ref": "#/$defs/CampaignAlert"
+            },
+            {
+              "$ref": "#/$defs/ScenarioSwitchResponse"
+            },
+            {
+              "$ref": "#/$defs/JobNotification"
+            }
+          ],
+          "title": "Payload"
+        },
+        "sequence": {
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "timestamp_utc": {
+          "title": "Timestamp Utc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sequence",
+        "message_type",
+        "timestamp_utc",
+        "headline",
+        "payload"
+      ],
+      "title": "WebSocketStreamMessage",
+      "type": "object"
+    }
+  }
+}

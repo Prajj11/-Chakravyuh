@@ -42,22 +42,22 @@
 
 - [x] **T-4.1:** Available-component CTI, effective weights, provisional tiers, eligibility gates, cooldown and rearm.
 - [x] **T-4.2:** FastAPI REST endpoints, typed async jobs, upload/artifact store, generation-safe mutations and safe error envelope.
-- [/] **T-4.3:** WebSocket sequence retention/resync, polling, snapshot revision consistency and session-scoped access.
+- [x] **T-4.3:** WebSocket sequence retention/resync, polling, snapshot revision consistency and session-scoped access.
 - [x] **T-4.4:** Integrity-verified ZIP exports containing dossier, HTML/PDF, manifest, STIX and authorized derivatives.
 - [x] **T-4.5:** Consistent organic/unclassified redaction across every representation; hash derivatives and omit restricted originals.
 - [x] **T-4.6:** CORS, loopback defaults, upload size/type/dimension guards and reviewer identity from session. Local session/CORS/image guards implemented; claim-review integration and remaining media adapters pending.
 
 ## Phase 5: Complete investigation frontend
 
-- [/] **T-5.1:** Next.js/Tailwind app shell, telemetry, campaign feed, origin/window badges and responsive layout. Foundation shell and live health implemented; analytical campaign feed/window/origin rendering pending.
-- [ ] **T-5.2:** Canvas graph, sync/role/time controls, hulls, cascade lens, accessible node list and account/edge drawers.
-- [ ] **T-5.3:** H3 map/arcs with offline outline, source-confidence composition, sample/coverage gates and baseline explanations.
-- [ ] **T-5.4:** Cross-filtered propagation timeline with coordinated, low-indicator and unclassified volume and alert markers.
-- [ ] **T-5.5:** Computed media comparison slider, pHash/hash details, EXIF/C2PA status and unsupported/error states.
-- [ ] **T-5.6:** Candidate reference/claim review UI with synthetic warnings and authenticated reviewer action.
-- [ ] **T-5.7:** Scenario controls, queued injection/upload flow, replay speed/time cursor, reset and reconnect/resync.
-- [ ] **T-5.8:** Export format/privacy dialog, verification/job states and completed artifact downloads.
-- [ ] **T-5.9:** Keyboard accessibility, reduced motion, multilingual typography, empty/loading/failure and narrow-screen states.
+- [x] **T-5.1:** Next.js/Tailwind app shell, telemetry, campaign feed, origin/window badges and responsive layout. Foundation shell and live health implemented; analytical campaign feed/window/origin rendering pending.
+- [x] **T-5.2:** Canvas graph, sync/role/time controls, hulls, cascade lens, accessible node list and account/edge drawers.
+- [x] **T-5.3:** H3 map/arcs with offline outline, source-confidence composition, sample/coverage gates and baseline explanations.
+- [x] **T-5.4:** Cross-filtered propagation timeline with coordinated, low-indicator and unclassified volume and alert markers.
+- [x] **T-5.5:** Computed media comparison slider, pHash/hash details, EXIF/C2PA status and unsupported/error states.
+- [x] **T-5.6:** Candidate reference/claim review UI with synthetic warnings and authenticated reviewer action.
+- [x] **T-5.7:** Scenario controls, queued injection/upload flow, replay speed/time cursor, reset and reconnect/resync.
+- [x] **T-5.8:** Export format/privacy dialog, verification/job states and completed artifact downloads.
+- [x] **T-5.9:** Keyboard accessibility, reduced motion, multilingual typography, empty/loading/failure and narrow-screen states.
 
 ## Phase 6: Tests, evaluation and release
 
