@@ -7,8 +7,8 @@ integrity-checked investigative dossiers. The active specification is in [`docs 
 ## Start on Windows
 
 1. Install Python 3.12 and Node.js 24, then double-click **`start.bat`**.
-2. Wait for the backend and frontend terminals to become ready. Open
-   [the workbench](http://127.0.0.1:3000).
+2. Wait for the backend and frontend terminals to become ready. The launcher opens
+   [the workbench](http://127.0.0.1:3000) automatically. You can also open that address manually.
 3. Read `.runtime/local-session-token` locally and paste it into **Local session token**.
    Click **Connect session**. The field clears; the token stays in memory for this page session.
 4. Select a replay scenario and click **Load raw scenario**. Default 100× replay completes
@@ -19,6 +19,23 @@ in separate terminals. Initial installation requires internet access; the instal
 fixtures, fonts and default map work offline. Stop both terminals with Ctrl+C before relaunching.
 `start.bat --setup` refreshes locked dependencies; `start.bat --check` checks prerequisites.
 The default ports are **8001** for the API and **3000** for the UI.
+Use port **3000** to use the app. The backend root on port **8001** provides links to the
+workbench, API documentation and health status. Starting only the backend requires starting
+the frontend separately as well.
+The launcher refuses occupied ports before starting another backend, then waits for both
+services before opening the browser. If the app is already running, open port 3000 directly.
+
+| Windows file | Action |
+|---|---|
+| `start.bat` | Install missing/changed dependencies and start both services |
+| `start-backend.bat` | Check prerequisites and run only the backend on port 8001 |
+| `start-frontend.bat` | Check prerequisites and run only the frontend on port 3000 |
+| `setup.bat` | Install or refresh dependencies |
+| `check.bat` | Check prerequisites without starting services |
+
+Use `start.bat` for normal startup, or run both service launchers separately. For unattended
+checks, use `check.bat --no-pause`; the individual launchers support `--check` without starting
+a service. `setup.bat --no-pause` installs dependencies without waiting for a keypress.
 
 Tested locally on Windows 11, Python 3.12.10, Node.js 24.18.0 and Microsoft Edge. The declared
 minimums are Python 3.11 and Node.js 20.9; other combinations have not been verified.
@@ -131,7 +148,7 @@ again at the frontend boundary.
 Next.js owns `frontend/next-env.d.ts`; it is generated and gitignored. The typecheck command
 runs `next typegen` before TypeScript, so fresh checkouts do not require a prior build.
 
-Local release verification: **124 backend tests and three Edge browser journeys pass**,
+Local release verification: **125 backend tests and three Edge browser journeys pass**,
 along with the complete phase gate, a locked reinstall, startup prerequisite check and npm
 audit (zero reported vulnerabilities). The actual seven-page English/Hindi dossier and desktop/
 narrow layouts were rendered and visually inspected. Remote CI results remain unobserved.

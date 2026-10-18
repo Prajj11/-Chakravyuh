@@ -6,13 +6,14 @@ import secrets
 import wave
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from html import escape
 from io import BytesIO
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from PIL import Image, UnidentifiedImageError
 from starlette.exceptions import HTTPException
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -195,6 +196,29 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if origin is not None and origin != runtime.frontend_origin:
             raise HTTPException(403, "Origin is outside this local session")
         return "local-analyst:" + sha256(token.encode())[:12]
+
+    @application.get("/", response_class=HTMLResponse, include_in_schema=False)
+    def api_home() -> HTMLResponse:
+        workbench = escape(runtime.frontend_origin, quote=True)
+        return HTMLResponse(
+            "<!doctype html><html lang='en'><head><meta charset='utf-8'>"
+            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+            "<title>Chakravyuh API</title><style>"
+            "body{font:17px/1.6 system-ui,sans-serif;background:#0b1220;color:#e2e8f0;"
+            "max-width:700px;margin:12vh auto;padding:24px}"
+            "h1{line-height:1.2}a{color:#7dd3fc}code{color:#a5f3fc}"
+            ".open{display:inline-block;background:#38bdf8;color:#082033;padding:12px 20px;"
+            "border-radius:8px;text-decoration:none;font-weight:700}"
+            "nav{display:flex;gap:24px;margin-top:24px}</style></head><body>"
+            "<h1>Chakravyuh API is running</h1>"
+            "<p>Open the investigation workbench to use the app:</p>"
+            f"<p><a class='open' href='{workbench}'>Open Chakravyuh workbench</a></p>"
+            f"<p>Workbench address: <a href='{workbench}'>{workbench}</a></p>"
+            "<p>If it is unavailable, double-click <code>start.bat</code> to start both services, "
+            "or <code>start-frontend.bat</code> to start the frontend separately.</p>"
+            "<nav aria-label='API resources'><a href='/docs'>API documentation</a>"
+            "<a href='/api/v1/health'>API health</a></nav></body></html>"
+        )
 
     @application.get("/api/v1/health", response_model=HealthStatusResponse)
     def health(request: Request) -> HealthStatusResponse:

@@ -53,6 +53,9 @@ if /i "%~1"=="--check" (
     exit /b 0
 )
 
+".venv\Scripts\python.exe" scripts/open_workbench.py --ports-free
+if errorlevel 1 goto failed
+
 echo Starting Chakravyuh in two terminal windows...
 echo Workbench: http://127.0.0.1:3000
 echo API docs:  http://127.0.0.1:8001/docs
@@ -61,15 +64,27 @@ echo If either port is already in use, stop the previous instance first.
 
 start "Chakravyuh Backend" "%ComSpec%" /k ""%~f0" --backend"
 start "Chakravyuh Frontend" "%ComSpec%" /k ""%~f0" --frontend"
+echo Waiting for both services before opening the workbench...
+".venv\Scripts\python.exe" scripts/open_workbench.py
+if errorlevel 1 goto failed
 exit /b 0
 
 :backend
 title Chakravyuh Backend
+".venv\Scripts\python.exe" scripts/open_workbench.py --ports-free 8001
+if errorlevel 1 goto failed
+echo Backend API: http://127.0.0.1:8001/docs
+echo Open the app at http://127.0.0.1:3000
+echo Both services must be running. Use start.bat or also run start-frontend.bat.
 ".venv\Scripts\python.exe" -m uvicorn app.main:app --host 127.0.0.1 --port 8001 --loop asyncio
 exit /b %errorlevel%
 
 :frontend
 title Chakravyuh Frontend
+".venv\Scripts\python.exe" scripts/open_workbench.py --ports-free 3000
+if errorlevel 1 goto failed
+echo Workbench: http://127.0.0.1:3000
+echo Keep the backend running on port 8001. Use start.bat or also run start-backend.bat.
 set "NEXT_PUBLIC_API_URL=http://127.0.0.1:8001"
 cd /d "%~dp0frontend"
 node node_modules\next\dist\bin\next dev --hostname 127.0.0.1 --port 3000

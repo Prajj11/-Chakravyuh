@@ -17,6 +17,21 @@ def png() -> bytes:
     return stream.getvalue()
 
 
+def test_api_home_points_to_configured_workbench(tmp_path: Path) -> None:
+    app = create_app(
+        Settings(data_dir=tmp_path, session_token=TOKEN, frontend_origin="http://127.0.0.1:3456")
+    )
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        home = client.get("/")
+        assert home.status_code == 200
+        assert home.headers["content-type"].startswith("text/html")
+        assert "Chakravyuh API is running" in home.text
+        assert "href='http://127.0.0.1:3456'" in home.text
+        assert "href='/docs'" in home.text
+        assert TOKEN not in home.text
+        assert client.get("/api/v1/campaigns").status_code == 401
+
+
 def test_unauthorized_json_is_rejected_before_parsing(tmp_path: Path) -> None:
     app = create_app(Settings(data_dir=tmp_path, session_token=TOKEN))
     with TestClient(app, base_url="http://127.0.0.1") as client:

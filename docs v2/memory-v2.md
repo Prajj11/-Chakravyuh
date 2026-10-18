@@ -173,3 +173,9 @@ The documentation revision checked all ten file versions, 18 relative links, Pyt
 Full evaluation protocol, raw metrics, limitations and reproduction commands are in [evaluation/README.md](../evaluation/README.md). README now describes the implemented workbench, Windows/Linux entry points, optional weights, a five-minute demonstration and actual release gaps.
 
 - Live launch verification: backend healthy and frontend HTTP 200 through the Windows launcher subcommands. Followed bundled Next.js 16.4 guidance: keep next-env.d.ts generated/gitignored, run next typegen before typechecking a fresh checkout, and retain the framework-generated AGENTS.md. Development startup no longer changes tracked framework type declarations.
+
+### October 18, 2026 — Windows launch and API entry-page fix
+
+- Added setup/check and separate backend/frontend BAT entry points. The main launcher checks port availability before starting services, waits for API health and frontend HTTP readiness, then opens the workbench at port 3000. Individual service starts also check their own port; occupied ports produce clear instructions before another backend can overwrite the session token file.
+- GET / on the backend now serves an API landing page linking the configured frontend origin, API docs and health. It exposes no session token and does not change protected API authorization. Service terminal messages distinguish the workbench address from API documentation.
+- Verified 125 backend tests, Ruff lint/format, mypy and generated-contract consistency; exercised readiness against both running services and confirmed duplicate-start guards for both ports. The landing page test covers a custom frontend port and continued authorization enforcement. Frontend runtime code is unchanged; the existing three browser journeys remain the UI verification record. Existing running services require a restart to load the new backend root route.
