@@ -23,12 +23,12 @@
 
 ## Phase 2: Narrative and coordination analytics
 
-- [ ] **T-2.1:** Versioned multilingual embedder and frozen TF-IDF fallback, separate vector indexes and 24-hour clustering.
-- [ ] **T-2.2:** Typed claim registry, source snapshots, candidate retrieval and human contextual review/audit; reject synthetic cross-origin verification.
-- [ ] **T-2.3:** Explainable multilingual lexicon harm indicators with supported-language coverage.
-- [ ] **T-2.4:** Content-linked disjoint event pairing, repeated buckets, q_uv normalization and account/campaign synchronization.
-- [ ] **T-2.5:** Explicit bot feature scaling, availability weights, additive contributions and null/sufficiency rules.
-- [ ] **T-2.6:** Descriptive burst index and explicit UNSUPPORTED Hawkes fields; no proxy-to-Hawkes relabeling.
+- [x] **T-2.1:** Versioned multilingual embedder and frozen TF-IDF fallback, separate vector indexes and 24-hour clustering.
+- [/] **T-2.2:** Typed claim registry, source snapshots, candidate retrieval and human contextual review/audit; reject synthetic cross-origin verification.
+- [x] **T-2.3:** Explainable multilingual lexicon harm indicators with supported-language coverage.
+- [x] **T-2.4:** Content-linked disjoint event pairing, repeated buckets, q_uv normalization and account/campaign synchronization.
+- [x] **T-2.5:** Explicit bot feature scaling, availability weights, additive contributions and null/sufficiency rules.
+- [x] **T-2.6:** Descriptive burst index and explicit UNSUPPORTED Hawkes fields; no proxy-to-Hawkes relabeling.
 
 ## Phase 3: Graph, media and geography
 

@@ -6,9 +6,12 @@ import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import numpy as np
 from app.config import Parameters
+from app.coordination.engine import CoordinationEngine
 from app.ingestion.service import IngestionService
 from app.ingestion.simulator import SCENARIO_IDS, ingest_scenario, replay_scope
+from app.nlp_engine.engine import NarrativeEngine
 from app.repositories.evidence import EvidenceRepository
 from app.repositories.state import StatePartition, StateRepository
 from app.schemas.models import DataOrigin, UnifiedSocialEvent
@@ -52,6 +55,7 @@ def main() -> None:
             if counts["events"] != 1 or counts["audit_entries"] != 1:
                 raise RuntimeError(f"CLI ingestion was not idempotent: {counts}")
             state = StateRepository(repository)
+            nlp = NarrativeEngine(repository.parameters)
             for scenario in SCENARIO_IDS:
                 events = ingest_scenario(
                     scenario, IngestionService(repository), scope="local"
@@ -63,6 +67,34 @@ def main() -> None:
                 generation = state.generation(partition)
                 for event in events:
                     state.record_account(partition, generation, event.event_id)
+                for cluster in nlp.cluster(events, partition_id=partition.key):
+                    members = [
+                        event for event in events if event.event_id in cluster.event_ids
+                    ]
+                    vectors = nlp.embed([event.text for event in members])
+                    indices = {
+                        event.event_id: index for index, event in enumerate(members)
+                    }
+                    result = CoordinationEngine(repository.parameters).analyze(
+                        members,
+                        similarity=lambda a, b, vectors=vectors, indices=indices: float(
+                            np.clip(
+                                np.dot(
+                                    vectors[indices[a.event_id]],
+                                    vectors[indices[b.event_id]],
+                                ),
+                                0,
+                                1,
+                            )
+                        ),
+                    )
+                    repository.record_analysis(
+                        result.assessment,
+                        [event.canonical_event_sha256 for event in members],
+                        {nlp.model_id: nlp.revision},
+                        partition.data_origin,
+                        "local",
+                    )
                 if state.list_events(partition) != sorted(
                     events, key=lambda event: (event.timestamp_utc, event.event_id)
                 ):
@@ -76,7 +108,7 @@ def main() -> None:
         finally:
             repository.close()
     print(
-        "Offline smoke passed: idempotent CLI, three replay scenarios, isolated reset and verified hashes."
+        "Offline smoke passed: CLI, three replay scenarios, frozen NLP, coordination, reset and integrity."
     )
 
 

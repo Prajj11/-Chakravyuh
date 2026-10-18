@@ -12,6 +12,35 @@ from app.schemas.models import ContractModel
 
 
 class Parameters(ContractModel):
+    PARAMETER_VERSION: str = "2.1.0.1"
+    SYNC_BUCKET_SEC: int = 60
+    ACCOUNT_TOP_SYNC_PEERS: int = 5
+    COORDINATION_MIN_POSTS: int = 10
+    BURST_MIN_COMPLETE_BINS: int = 10
+    BURST_MIN_EVENTS: int = 20
+    CREATION_BATCH_WINDOW_HOURS: float = 48
+    CREATION_BATCH_MIN_KNOWN_PEERS: int = 3
+    CREATION_BATCH_DENSITY_DENOMINATOR: float = 10
+    POSTING_RATE_BURST_SCALE: float = 9
+    HANDLE_TRAILING_DIGIT_CAP: int = 6
+    HARM_MIN_LANGUAGE_COVERAGE: float = 0.30
+    PHASH_MAX_DISTANCE: int = 10
+    LOUVAIN_RESOLUTION: float = 1
+    BRIDGE_CENTRALITY_PERCENTILE: float = 85
+    BRIDGE_MIN_INTERACTION_EDGES: int = 2
+    ELA_JPEG_QUALITY: int = 90
+    ELA_DISPLAY_SCALE: float = 15
+    ELA_SCORE_SCALE: float = 10
+    ELA_REGION_THRESHOLD: float = 15
+    ELA_MIN_COMPONENT_PIXELS: int = 16
+    GEO_TRAILING_WINDOW_SEC: int = 3600
+    GEO_GRID_RADIUS: int = 2
+    GEO_MIN_COLLECTION_COVERAGE: float = 0.90
+    GEO_Z_COMPONENT_SCALE: float = 6
+    CTI_BOT_MIN_SCORED_AUTHORS: int = 3
+    CTI_MEDIUM_THRESHOLD: float = 40
+    CTI_HIGH_THRESHOLD: float = 60
+    MEDIA_INDICATOR_THRESHOLD: float = 50
     SEMANTIC_CLUSTER_SIMILARITY: float = Field(default=0.85, ge=0, le=1)
     NARRATIVE_WINDOW_HOURS: int = Field(default=24, gt=0)
     TEMPORAL_CO_POST_WINDOW_SEC: float = Field(default=60, gt=0)

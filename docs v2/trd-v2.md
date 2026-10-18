@@ -197,3 +197,8 @@ UI/WebSocket alerts are automatic local notifications. External incident webhook
 - Tests cover empty/single-node graphs, zero available features, exact timestamps, 60-second boundaries, event reuse prevention, 0.65/70/75 boundaries, redaction leaks, hash corruption, synthetic reference isolation, failed models, zero known geography and missing baselines.
 - Offline demo must support all three scenarios, injection, map/graph/timeline cross-filtering, claim review, reconnect, and verified redacted ZIP/PDF/STIX export. Outputs are measured; no expected scenario CTI is hardcoded.
 - Initial performance targets: read P95<200ms; scoring <2s for a declared 100-event text/image batch excluding queued heavy inference; 1,000-node local graph recalculation <800ms; export <2s for 100 events. Record hardware, data size and cold/warm conditions. Queued endpoints return promptly. Larger 5,000-node rendering and 500 events/sec remain measured stretch goals, not MVP guarantees.
+
+Implementation parameter revision 2.1.0.1 centralizes all algorithm constants from sections 4–9
+(including feature scales, ELA, graph and sample gates) in Parameters. Defaults are unchanged.
+The full canonical parameter JSON, including this revision, determines parameter_set_id.
+Lexical preprocessing aliases are versioned with the frozen corpus hash in tfidf-v1.
