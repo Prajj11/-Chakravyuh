@@ -13,12 +13,15 @@ h3==4.5.0
 httpcore2==2.13.1
 httpx2==2.13.1
 idna==3.20
+ImageHash==4.3.2
 iniconfig==2.3.1
 joblib==1.6.0
 librt==0.16.0
 mypy==2.4.0
 mypy_extensions==1.1.0
+networkx==3.5
 numpy==2.2.6
+opencv-python-headless==4.12.0.88
 opentelemetry-api==1.45.1
 packaging==26.3
 pathspec==1.1.1
@@ -31,6 +34,7 @@ Pygments==2.21.0
 pytest==9.1.1
 python-dotenv==1.2.4
 python-multipart==0.0.32
+PyWavelets==1.10.0
 ruff==0.17.1
 scikit-learn==1.7.2
 scipy==1.15.3

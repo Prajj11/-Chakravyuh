@@ -32,11 +32,11 @@
 
 ## Phase 3: Graph, media and geography
 
-- [ ] **T-3.1:** Separate directed interactions and undirected sync projection, deterministic Louvain/centrality and platform-qualified IDs.
-- [ ] **T-3.2:** Role precedence with temporal seed, bot/bridge/low-indicator eligibility and UNCLASSIFIED fallback.
-- [ ] **T-3.3:** Real pHash/ELA report, bounding boxes, EXIF inspection and explicit C2PA/video/audio adapter states.
-- [ ] **T-3.4:** H3 source/subject separation, profile uncertainty, coverage/sample gates and coordination-gated mismatch.
-- [ ] **T-3.5:** Same-scope historical baselines with collection coverage, minimum buckets, origin separation and null Z without history.
+- [x] **T-3.1:** Separate directed interactions and undirected sync projection, deterministic Louvain/centrality and platform-qualified IDs.
+- [x] **T-3.2:** Role precedence with temporal seed, bot/bridge/low-indicator eligibility and UNCLASSIFIED fallback.
+- [x] **T-3.3:** Real pHash/ELA report, bounding boxes, EXIF inspection and explicit C2PA/video/audio adapter states.
+- [x] **T-3.4:** H3 source/subject separation, profile uncertainty, coverage/sample gates and coordination-gated mismatch.
+- [x] **T-3.5:** Same-scope historical baselines with collection coverage, minimum buckets, origin separation and null Z without history.
 
 ## Phase 4: API, CTI and reporting
 
