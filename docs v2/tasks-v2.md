@@ -16,9 +16,9 @@
 
 - [x] **T-1.1:** Build exact raw capture and capture manifest, immutable canonical serializer, media-byte store and distinct SHA-256 domains.
 - [x] **T-1.2:** Implement append-only chained audit, content-addressed repository, deduplication and late media enrichment.
-- [ ] **T-1.3:** Generate baseline/spliced JPEG byte fixtures with separate evaluation masks; no analytical outputs in fixtures.
-- [ ] **T-1.4:** Build three replay scenarios with repeated waves, missing metadata, stable actor identities and optional historical baseline events.
-- [ ] **T-1.5:** Add event-time replay clock, generation-safe reset and separate origin/scope stores.
+- [x] **T-1.3:** Generate baseline/spliced JPEG byte fixtures with separate evaluation masks; no analytical outputs in fixtures.
+- [x] **T-1.4:** Build three replay scenarios with repeated waves, missing metadata, stable actor identities and optional historical baseline events.
+- [x] **T-1.5:** Add event-time replay clock, generation-safe reset and separate origin/scope stores.
 - [ ] **T-1.6 (optional live):** Public Reddit feed adapter; Telegram preview adapter if accessible, with allowlist/backoff and graceful 403/429.
 
 ## Phase 2: Narrative and coordination analytics
