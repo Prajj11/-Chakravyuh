@@ -41,6 +41,7 @@ def test_health_auth_upload_download_and_cors(tmp_path: Path) -> None:
         download = client.get(f"/api/v1/artifacts/{artifact_id}/download")
         assert download.content == png()
         assert "unsafe" not in download.headers["content-disposition"]
+        assert download.headers["content-disposition"].endswith('.png"')
         assert download.headers["x-content-type-options"] == "nosniff"
         client.headers.pop("Authorization")
         assert client.get(f"/api/v1/artifacts/{artifact_id}/download").status_code == 401
@@ -50,6 +51,23 @@ def test_health_auth_upload_download_and_cors(tmp_path: Path) -> None:
             headers={"Origin": "http://127.0.0.1:3000", "Access-Control-Request-Method": "POST"},
         )
         assert allowed.headers["access-control-allow-origin"] == "http://127.0.0.1:3000"
+
+
+def test_unauthorized_upload_rejected_before_multipart_parsing(tmp_path: Path) -> None:
+    with TestClient(
+        create_app(Settings(data_dir=tmp_path, session_token=TOKEN)), base_url="http://127.0.0.1"
+    ) as client:
+        # A malformed body would fail parsing; early auth must win without spooling it to disk.
+        result = client.post(
+            "/api/v1/media",
+            content=b"invalid multipart",
+            headers={
+                "Content-Type": "multipart/form-data; boundary=missing",
+                "Content-Length": "99999999",
+            },
+        )
+        assert result.status_code == 401
+        assert result.json()["code"] == "SESSION_REQUIRED"
 
 
 @pytest.mark.parametrize("data,mime", [(b"not an image", "image/jpeg"), (png(), "image/jpeg")])

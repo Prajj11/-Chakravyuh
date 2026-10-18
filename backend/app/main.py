@@ -5,7 +5,6 @@ import secrets
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from io import BytesIO
-from pathlib import Path
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Request, UploadFile
@@ -46,6 +45,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         repository = EvidenceRepository(runtime.data_dir, parameters)
         application.state.repository = repository
+        application.state.layer_status = {
+            name: AnalysisStatus.AVAILABLE if name == "ingestion" else AnalysisStatus.PENDING
+            for name in (
+                "ingestion",
+                "nlp_engine",
+                "coordination",
+                "graph_engine",
+                "geo_engine",
+                "media_forensics",
+                "reporting",
+            )
+        }
         # Local user reads this file to authorize this launch. Never expose the token through HTTP.
         token_file = runtime.data_dir / "local-session-token"
         token_file.write_text(token, encoding="utf-8")
@@ -72,6 +83,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     ) -> Response:
         request.state.request_id = uuid4().hex
         if request.method == "POST" and request.url.path == "/api/v1/media":
+            # FastAPI parses multipart before dependency resolution. Authenticate here as well
+            # to reject unauthorized bodies before the parser can spool them to disk.
             if not secrets.compare_digest(
                 request.headers.get("authorization", ""), "Bearer " + token
             ):
@@ -151,18 +164,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def health(request: Request) -> HealthStatusResponse:
         repository: EvidenceRepository = request.app.state.repository
         return HealthStatusResponse(
-            status="degraded",
+            status="healthy"
+            if all(
+                status == AnalysisStatus.AVAILABLE
+                for status in request.app.state.layer_status.values()
+            )
+            else "degraded",
             active_campaigns_count=0,
             total_ingested_events=repository.event_count(scope),
-            layer_status={
-                "ingestion": AnalysisStatus.AVAILABLE,
-                "nlp_engine": AnalysisStatus.PENDING,
-                "coordination": AnalysisStatus.PENDING,
-                "graph_engine": AnalysisStatus.PENDING,
-                "geo_engine": AnalysisStatus.PENDING,
-                "media_forensics": AnalysisStatus.PENDING,
-                "reporting": AnalysisStatus.PENDING,
-            },
+            layer_status=request.app.state.layer_status,
         )
 
     @application.get(
@@ -223,10 +233,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return Response(
             data,
             media_type=mime,
-            headers={"Content-Disposition": f'attachment; filename="{Path(artifact_id).name}.bin"'},
+            headers={
+                "Content-Disposition": f'attachment; filename="{artifact_id}{extension(mime)}"'
+            },
         )
 
     return application
 
 
 app = create_app()
+
+
+def extension(mime: str) -> str:
+    return {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+        "application/pdf": ".pdf",
+        "application/zip": ".zip",
+        "application/json": ".json",
+        "text/html": ".html",
+        "video/mp4": ".mp4",
+        "audio/wav": ".wav",
+        "audio/mpeg": ".mp3",
+    }.get(mime, ".bin")

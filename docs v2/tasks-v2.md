@@ -10,6 +10,7 @@
 - [x] **T-0.2:** Initialize backend/, frontend/, sample_data/ and development configuration; retain docs v2 as active documentation.
 - [/] **T-0.3:** Implement typed schemas and central config including validators, parameter-set hashing and TypeScript mirror. Models/config/mirror and structural validators implemented; engine/context-dependent invariants remain for later slices.
 - [x] **T-0.4:** Pin compatible runtime/dependency versions, including native Windows asyncio and CPU/offline mode; document startup.
+- [x] **T-0.5:** Portable startup, Linux/Windows CI configuration, isolated offline CLI smoke, Python typechecking, MIME-derived download names and early upload authorization. Remote CI execution remains unverified.
 
 ## Phase 1: Evidence, ingestion and reproducible inputs
 

@@ -84,6 +84,13 @@ The new evidence/sample gates are chosen MVP defaults to validate on calibration
 
 ## 5. Changelog and current verification
 
+### October 18, 2026 — Phase 0 hardening
+
+- Added Linux setup/dev scripts, Makefile, Windows auto-setup launcher, portable dependency constraints and Linux/Windows CI. Initial installation needs network; installed runtime is offline. CI configuration is present; remote Linux/Windows CI execution is not claimed.
+- Switched the Starlette test client to httpx2, added mypy, MIME-derived download names, and tested upload authorization before multipart parsing. Health reads the actual registered layer states; pending engines remain degraded.
+- The supplied master prompts disagree on pairing buckets; the owning TRD and second prompt specify one-minute buckets, which remain authoritative. The documented three scenario IDs are retained; additional benign controls belong in evaluation. The requested frontend-design skill is unavailable, so the supplied design contract guides implementation.
+- Windows phase gate: 39 backend tests, Ruff lint/format, mypy, generated contracts, frontend typecheck/format/build and offline CLI smoke pass. Linux execution remains unverified locally.
+
 - **October 18, 2026 — v1:** Initial ten architecture/product documents created.
 - **October 18, 2026 — v2.0:** Threshold and schema reconciliation introduced separate claim context, missing metadata and runtime-computed outputs.
 - **October 18, 2026 — v2.1.0:** Corrected remaining enum inconsistencies, organic fallback, raw/canonical/media hashes, source capture lineage, report metadata and endpoint/job contracts. Specified synchronization normalization, bot scaling, geographic history/sample gates, CTI missing-component behavior and alert eligibility. Restored complete engineering/privacy rules, UI interactions, frontend backlog and release checks. Removed guaranteed scenario outputs and unsupported deepfake/Hawkes claims.

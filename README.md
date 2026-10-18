@@ -22,7 +22,7 @@ findings. Only JPEG, PNG and WebP uploads are supported in this slice; other med
 
 ## Windows startup
 
-After installing the dependencies below, double-click `start.bat` to launch the backend and
+Double-click `start.bat` to install missing dependencies and launch the backend and
 frontend in separate terminals. Open http://127.0.0.1:3000 when they are ready. Stop each service
 with Ctrl+C. `start.bat --check` checks prerequisites without starting services. Close any
 previous instances before launching again.
@@ -64,6 +64,13 @@ builds. Use `127.0.0.1` consistently; `localhost` is a different CORS origin.
 
 ## Exercise ingestion and integrity
 
+On Linux, run `./scripts/dev.sh` from a clean clone (Python 3.12 and Node.js 24 recommended).
+It creates the virtual environment, installs locked dependencies and starts both services;
+Ctrl+C stops them. Initial dependency installation needs network access; the installed
+runtime and offline smoke test need none. `make setup`, `make check`, `make test` and
+`make demo` provide matching shortcuts. Windows `start.bat --setup` refreshes dependencies.
+CI is configured for Linux and Windows; remote CI results have not yet been observed.
+
 With the Python environment installed, run from the root:
 
 ```powershell
@@ -99,8 +106,10 @@ After intentional Python schema changes, regenerate with
 `.\.venv\Scripts\python.exe backend/scripts/generate_types.py` from the repository root.
 Tests place isolated temporary data under `.runtime/test-tmp/`, avoiding shared Windows temp
 permissions. `backend/requirements.lock` pins the resolved Windows Python dependencies;
-`frontend/package-lock.json` locks the frontend tree. Add engine dependencies only as their
-implementation arrives. Current Starlette emits a development-only httpx deprecation warning.
+`frontend/package-lock.json` locks the frontend tree. The backend constraints include platform
+markers for Windows dependencies. The test client uses httpx2. Python source is checked with
+`python -m mypy backend/app --ignore-missing-imports`; `python scripts/smoke.py` verifies offline
+CLI ingestion, idempotency and evidence integrity.
 
 See [`tasks-v2.md`](docs%20v2/tasks-v2.md) and [`memory-v2.md`](docs%20v2/memory-v2.md) for actual
 completion status and remaining acceptance work. Accuracy and performance targets remain
