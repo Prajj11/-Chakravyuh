@@ -1,0 +1,14 @@
+{
+  "source_event_key": "local-example-001",
+  "platform": "simulator",
+  "data_origin": "USER_INJECTED",
+  "collector_id": "local-cli-v1",
+  "collector_scope": "local-example",
+  "timestamp_utc": "2026-10-18T12:00:00Z",
+  "account": {
+    "account_id": "simulator:local-example",
+    "handle": "@local_example"
+  },
+  "text": "A local evidence capture. यह एक परीक्षण है।",
+  "language": "hi"
+}

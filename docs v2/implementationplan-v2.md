@@ -2,7 +2,7 @@
 
 **Contract version:** 2.1.0  
 **Updated:** October 18, 2026  
-**Strategy:** Testable vertical slices; docs are complete, application scaffolding remains pending.
+**Strategy:** Testable vertical slices; evidence foundation implemented, analytical pipeline and complete MVP pending. See tasks/memory for exact progress.
 
 Use [tasks-v2.md](tasks-v2.md) for checkboxes, [backendschema-v2.md](backendschema-v2.md) for types/API and [trd-v2.md](trd-v2.md) for all algorithms. This plan does not override formulas or promise specific scenario CTI values.
 

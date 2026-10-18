@@ -2,8 +2,8 @@
 
 **Contract version:** 2.1.0  
 **Updated:** October 18, 2026  
-**Current state:** Documentation reconciliation complete; application scaffolding and all implementation phases pending.  
-**Next task:** T-0.2 in [tasks-v2.md](tasks-v2.md).
+**Current state:** Evidence foundation and frontend preview implemented; analytical pipeline and complete MVP remain pending.
+**Next task:** T-1.3 / T-1.4 raw replay fixtures, followed by narrative analytics; finish context-dependent T-0.3 validators as services arrive.
 
 ## 1. Active specification
 
@@ -88,4 +88,16 @@ The new evidence/sample gates are chosen MVP defaults to validate on calibration
 - **October 18, 2026 — v2.0:** Threshold and schema reconciliation introduced separate claim context, missing metadata and runtime-computed outputs.
 - **October 18, 2026 — v2.1.0:** Corrected remaining enum inconsistencies, organic fallback, raw/canonical/media hashes, source capture lineage, report metadata and endpoint/job contracts. Specified synchronization normalization, bot scaling, geographic history/sample gates, CTI missing-component behavior and alert eligibility. Restored complete engineering/privacy rules, UI interactions, frontend backlog and release checks. Removed guaranteed scenario outputs and unsupported deepfake/Hawkes claims.
 
-Only documentation task T-0.1 is complete. Runtime/accuracy/performance results remain unmeasured. This revision checked all ten file versions, 18 relative links, Python syntax for 53 documented classes and Pydantic v2 JSON-schema generation. All passed. These documentation checks do not implement cross-field service validators or substitute for platform tests.
+The documentation revision checked all ten file versions, 18 relative links, Python syntax for 53 documented classes and Pydantic v2 JSON-schema generation. Those checks did not constitute software implementation.
+
+### October 18, 2026 — Initial implementation slice
+
+- Completed T-0.2, T-0.4, T-1.1 and T-1.2. All documented Python wire models now exist; generated strict TypeScript mirrors include discriminated job/WebSocket unions. Structural validation covers finite scores, unavailable primary scores, additive contributions, job/payload pairings, UTC timestamps, media retention, geography and review prerequisites. Service-context checks (claim audit/context, engine sufficiency, crypto adapter verification, sequence state) remain pending under T-0.3.
+- Implemented canonical-json-v1, exact source captures/manifests, immutable nested event fields, SQLite content-addressed evidence metadata, chained audit, concurrent idempotent ingestion, late media collection and analytical-run lineage. Evidence verification detects raw/canonical/media/analysis/manifest corruption, event divergence and audit chain changes. No export service exists yet.
+- Added local bearer session, loopback/CORS defaults, APIError envelope, safe JPEG/PNG/WebP decoding/limits and scoped artifact downloads. API currently exposes health, empty campaigns, image upload and artifact download only. Other required endpoints are pending; no successful analytical responses are fabricated.
+- Added Next.js/Tailwind preview with real health/event telemetry, pending analytical views, session authorization and responsive layout. Scenario/injection/export controls are disabled and visibly planned. This does not complete Phase 5.
+- ADR-010: Backend default development port is 8001 because another service already occupied 8000. Frontend defaults to 127.0.0.1:3000; both bind to loopback. README includes environment overrides and Windows startup without activation/uvloop.
+- Verified Windows / Python 3.12.10 / Node.js 24.18.0 with pinned dependency trees. Initial tests: 36 passed; Ruff lint/format, generated-contract check, frontend strict typecheck and production build passed. Follow-up checks recorded below. Starlette currently emits a dev-only httpx deprecation warning. Other OS/Python minimum combinations are untested.
+- Smoke-tested CLI ingestion twice (one retained event/audit entry), integrity verification, live API telemetry and narrow in-app browser layout. Fixed Windows cp1252 console output by emitting UTF-8 in the CLI. Default shared pytest temp directory was inaccessible; tests now use isolated workspace-local temporary directories.
+- No accuracy, latency, full replay journey, graph/map/forensics visual QA, multilingual PDF or redaction-export acceptance is claimed. Retained one clearly USER_INJECTED local example in gitignored runtime storage for the preview.
+- Final foundation verification: 38 backend tests passed (one upstream Starlette/httpx deprecation warning); Ruff lint and format checks passed; TypeScript mirror regeneration check passed; frontend typecheck, Prettier check and production build passed; tracked diff whitespace check passed. Live browser confirmed API connection, one retained event, local-session authorization and arrow-key view-tab navigation. Persisted complete parameter-set JSON alongside its hash; parameter metadata is append-only and included in integrity verification. Preview services run locally on ports 3000 and 8001.

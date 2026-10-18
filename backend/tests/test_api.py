@@ -1,0 +1,104 @@
+from io import BytesIO
+from pathlib import Path
+
+import pytest
+from fastapi.testclient import TestClient
+from PIL import Image
+
+from app.config import Settings
+from app.main import create_app
+
+TOKEN = "test-session-token-32-characters-minimum"
+
+
+def png() -> bytes:
+    stream = BytesIO()
+    Image.new("RGB", (16, 16), "blue").save(stream, format="PNG")
+    return stream.getvalue()
+
+
+def test_health_auth_upload_download_and_cors(tmp_path: Path) -> None:
+    app = create_app(Settings(data_dir=tmp_path, session_token=TOKEN))
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        health = client.get("/api/v1/health")
+        assert health.status_code == 200
+        assert health.json()["layer_status"]["coordination"] == "PENDING"
+        assert TOKEN not in health.text
+        assert client.get("/api/v1/campaigns").json()["code"] == "SESSION_REQUIRED"
+        client.headers["Authorization"] = f"Bearer {TOKEN}"
+        assert client.get("/api/v1/campaigns").json() == []
+        assert (
+            client.get(
+                "/api/v1/campaigns", headers={"Origin": "https://outside.example"}
+            ).status_code
+            == 403
+        )
+        upload = client.post(
+            "/api/v1/media", files={"file": ("../../unsafe.png", png(), "image/png")}
+        )
+        assert upload.status_code == 201
+        artifact_id = upload.json()["media_artifact_id"]
+        download = client.get(f"/api/v1/artifacts/{artifact_id}/download")
+        assert download.content == png()
+        assert "unsafe" not in download.headers["content-disposition"]
+        assert download.headers["x-content-type-options"] == "nosniff"
+        client.headers.pop("Authorization")
+        assert client.get(f"/api/v1/artifacts/{artifact_id}/download").status_code == 401
+        assert client.get("/unknown").json()["code"] == "NOT_FOUND"
+        allowed = client.options(
+            "/api/v1/media",
+            headers={"Origin": "http://127.0.0.1:3000", "Access-Control-Request-Method": "POST"},
+        )
+        assert allowed.headers["access-control-allow-origin"] == "http://127.0.0.1:3000"
+
+
+@pytest.mark.parametrize("data,mime", [(b"not an image", "image/jpeg"), (png(), "image/jpeg")])
+def test_malformed_and_mismatched_uploads(tmp_path: Path, data: bytes, mime: str) -> None:
+    with TestClient(
+        create_app(Settings(data_dir=tmp_path, session_token=TOKEN)), base_url="http://127.0.0.1"
+    ) as client:
+        response = client.post(
+            "/api/v1/media",
+            headers={"Authorization": f"Bearer {TOKEN}"},
+            files={"file": ("file.jpg", data, mime)},
+        )
+        assert response.status_code == 415
+        assert response.json()["code"] == "UNSUPPORTED_MEDIA"
+        assert response.json()["request_id"]
+
+
+def test_upload_size_dimensions_and_validation(tmp_path: Path) -> None:
+    settings = Settings(
+        data_dir=tmp_path, session_token=TOKEN, upload_limit_bytes=100, image_max_pixels=100
+    )
+    with TestClient(create_app(settings), base_url="http://127.0.0.1") as client:
+        client.headers["Authorization"] = f"Bearer {TOKEN}"
+        assert (
+            client.post(
+                "/api/v1/media", files={"file": ("large.png", b"x" * 101, "image/png")}
+            ).status_code
+            == 413
+        )
+        assert (
+            client.post(
+                "/api/v1/media", files={"file": ("pixels.png", png(), "image/png")}
+            ).status_code
+            == 413
+        )
+        invalid = client.post("/api/v1/media")
+        assert invalid.status_code == 422
+        assert invalid.json()["code"] == "VALIDATION_ERROR"
+
+
+def test_corruption_blocks_artifact_download(tmp_path: Path) -> None:
+    app = create_app(Settings(data_dir=tmp_path, session_token=TOKEN))
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        client.headers["Authorization"] = f"Bearer {TOKEN}"
+        uploaded = client.post(
+            "/api/v1/media", files={"file": ("test.png", png(), "image/png")}
+        ).json()
+        repository = app.state.repository
+        repository.store._path(uploaded["sha256_hash"]).write_bytes(b"tampered")
+        response = client.get(f"/api/v1/artifacts/{uploaded['media_artifact_id']}/download")
+        assert response.status_code == 409
+        assert response.json()["code"] == "EVIDENCE_INTEGRITY_MISMATCH"

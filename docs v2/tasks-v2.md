@@ -7,14 +7,14 @@
 ## Phase 0: Contracts and scaffolding
 
 - [x] **T-0.1:** Reconcile all ten v2 docs to 2.1.0: enums, unknown roles, provenance, algorithms, coverage/gates, endpoints, UI, governance and full backlog.
-- [ ] **T-0.2:** Initialize backend/, frontend/, sample_data/ and development configuration; retain docs v2 as active documentation.
-- [ ] **T-0.3:** Implement typed schemas and central config including validators, parameter-set hashing and TypeScript mirror.
-- [ ] **T-0.4:** Pin compatible runtime/dependency versions, including native Windows asyncio and CPU/offline mode; document startup.
+- [x] **T-0.2:** Initialize backend/, frontend/, sample_data/ and development configuration; retain docs v2 as active documentation.
+- [/] **T-0.3:** Implement typed schemas and central config including validators, parameter-set hashing and TypeScript mirror. Models/config/mirror and structural validators implemented; engine/context-dependent invariants remain for later slices.
+- [x] **T-0.4:** Pin compatible runtime/dependency versions, including native Windows asyncio and CPU/offline mode; document startup.
 
 ## Phase 1: Evidence, ingestion and reproducible inputs
 
-- [ ] **T-1.1:** Build exact raw capture and capture manifest, immutable canonical serializer, media-byte store and distinct SHA-256 domains.
-- [ ] **T-1.2:** Implement append-only chained audit, content-addressed repository, deduplication and late media enrichment.
+- [x] **T-1.1:** Build exact raw capture and capture manifest, immutable canonical serializer, media-byte store and distinct SHA-256 domains.
+- [x] **T-1.2:** Implement append-only chained audit, content-addressed repository, deduplication and late media enrichment.
 - [ ] **T-1.3:** Generate baseline/spliced JPEG byte fixtures with separate evaluation masks; no analytical outputs in fixtures.
 - [ ] **T-1.4:** Build three replay scenarios with repeated waves, missing metadata, stable actor identities and optional historical baseline events.
 - [ ] **T-1.5:** Add event-time replay clock, generation-safe reset and separate origin/scope stores.
@@ -44,11 +44,11 @@
 - [ ] **T-4.3:** WebSocket sequence retention/resync, polling, snapshot revision consistency and session-scoped access.
 - [ ] **T-4.4:** Integrity-verified ZIP exports containing dossier, HTML/PDF, manifest, STIX and authorized derivatives.
 - [ ] **T-4.5:** Consistent organic/unclassified redaction across every representation; hash derivatives and omit restricted originals.
-- [ ] **T-4.6:** CORS, loopback defaults, upload size/type/dimension guards and reviewer identity from session.
+- [/] **T-4.6:** CORS, loopback defaults, upload size/type/dimension guards and reviewer identity from session. Local session/CORS/image guards implemented; claim-review integration and remaining media adapters pending.
 
 ## Phase 5: Complete investigation frontend
 
-- [ ] **T-5.1:** Next.js/Tailwind app shell, telemetry, campaign feed, origin/window badges and responsive layout.
+- [/] **T-5.1:** Next.js/Tailwind app shell, telemetry, campaign feed, origin/window badges and responsive layout. Foundation shell and live health implemented; analytical campaign feed/window/origin rendering pending.
 - [ ] **T-5.2:** Canvas graph, sync/role/time controls, hulls, cascade lens, accessible node list and account/edge drawers.
 - [ ] **T-5.3:** H3 map/arcs with offline outline, source-confidence composition, sample/coverage gates and baseline explanations.
 - [ ] **T-5.4:** Cross-filtered propagation timeline with coordinated, low-indicator and unclassified volume and alert markers.
@@ -60,7 +60,7 @@
 
 ## Phase 6: Tests, evaluation and release
 
-- [ ] **T-6.1:** Schema/invariant tests, canonical serializer golden vectors, raw/canonical/media/audit corruption and export-failure tests.
+- [/] **T-6.1:** Schema/invariant tests, canonical serializer golden vectors, raw/canonical/media/audit corruption and export-failure tests. Foundation tests implemented; export-failure and engine-dependent cases pending.
 - [ ] **T-6.2:** Coordination deduplication, same timestamps, 60s boundaries, event reuse, repeated buckets and benign coordination false positives.
 - [ ] **T-6.3:** All-missing bot features, coverage boundaries, unclassified/organic/seed precedence and centrality edge cases.
 - [ ] **T-6.4:** Media malformed/unsupported states, real ELA/pHash, missing provenance and no fixture score leakage.
