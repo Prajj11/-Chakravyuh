@@ -1,7 +1,8 @@
 # Engineering Backlog and Release Checks: Chakravyuh
 
 **Contract version:** 2.1.0  
-**Updated:** October 18, 2026  
+**Updated:** October 19, 2026
+
 **Tracking:** [x] implemented/verified or release review recorded, [/] in progress, [ ] pending. Explicit release gaps below remain unmet; a checked review task does not erase an unmet target.
 
 ## Phase 0: Contracts and scaffolding
@@ -58,6 +59,10 @@
 - [x] **T-5.7:** Scenario controls, queued injection/upload flow, replay speed/time cursor, reset and reconnect/resync.
 - [x] **T-5.8:** Export format/privacy dialog, verification/job states and completed artifact downloads.
 - [x] **T-5.9:** Keyboard accessibility, reduced motion, multilingual typography, empty/loading/failure and narrow-screen states.
+- [x] **T-5.10:** October 19 UI redesign: branded session entry, teal/charcoal workbench, searchable campaign queue and eligibility/review filters, compact signal cards, collapsible assessment and scenario controls, persistent privacy toggle, responsive layouts and a deterministic evidence-linked Investigation brief.
+- [x] **T-5.11:** Production browser regression for queue filters, brief-to-account/edge/claim navigation, expandable explanations, existing review/export, injection/reset and dropped-stream recovery; desktop graph/map/media/natural-discussion and 390 px layout inspected. See memory for the final keyboard-focus follow-up check.
+
+Additional hackathon features are ranked in [hackathon-roadmap.md](hackathon-roadmap.md). That proposal is not an implementation checklist or an amendment to the analytical contract; evolution trees, historical as-of analysis and an interactive challenge lab are not shipped by the UI redesign.
 
 ## Phase 6: Tests, evaluation and release
 

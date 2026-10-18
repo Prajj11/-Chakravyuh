@@ -405,10 +405,11 @@ class HealthStatusResponse(ContractModel):
     execution_mode: Literal["local_computed"] = "local_computed"
 
 class ScenarioSwitchRequest(ContractModel):
-    scenario_id: Literal["cmp_electoral_01", "cmp_geo_astroturf_02", "cmp_organic_03", "all"]
+    scenario_id: str = Field(min_length=1, max_length=80)
     reset_state: bool = True
     seed: int = 42
     speed_multiplier: float = Field(default=1, gt=0, le=100)
+    playback_mode: Literal["TIMED", "BATCH"] = "TIMED"
 
 class ScenarioSwitchResponse(ContractModel):
     scenario_id: str

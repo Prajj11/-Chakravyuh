@@ -1,14 +1,15 @@
 # UI/UX and Visualization Design: Chakravyuh
 
 **Contract version:** 2.1.0  
-**Updated:** October 18, 2026  
+**Updated:** October 19, 2026
+
 **Theme:** Dark investigation workbench with visible evidence and uncertainty.
 
 This file fully replaces the v1 design. Use backend enum values and nested assessments from [backendschema-v2.md](backendschema-v2.md). Screenshots, example values and narrative names are illustrative, never expected computed outputs.
 
 ## 1. Assessment hierarchy
 
-The campaign header shows three distinct assessments:
+The campaign header shows four compact signal cards: CTI prioritization, coordination, media indicators and independent claim verification. CTI includes a numeric dial and tier; the remaining cards retain their own units and availability. These represent three distinct assessment domains:
 - **Coordination:** measured campaign sync and coverage, with a separate **CTI prioritization** badge. CTI includes media, geography and harm as well as coordination; do not describe CTI as a pure coordination metric.
 - **Media indicators:** measured ELA/model result, computation method and status; NO MEDIA differs from PENDING, UNSUPPORTED and FAILED.
 - **Claim verification:** UNVERIFIED, CONTRADICTED_BY_SOURCE, CORROBORATED or CONTEXT_MISSING, reference link/snapshot and review attribution.
@@ -34,15 +35,21 @@ Campaign selection loads one snapshot revision for every panel. Node/edge select
 
 Desktop uses three columns; narrow layouts collapse the feed and drawer into accessible panels and render one workbench tab at a time. Maintain keyboard focus and escape-to-close behavior for dialogs. Do not rely on color alone for roles or alerts.
 
+The October 19 visual revision adds a branded session-entry page, a searchable investigation queue, All cases / Warnings / Unverified filters, campaign observation totals and a snapshot identifier. Warnings filters by alert eligibility, not by a rounded CTI score or past dispatch. Search uses displayed privacy-aware titles, languages and origin. Filtering the queue does not change the selected investigation or its measurements.
+
+Scenario studio is collapsed by default and opened from the header. Privacy masking remains directly available in the header. Collection-window attribution limits and additive CTI contributions expand on demand; component coverage and alert eligibility/suppression remain visible. The media summary is the maximum available measured indicator, not a probability or a new aggregate detector; per-report method and availability remain in Media.
+
+With no selected account or edge, the right column contains an Investigation brief derived only from the current snapshot: eligible co-post pair count, strongest measured co-post link, earliest observed seed, computed media report count and claim review status. Actions open the corresponding existing evidence inspector or tab. This is a deterministic presentation aid, not an LLM inference or a new attribution engine. On smaller screens the brief follows the workbench and a selected evidence inspector uses the existing overlay treatment.
+
 ## 3. Palette and typography
 
 | Token / role | Color | Meaning |
 |---|---|---|
-| canvas | #070B14 | app background |
-| panel | #0F172A | primary surfaces |
-| elevated | #1E293B | drawer/modal |
-| border | #334155 | separators |
-| primary | #38BDF8 | active controls |
+| canvas | #0A1016 | app background |
+| panel | #101820 | primary surfaces |
+| elevated | #17222C | drawer/modal |
+| border | #26343E | separators |
+| primary | #77E1C9 | active controls |
 | EARLIEST_OBSERVED_SEED | #EF4444 | earliest observed, not a guilt label |
 | BOT_AMPLIFIER | #F59E0B | bot/coordination indicators pass gates |
 | BRIDGE_INFLUENCER | #A855F7 | qualifying bridge pattern |
@@ -51,7 +58,7 @@ Desktop uses three columns; narrow layouts collapse the feed and drawer into acc
 | CRITICAL | #F43F5E | CTI >=75; alert eligibility shown separately |
 | HIGH | #FB923C | CTI >=60 and <75 |
 
-Use Inter/Plus Jakarta Sans with a bundled Devanagari-capable fallback for narratives, and JetBrains Mono/Fira Code with tabular numerals for hashes, times, indices and scores. Include units and UTC labels. Present full hashes in copyable expanded views; shortening is only visual.
+Use locally available Segoe UI with the bundled Chakravyuh Devanagari-capable font and system sans-serif fallback. Use the local monospace stack and tabular numerals for hashes, times, indices and scores. No remote font request is needed. Include units and UTC labels. Present full hashes in copyable expanded views; shortening is only visual. Shared analytical styles remain in globals.css; workbench.css owns the visual theme and responsive overrides.
 
 ## 4. Coordination graph and dossier
 

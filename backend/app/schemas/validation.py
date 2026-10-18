@@ -8,6 +8,18 @@ import h3
 def validate_contract(value: object) -> None:
     from app.schemas import models as m
 
+    if isinstance(value, m.ScenarioSwitchRequest):
+        from app.ingestion.case_catalogue import DEMO_CASE_IDS
+
+        if value.scenario_id not in (
+            "cmp_electoral_01",
+            "cmp_geo_astroturf_02",
+            "cmp_organic_03",
+            "all",
+            "expanded",
+            *DEMO_CASE_IDS,
+        ):
+            raise ValueError("Unknown replay scenario")
     if isinstance(value, m.AnalyticalReport):
         if value.computation_mode == m.ComputationMode.SIMULATED_FIXTURE_METADATA:
             raise ValueError("Fixture annotations cannot be analytical reports")

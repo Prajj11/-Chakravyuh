@@ -15,6 +15,11 @@ async function connect(page: Page) {
   ).toBeVisible();
 }
 async function load(page: Page, scenario: string) {
+  if (!(await page.getByLabel("Scenario", { exact: true }).isVisible())) {
+    await page
+      .getByRole("button", { name: "Scenario studio", exact: true })
+      .click();
+  }
   await page.getByLabel("Scenario", { exact: true }).selectOption(scenario);
   await page
     .getByRole("button", { name: "Load raw scenario", exact: true })
@@ -44,6 +49,41 @@ test("scenario → graph / map / media → claim review → verified export", as
   });
   await connect(page);
   await load(page, "cmp_electoral_01");
+  await page
+    .getByRole("button", { name: "Scenario studio", exact: true })
+    .click();
+  await expect(page.getByLabel("Scenario", { exact: true })).not.toBeVisible();
+  await page
+    .getByLabel("Search campaigns")
+    .fill("a-narrative-that-does-not-exist");
+  await expect(page.locator(".campaign-card")).toHaveCount(0);
+  await page.getByRole("button", { name: "Clear campaign filters" }).click();
+  await expect(page.locator(".campaign-card")).not.toHaveCount(0);
+  await page.getByRole("button", { name: "Warnings", exact: true }).click();
+  await expect(page.locator(".campaign-card.active")).toBeVisible();
+  await page.getByRole("button", { name: "All cases", exact: true }).click();
+  await page.getByRole("button", { name: "Inspect strongest link" }).click();
+  await expect(page.locator(".inspector h2")).toHaveText("CO POST SYNC");
+  await expect(
+    page.getByRole("heading", { name: "Exact matched event IDs" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Clear", exact: true }).click();
+  await page.getByRole("button", { name: "Open account evidence" }).click();
+  await expect(page.locator(".inspector")).toContainText(
+    "global origin is not established",
+  );
+  await page.getByRole("button", { name: "Clear", exact: true }).click();
+  await page.getByRole("button", { name: "Review claim evidence" }).click();
+  await expect(
+    page.getByRole("tab", { name: "Claims", exact: true }),
+  ).toBeFocused();
+  await expect(
+    page.getByRole("tab", { name: "Claims", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
+  await page.getByRole("tab", { name: "Graph", exact: true }).click();
+  await page.locator(".assessment-explanation summary").click();
+  await expect(page.getByText(/Missing components:/)).toBeVisible();
+  await page.locator(".assessment-explanation summary").click();
   await expect(page.getByLabel("Recent local warning markers")).toBeVisible();
   await expect(page.getByLabel("Recent local warning markers")).toContainText(
     "12:",
@@ -208,6 +248,14 @@ test("natural discussion stays suppressed and a dropped stream reconnects", asyn
   await load(page, "cmp_organic_03");
   await expect(page.getByText(/Alert suppressed:/)).toBeVisible();
   await expect(page.getByLabel("Recent local warning markers")).toHaveCount(0);
+  await page.getByRole("button", { name: "Warnings", exact: true }).click();
+  await expect(page.locator(".campaign-card")).toHaveCount(0);
+  await page.getByRole("button", { name: "All cases", exact: true }).click();
+  await expect(
+    page.getByRole("button", {
+      name: "Mask low-indicator and unclassified identities",
+    }),
+  ).toHaveAttribute("aria-pressed", "true");
   await page.screenshot({
     path: info.outputPath("natural-discussion.png"),
     fullPage: true,

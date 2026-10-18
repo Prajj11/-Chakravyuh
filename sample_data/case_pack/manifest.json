@@ -1,0 +1,436 @@
+{
+  "version": "diverse-cases-v1",
+  "seed": 42,
+  "data_origin": "SYNTHETIC_REPLAY",
+  "total_cases": 25,
+  "total_posts": 7500,
+  "total_accounts": 1500,
+  "notice": "Fictional exercise data. Patterns are generator metadata, not detector outputs or evaluated labels. Media references reuse synthetic baseline/spliced JPEG fixtures; no audio/video is supplied.",
+  "cases": [
+    {
+      "scenario_id": "demo_flood_photo",
+      "title": "Recycled flood photograph",
+      "city": "Mumbai",
+      "generation_pattern": "synchronized",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_flood_photo.jsonl",
+      "sha256": "ab2909224363237d00690af7f15ee66b1b824c4bc5d3dfbee27da41754beeb7d",
+      "first_event_utc": "2026-10-01T08:00:00+00:00",
+      "last_event_utc": "2026-10-01T13:20:45+00:00"
+    },
+    {
+      "scenario_id": "demo_school_heat",
+      "title": "Unverified school closure notice",
+      "city": "Delhi",
+      "generation_pattern": "staggered",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_school_heat.jsonl",
+      "sha256": "c7c30b32727e1721aaaea23344b5f37899e3024f2f1907cefe62ce25f7f85184",
+      "first_event_utc": "2026-10-01T08:03:00+00:00",
+      "last_event_utc": "2026-10-01T13:34:52+00:00"
+    },
+    {
+      "scenario_id": "demo_metro_fare",
+      "title": "Altered metro fare screenshot",
+      "city": "Bengaluru",
+      "generation_pattern": "mixed",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_metro_fare.jsonl",
+      "sha256": "4894217faa38ab8f16bcdb5a21b2fc16f35e1e2bd07988687cd7d40a8c5e3d3d",
+      "first_event_utc": "2026-10-01T08:06:00+00:00",
+      "last_event_utc": "2026-10-01T14:35:52+00:00"
+    },
+    {
+      "scenario_id": "demo_water_notice",
+      "title": "Unverified water contamination claim",
+      "city": "Chennai",
+      "generation_pattern": "synchronized",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_water_notice.jsonl",
+      "sha256": "2377e60c547a4bee400ee756058cff8915a54b5cd6fbd36bda19907ebf2745db",
+      "first_event_utc": "2026-10-01T08:09:00+00:00",
+      "last_event_utc": "2026-10-01T13:29:45+00:00"
+    },
+    {
+      "scenario_id": "demo_bank_queue",
+      "title": "Fictional bank closure rumour",
+      "city": "Kolkata",
+      "generation_pattern": "staggered",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_bank_queue.jsonl",
+      "sha256": "b5597d7401ddbf9873a58621d57c3c1a73d5d1b9dd71c0536690ce54f9f95a81",
+      "first_event_utc": "2026-10-01T08:12:00+00:00",
+      "last_event_utc": "2026-10-01T13:43:55+00:00"
+    },
+    {
+      "scenario_id": "demo_clinic_message",
+      "title": "Misattributed clinic message",
+      "city": "Hyderabad",
+      "generation_pattern": "mixed",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_clinic_message.jsonl",
+      "sha256": "dc4b22ab8a3924176abcf010973c68a8d4055f73faf85775792cb02416ef0a52",
+      "first_event_utc": "2026-10-01T08:15:00+00:00",
+      "last_event_utc": "2026-10-01T14:45:19+00:00"
+    },
+    {
+      "scenario_id": "demo_exam_paper",
+      "title": "Fictional exam paper leak",
+      "city": "Jaipur",
+      "generation_pattern": "synchronized",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_exam_paper.jsonl",
+      "sha256": "73630050bab23ab814f30598f5207fdfeff5e9f9f59023ff8681c5a7ae737c8c",
+      "first_event_utc": "2026-10-01T08:18:00+00:00",
+      "last_event_utc": "2026-10-01T13:38:45+00:00"
+    },
+    {
+      "scenario_id": "demo_power_refund",
+      "title": "Impersonated electricity refund",
+      "city": "Ahmedabad",
+      "generation_pattern": "mixed",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_power_refund.jsonl",
+      "sha256": "f0cbcdb08ce1ecd340d39299072cb98303fcd9458415afe742f480e18626cbe4",
+      "first_event_utc": "2026-10-01T08:21:00+00:00",
+      "last_event_utc": "2026-10-01T14:51:07+00:00"
+    },
+    {
+      "scenario_id": "demo_fuel_shortage",
+      "title": "Fuel shortage amplification",
+      "city": "Pune",
+      "generation_pattern": "synchronized",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_fuel_shortage.jsonl",
+      "sha256": "68e96d5fc7878d1e348f0442606044d52d27878536c67a3dac219ba9a67fe056",
+      "first_event_utc": "2026-10-01T08:24:00+00:00",
+      "last_event_utc": "2026-10-01T13:44:45+00:00"
+    },
+    {
+      "scenario_id": "demo_cyclone_voice",
+      "title": "Unverified cyclone voice-message transcript",
+      "city": "Kochi",
+      "generation_pattern": "staggered",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_cyclone_voice.jsonl",
+      "sha256": "f38dfe509032c43a3044376560db9b9b18c667d1c0f3626401f7f17abcebc6bf",
+      "first_event_utc": "2026-10-01T08:27:00+00:00",
+      "last_event_utc": "2026-10-01T13:58:49+00:00"
+    },
+    {
+      "scenario_id": "demo_beach_restriction",
+      "title": "Outdated beach restriction notice",
+      "city": "Panaji",
+      "generation_pattern": "mixed",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_beach_restriction.jsonl",
+      "sha256": "7802decddf314372b74a6219e1ea6a3a89f657d0184269f2ad02ad393f803ccc",
+      "first_event_utc": "2026-10-01T08:30:00+00:00",
+      "last_event_utc": "2026-10-01T15:00:19+00:00"
+    },
+    {
+      "scenario_id": "demo_ration_registration",
+      "title": "Fictional ration registration deadline",
+      "city": "Bhopal",
+      "generation_pattern": "synchronized",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_ration_registration.jsonl",
+      "sha256": "33eb897d9ebff08bfd13d95defeaab4dcf1ccc9b5edb42549bfa8979c68ac60e",
+      "first_event_utc": "2026-10-01T08:33:00+00:00",
+      "last_event_utc": "2026-10-01T13:53:45+00:00"
+    },
+    {
+      "scenario_id": "demo_bridge_clip",
+      "title": "Mislocated bridge clip caption",
+      "city": "Patna",
+      "generation_pattern": "staggered",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_bridge_clip.jsonl",
+      "sha256": "084d2a4ae23be583232809f8fa06e39636d5061eec45859655596c22fe17276e",
+      "first_event_utc": "2026-10-01T08:36:00+00:00",
+      "last_event_utc": "2026-10-01T14:07:55+00:00"
+    },
+    {
+      "scenario_id": "demo_evacuation_route",
+      "title": "Conflicting evacuation route messages",
+      "city": "Bhubaneswar",
+      "generation_pattern": "mixed",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_evacuation_route.jsonl",
+      "sha256": "83423a4f3aaabdd7a8b4695c9eaa4f9a07aa8bdae9dae974026e2b32c00a0f78",
+      "first_event_utc": "2026-10-01T08:39:00+00:00",
+      "last_event_utc": "2026-10-01T15:08:49+00:00"
+    },
+    {
+      "scenario_id": "demo_telecom_shutdown",
+      "title": "Telecom shutdown rumour",
+      "city": "Guwahati",
+      "generation_pattern": "synchronized",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_telecom_shutdown.jsonl",
+      "sha256": "4b67ced53d1dfa789279aa77d1a658b57e34647d3047aa77fd9cb3c77525c9d9",
+      "first_event_utc": "2026-10-01T08:42:00+00:00",
+      "last_event_utc": "2026-10-01T14:02:45+00:00"
+    },
+    {
+      "scenario_id": "demo_polling_hours",
+      "title": "Fictional polling-hours change",
+      "city": "Lucknow",
+      "generation_pattern": "mixed",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_polling_hours.jsonl",
+      "sha256": "47b0217a9d968b39e9f5cfe6051f32ee0ee51f4cdd429edaa1abe7d97f9bda6c",
+      "first_event_utc": "2026-10-01T08:45:00+00:00",
+      "last_event_utc": "2026-10-01T15:15:02+00:00"
+    },
+    {
+      "scenario_id": "demo_blood_donation",
+      "title": "Volunteer blood donation mobilisation",
+      "city": "Surat",
+      "generation_pattern": "mobilization",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_blood_donation.jsonl",
+      "sha256": "28d8e3edcd87435bb70adeb90c7d0135d1ee451ab0cbcc4715fc82c9a94f22f4",
+      "first_event_utc": "2026-10-01T08:48:00+00:00",
+      "last_event_utc": "2026-10-01T14:08:45+00:00"
+    },
+    {
+      "scenario_id": "demo_cleanup_drive",
+      "title": "Neighbourhood cleanup coordination",
+      "city": "Indore",
+      "generation_pattern": "mobilization",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_cleanup_drive.jsonl",
+      "sha256": "791732839bab583305464900be5ccb519515361e3e205da5e8b34352d2975712",
+      "first_event_utc": "2026-10-01T08:51:00+00:00",
+      "last_event_utc": "2026-10-01T14:11:45+00:00"
+    },
+    {
+      "scenario_id": "demo_food_volunteers",
+      "title": "Food collection volunteer network",
+      "city": "Nagpur",
+      "generation_pattern": "mobilization",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_food_volunteers.jsonl",
+      "sha256": "b130bda15c712d036eb787e2d236f3b9ae19f4c4d9a9076fe6b7402442ce894b",
+      "first_event_utc": "2026-10-01T08:54:00+00:00",
+      "last_event_utc": "2026-10-01T14:14:44+00:00"
+    },
+    {
+      "scenario_id": "demo_storm_help",
+      "title": "Storm assistance coordination",
+      "city": "Thiruvananthapuram",
+      "generation_pattern": "mobilization",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_storm_help.jsonl",
+      "sha256": "ddd5803185cb38a173a0c499e824b7c5627174ed22c525a882e7bfe2065a01b9",
+      "first_event_utc": "2026-10-01T08:57:00+00:00",
+      "last_event_utc": "2026-10-01T14:17:45+00:00"
+    },
+    {
+      "scenario_id": "demo_bus_feedback",
+      "title": "Independent bus service feedback",
+      "city": "Chandigarh",
+      "generation_pattern": "organic",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_bus_feedback.jsonl",
+      "sha256": "49746184ceb44b3c52b04d21372392b48f44f2f2795b4fe4ef993212ab8f60f8",
+      "first_event_utc": "2026-10-01T09:00:00+00:00",
+      "last_event_utc": "2026-10-01T15:30:00+00:00"
+    },
+    {
+      "scenario_id": "demo_park_access",
+      "title": "Independent park access discussion",
+      "city": "Dehradun",
+      "generation_pattern": "organic",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_park_access.jsonl",
+      "sha256": "bc18a6d3c276f117761e051686033731c9c4257eedc5b8fc9a7deeddd4b9eea1",
+      "first_event_utc": "2026-10-01T09:03:00+00:00",
+      "last_event_utc": "2026-10-01T15:32:54+00:00"
+    },
+    {
+      "scenario_id": "demo_waste_pickup",
+      "title": "Waste collection observations",
+      "city": "Ranchi",
+      "generation_pattern": "organic",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_waste_pickup.jsonl",
+      "sha256": "4a856ba90125377311f680b5a8e71bb7b2136fce7092a9df641cddd502e36f0c",
+      "first_event_utc": "2026-10-01T09:06:00+00:00",
+      "last_event_utc": "2026-10-01T15:35:58+00:00"
+    },
+    {
+      "scenario_id": "demo_harbour_weather",
+      "title": "Harbour weather discussion",
+      "city": "Visakhapatnam",
+      "generation_pattern": "organic",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_harbour_weather.jsonl",
+      "sha256": "64f6c27052f54fcec3872718a9c924066c293ba1e059a43b162ee298c05d31f2",
+      "first_event_utc": "2026-10-01T09:09:00+00:00",
+      "last_event_utc": "2026-10-01T15:38:50+00:00"
+    },
+    {
+      "scenario_id": "demo_library_hours",
+      "title": "Library opening-hours discussion",
+      "city": "Coimbatore",
+      "generation_pattern": "organic",
+      "posts": 300,
+      "accounts": 60,
+      "languages": [
+        "en",
+        "hi",
+        "hinglish"
+      ],
+      "file": "demo_library_hours.jsonl",
+      "sha256": "1a078c5c5b6db477eb86ceda26fd09ce17e1008560c8c892c33c0eb499ed3931",
+      "first_event_utc": "2026-10-01T09:12:00+00:00",
+      "last_event_utc": "2026-10-01T15:42:24+00:00"
+    }
+  ]
+}

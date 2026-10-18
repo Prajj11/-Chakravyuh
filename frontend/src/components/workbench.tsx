@@ -3,7 +3,12 @@ import { useMemo, useState } from "react";
 import {
   Activity,
   ArrowDownToLine,
-  Fingerprint,
+  ChevronRight,
+  FileCheck2,
+  ScanLine,
+  SlidersHorizontal,
+  Users,
+  MessagesSquare,
   Globe2,
   Network,
   Plus,
@@ -21,8 +26,23 @@ import { MediaPanel } from "./forensics/media-panel";
 import { ClaimPanel } from "./claims/claim-panel";
 import { TimelinePanel } from "./timeline/timeline-panel";
 import { Assessment } from "./alerts/assessment";
+import { BrandMark, SignalIllustration } from "./brand-mark";
+import demoCases from "@/lib/scenario-catalogue.json";
+import { CampaignFeed } from "./campaign-feed";
 import { ExportDialog, InjectDialog, Modal } from "./alerts/dialogs";
 const tabs = ["Graph", "Geography", "Media", "Claims"] as const;
+const tabIcons = {
+  Graph: Network,
+  Geography: Globe2,
+  Media: ScanLine,
+  Claims: FileCheck2,
+};
+const utcLabel = (value: string) =>
+  new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "UTC",
+  }).format(new Date(value));
 export function Workbench() {
   const work = useWorkbench();
   const [tokenInput, setTokenInput] = useState(""),
@@ -40,6 +60,8 @@ export function Workbench() {
     [cell, setCell] = useState(""),
     [cursor, setCursor] = useState<number | null>(null);
   const [postLimit, setPostLimit] = useState(100);
+  const [showReplay, setShowReplay] = useState(false);
+  const [batchMode, setBatchMode] = useState(false);
   const detail =
     work.detail?.campaign_id === work.selected ? work.detail : null;
   const highlight = useMemo(() => {
@@ -82,6 +104,7 @@ export function Workbench() {
           reset_state: reset,
           seed,
           speed_multiplier: speed,
+          playback_mode: batchMode ? "BATCH" : "TIMED",
         },
         "Replay",
       );
@@ -117,11 +140,11 @@ export function Workbench() {
       <header className="topbar">
         <div className="brand">
           <div className="brand-symbol">
-            <Fingerprint size={28} />
+            <BrandMark />
           </div>
           <div>
             <h1>CHAKRAVYUH</h1>
-            <span>Evidence & coordination workbench</span>
+            <span>INTELLIGENCE WORKSPACE</span>
           </div>
         </div>
         <div className="stream-status">
@@ -133,6 +156,28 @@ export function Workbench() {
           {work.stream}
         </div>
         <div className="top-actions">
+          {work.token && (
+            <button
+              aria-label="Mask low-indicator and unclassified identities"
+              aria-pressed={privacy}
+              title="Mask low-indicator and unclassified identities"
+              onClick={() => setPrivacy(!privacy)}
+            >
+              <ShieldCheck size={15} />
+              Privacy {privacy ? "on" : "off"}
+            </button>
+          )}
+          {work.token && (
+            <button
+              className="studio-toggle"
+              aria-expanded={showReplay}
+              aria-controls="scenario-studio"
+              onClick={() => setShowReplay(!showReplay)}
+            >
+              <SlidersHorizontal size={15} />
+              Scenario studio
+            </button>
+          )}
           <button
             disabled={!work.token || !!work.busy}
             onClick={() => setDialog("inject")}
@@ -141,6 +186,7 @@ export function Workbench() {
             Inject event
           </button>
           <button
+            className="primary-button"
             disabled={!detail || !!work.busy}
             onClick={() => setDialog("export")}
           >
@@ -180,25 +226,27 @@ export function Workbench() {
       {!work.token ? (
         <main className="welcome">
           <div className="welcome-copy">
-            <span className="eyebrow">LOCAL-FIRST INVESTIGATION</span>
+            <span className="eyebrow welcome-kicker">
+              <span className="live-dot" /> OBSERVE. CONNECT. VERIFY.
+            </span>
             <h2>
-              Follow the evidence.
+              Find the pattern.
               <br />
-              <em>Keep uncertainty visible.</em>
+              <em>Follow the evidence.</em>
             </h2>
             <p>
-              Inspect repeated amplification, observed networks, media
-              compression anomalies and geographic context. Claim verification
-              remains a separate human review.
+              See how narratives travel, who amplifies them, and what the
+              evidence actually supports. One workspace for a complete
+              investigation.
             </p>
-            <div className="welcome-icons">
-              <Network />
-              <Globe2 />
-              <ShieldCheck />
-            </div>
+            <SignalIllustration />
           </div>
           <section className="session-card">
-            <h2>Connect your local session</h2>
+            <div className="session-icon">
+              <ShieldCheck size={23} />
+            </div>
+            <span className="eyebrow">YOUR SECURE WORKSPACE</span>
+            <h2>Start investigating</h2>
             <p>
               The backend saves a fresh token in{" "}
               <code>.runtime/local-session-token</code>. Read it locally and
@@ -233,16 +281,26 @@ export function Workbench() {
         </main>
       ) : (
         <>
-          <div className="replay-controls">
+          <div
+            className="replay-controls"
+            id="scenario-studio"
+            hidden={!showReplay}
+          >
             <span className="eyebrow">
-              <Radio size={14} /> RAW REPLAY
+              <Radio size={14} /> SCENARIO STUDIO
             </span>
             <label>
               Scenario
               <select
                 aria-label="Scenario"
                 value={scenario}
-                onChange={(e) => setScenario(e.target.value)}
+                onChange={(e) => {
+                  setScenario(e.target.value);
+                  setBatchMode(
+                    e.target.value === "expanded" ||
+                      e.target.value.startsWith("demo_"),
+                  );
+                }}
               >
                 <option value="cmp_electoral_01">
                   Electoral amplification
@@ -252,6 +310,14 @@ export function Workbench() {
                 </option>
                 <option value="cmp_organic_03">Natural discussion</option>
                 <option value="all">All three scenarios</option>
+                <option value="expanded">25 diverse cases · 7,500 posts</option>
+                <optgroup label="Diverse synthetic cases · 300 posts each">
+                  {demoCases.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.city} — {item.title}
+                    </option>
+                  ))}
+                </optgroup>
               </select>
             </label>
             <label>
@@ -266,6 +332,7 @@ export function Workbench() {
               Speed
               <select
                 value={speed}
+                disabled={batchMode}
                 onChange={(e) => setSpeed(Number(e.target.value))}
               >
                 {[1, 10, 25, 50, 100].map((value) => (
@@ -275,6 +342,22 @@ export function Workbench() {
                 ))}
               </select>
             </label>
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={batchMode}
+                onChange={(e) => setBatchMode(e.target.checked)}
+              />
+              Fast batch load (skip playback delays)
+            </label>
+            <span className="subtle">
+              {scenario === "expanded"
+                ? "25 fictional cases · 7,500 posts · 1,500 accounts. "
+                : ""}
+              {batchMode
+                ? "Scores are computed per case; intermediate warning times are not replayed."
+                : "Timed playback uses original event timestamps."}
+            </span>
             <label className="check">
               <input
                 type="checkbox"
@@ -323,70 +406,28 @@ export function Workbench() {
             </div>
           )}
           <div className="workspace">
-            <aside className="campaign-feed">
-              <div className="panel-heading">
-                <span className="eyebrow">NARRATIVE FEED</span>
-                <span>{work.campaigns.length}</span>
-              </div>
-              {!work.campaigns.length && (
-                <div className="empty">
-                  No active campaigns. Load a raw replay or inject an event to
-                  begin.
-                </div>
-              )}
-              {work.campaigns.map((campaign) => (
-                <button
-                  key={campaign.campaign_id}
-                  className={`campaign-card ${work.selected === campaign.campaign_id ? "active" : ""}`}
-                  onClick={() => {
-                    clear();
-                    work.setSelected(campaign.campaign_id);
-                  }}
-                >
-                  <div>
-                    <span
-                      className={`tier ${campaign.cti_assessment.threat_level?.toLowerCase() ?? "unknown"}`}
-                    >
-                      {campaign.cti_assessment.threat_level ?? "INSUFFICIENT"}
-                    </span>
-                    <b
-                      aria-label={
-                        campaign.cti_assessment.cti_score == null
-                          ? "CTI insufficient data"
-                          : undefined
-                      }
-                    >
-                      {campaign.cti_assessment.cti_score == null
-                        ? "—"
-                        : score(campaign.cti_assessment.cti_score)}
-                    </b>
-                  </div>
-                  <h3>
-                    {detail?.campaign_id === campaign.campaign_id
-                      ? privateText(campaign.title, detail, privacy)
-                      : campaign.title.replace(
-                          /@[\p{L}\p{N}_]+/gu,
-                          "[participant]",
-                        )}
-                  </h3>
-                  <span className="origin-badge">
-                    {campaign.data_origin.replaceAll("_", " ")}
-                  </span>
-                  <small>
-                    {campaign.total_posts} posts · {campaign.total_accounts}{" "}
-                    accounts
-                  </small>
-                  <small>
-                    Sync {score(campaign.coordination_assessment.sync_score, 3)}{" "}
-                    · rev {campaign.snapshot_revision}
-                  </small>
-                </button>
-              ))}
-            </aside>
+            <CampaignFeed
+              campaigns={work.campaigns}
+              detail={detail}
+              selected={work.selected}
+              privacy={privacy}
+              onSelect={(id) => {
+                clear();
+                work.setSelected(id);
+              }}
+            />
             <main id="investigation" className="investigation" tabIndex={-1}>
               {detail ? (
                 <>
                   <div className="campaign-header">
+                    <div className="case-breadcrumb">
+                      <span>Investigations</span>
+                      <ChevronRight size={13} />
+                      <span>Active case</span>
+                      <span className="case-revision">
+                        SNAPSHOT {detail.snapshot_revision}
+                      </span>
+                    </div>
                     <div className="badge-row">
                       <span className="origin-badge">
                         {detail.data_origin.replaceAll("_", " ")}
@@ -394,18 +435,41 @@ export function Workbench() {
                       <span className="chip">
                         {detail.languages.join(" / ")}
                       </span>
-                      <span className="chip">
-                        Snapshot {detail.snapshot_revision}
+                      <span className="case-time">
+                        {utcLabel(detail.first_detected_utc)} UTC
                       </span>
                     </div>
                     <h2>{privateText(detail.title, detail, privacy)}</h2>
-                    <p className="mono subtle">
-                      {detail.first_detected_utc} → {detail.last_updated_utc}{" "}
-                      UTC
-                    </p>
-                    <p className="subtle">
-                      {detail.collection_window.coverage_completeness_note}
-                    </p>
+                    <div className="case-stats">
+                      <span>
+                        <MessagesSquare size={14} />
+                        <b>{detail.total_posts.toLocaleString()}</b>{" "}
+                        observations
+                      </span>
+                      <span>
+                        <Users size={14} />
+                        <b>{detail.total_accounts.toLocaleString()}</b> accounts
+                      </span>
+                      <span>
+                        <Network size={14} />
+                        <b>{detail.edges.length.toLocaleString()}</b> observed
+                        links
+                      </span>
+                      <span>
+                        <ScanLine size={14} />
+                        <b>{detail.media_reports.length}</b> media reports
+                      </span>
+                    </div>
+                    <details className="collection-details">
+                      <summary>Collection window & attribution limits</summary>
+                      <p>
+                        {detail.first_detected_utc} → {detail.last_updated_utc}{" "}
+                        UTC
+                      </p>
+                      <p>
+                        {detail.collection_window.coverage_completeness_note}
+                      </p>
+                    </details>
                   </div>
                   <Assessment detail={detail} />
                   <div
@@ -413,34 +477,41 @@ export function Workbench() {
                     role="tablist"
                     aria-label="Investigation views"
                   >
-                    {tabs.map((name, index) => (
-                      <button
-                        role="tab"
-                        id={`tab-${name}`}
-                        aria-selected={tab === name}
-                        aria-controls="active-panel"
-                        tabIndex={tab === name ? 0 : -1}
-                        key={name}
-                        onClick={() => setTab(name)}
-                        onKeyDown={(e) => {
-                          if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-                            e.preventDefault();
-                            const next =
-                              tabs[
-                                (index +
-                                  (e.key === "ArrowRight"
-                                    ? 1
-                                    : tabs.length - 1)) %
-                                  tabs.length
-                              ];
-                            setTab(next);
-                            document.getElementById(`tab-${next}`)?.focus();
-                          }
-                        }}
-                      >
-                        {name}
-                      </button>
-                    ))}
+                    {tabs.map((name, index) => {
+                      const Icon = tabIcons[name];
+                      return (
+                        <button
+                          role="tab"
+                          id={`tab-${name}`}
+                          aria-selected={tab === name}
+                          aria-controls="active-panel"
+                          tabIndex={tab === name ? 0 : -1}
+                          key={name}
+                          onClick={() => setTab(name)}
+                          onKeyDown={(e) => {
+                            if (
+                              e.key === "ArrowRight" ||
+                              e.key === "ArrowLeft"
+                            ) {
+                              e.preventDefault();
+                              const next =
+                                tabs[
+                                  (index +
+                                    (e.key === "ArrowRight"
+                                      ? 1
+                                      : tabs.length - 1)) %
+                                    tabs.length
+                                ];
+                              setTab(next);
+                              document.getElementById(`tab-${next}`)?.focus();
+                            }
+                          }}
+                        >
+                          <Icon size={16} />
+                          {name}
+                        </button>
+                      );
+                    })}
                   </div>
                   <div
                     className="active-panel"
@@ -547,9 +618,27 @@ export function Workbench() {
                 </>
               ) : (
                 <div className="empty large-empty">
-                  {work.campaigns.length
-                    ? "Loading one coherent campaign snapshot…"
-                    : "Load a scenario to compute the first narrative snapshots. Results are derived from retained inputs."}
+                  <BrandMark large />
+                  <span className="eyebrow">READY WHEN YOU ARE</span>
+                  <h2>
+                    {work.campaigns.length
+                      ? "Opening your investigation…"
+                      : "Every investigation starts with a signal."}
+                  </h2>
+                  <p>
+                    {work.campaigns.length
+                      ? "Loading one coherent evidence snapshot."
+                      : "Explore a computed scenario, or bring an observation of your own."}
+                  </p>
+                  {!work.campaigns.length && (
+                    <button
+                      className="primary-button"
+                      onClick={() => setShowReplay(true)}
+                    >
+                      <Radio size={15} />
+                      Open Scenario studio
+                    </button>
+                  )}
                 </div>
               )}
             </main>
@@ -560,6 +649,20 @@ export function Workbench() {
                 edge={edge}
                 privacy={privacy}
                 onClear={clear}
+                onNode={(id) => {
+                  clear();
+                  setSelectedNode(id);
+                  setTab("Graph");
+                }}
+                onEdge={(selectedEdge) => {
+                  clear();
+                  setEdge(selectedEdge);
+                  setTab("Graph");
+                }}
+                onView={(view) => {
+                  setTab(view);
+                  document.getElementById(`tab-${view}`)?.focus();
+                }}
               />
             ) : (
               <aside className="inspector">
@@ -574,8 +677,8 @@ export function Workbench() {
         </>
       )}
       <footer>
-        Chakravyuh · local computed indicators · evidence stays on this machine
-        · no external dispatch
+        Chakravyuh · Evidence-led intelligence{" "}
+        <span>Local workspace · Human-reviewed claims</span>
       </footer>
       {dialog === "inject" && (
         <InjectDialog

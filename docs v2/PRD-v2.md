@@ -83,6 +83,8 @@ A regional spike separately requires Z>=3 and >=168 valid hourly historical buck
 
 ## 4. Non-functional requirements and acceptance
 
+The October 19 dataset extension adds 25 fictional source cases, 7,500 posts and 1,500 accounts across 25 cities, with English/Hindi/Hinglish variants, suspicious amplification patterns, benign mobilisation and ordinary discussion. Cases can be loaded individually or together from Scenario studio, with fast per-case analysis or timed replay. The original three acceptance scenarios remain available. Generator intentions must never become analytical scores or evaluated ground truth. New media references reuse explicitly synthetic image fixtures; no new video/audio inference or public-data collection is implied. See `sample_data/case_pack/README.md` for inventory, regeneration and limitations.
+
 Follow [rules-v2.md](rules-v2.md) for public-only collection, session access, safe uploads, privacy, modularity, strict types, reproducibility and tests.
 
 Targets, to be measured: REST read P95<200ms; text/image scoring <2s per declared 100-event batch excluding heavy queued inference; 1,000-node graph recalculation <800ms; 100-event export <2s. No unmeasured performance claim is part of delivery.

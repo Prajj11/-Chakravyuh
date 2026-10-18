@@ -56,6 +56,11 @@ def replay_scope(scenario_id: str, seed: int = 42) -> str:
 
 
 def load_scenario(scenario_id: str, seed: int = 42) -> tuple[SourceEvent, ...]:
+    from app.ingestion.case_catalogue import CASE_BY_ID
+    from app.ingestion.case_pack import generate_case
+
+    if scenario_id in CASE_BY_ID:
+        return generate_case(scenario_id, seed)
     if scenario_id not in SCENARIO_IDS:
         raise ValueError("Unknown replay scenario")
     rng = random.Random(seed)

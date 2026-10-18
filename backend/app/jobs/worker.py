@@ -10,6 +10,7 @@ from functools import partial
 from typing import ParamSpec, TypeVar
 
 from app.evidence.store import IntegrityMismatch
+from app.ingestion.case_catalogue import DEMO_CASE_IDS
 from app.ingestion.clock import ReplayClock
 from app.ingestion.contracts import SourceEvent
 from app.ingestion.simulator import SCENARIO_IDS, load_scenario, retain_source
@@ -188,8 +189,15 @@ class Worker:
             url = None
             result: object
             if isinstance(request, ScenarioSwitchRequest):
-                await self.cpu(self.pipeline.history, request.seed)
-                scenarios = SCENARIO_IDS if request.scenario_id == "all" else (request.scenario_id,)
+                scenarios = (
+                    SCENARIO_IDS
+                    if request.scenario_id == "all"
+                    else DEMO_CASE_IDS
+                    if request.scenario_id == "expanded"
+                    else (request.scenario_id,)
+                )
+                if any(scenario in SCENARIO_IDS for scenario in scenarios):
+                    await self.cpu(self.pipeline.history, request.seed)
                 sources = sorted(
                     [
                         source
@@ -213,6 +221,44 @@ class Worker:
                     )
                     for source in sources
                 }
+                if request.playback_mode == "BATCH":
+                    # Publish coherent per-case snapshots without waiting on simulated time.
+                    # All raw events still enter the same evidence/analysis pipeline.
+                    batches: dict[str, list[SourceEvent]] = {}
+                    for source in sources:
+                        batches.setdefault(source.collector_scope, []).append(source)
+                    for batch in batches.values():
+                        self.state.check(record.partition, record.generation)
+                        replay_alerts = await self.cpu(
+                            self.replay_batch,
+                            batch,
+                            parents,
+                            generations,
+                            record.partition,
+                            record.generation,
+                        )
+                        self.state.check(record.partition, record.generation)
+                        for alert in replay_alerts:
+                            self.stream.publish(
+                                "CTI_ALERT",
+                                alert,
+                                "Gated batch warning",
+                                alert.campaign_id,
+                                self.pipeline.alerts[alert.campaign_id].watermark,
+                            )
+                        event = self.state.evidence.get_event(
+                            parents[batch[-1].source_event_key],
+                            self.state.scope,
+                        )
+                        enriched = self.pipeline.enriched(event, self.state.list_campaigns(), [])
+                        self.stream.publish(
+                            "NEW_EVENT",
+                            enriched,
+                            f"Analyzed case batch of {len(batch)} synthetic observations",
+                            enriched.assigned_campaign_id,
+                            event.timestamp_utc,
+                        )
+                    sources = []
                 while sources:
                     self.state.check(record.partition, record.generation)
                     delay = clock.delay_until(

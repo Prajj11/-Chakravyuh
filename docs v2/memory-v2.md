@@ -1,11 +1,14 @@
 # Project Memory and Decision Log: Chakravyuh
 
 **Contract version:** 2.1.0  
-**Updated:** October 18, 2026  
+**Updated:** October 19, 2026
+
 **Current state:** Offline investigation workbench implemented through Phase 6, with recorded synthetic evaluation and explicit release gaps. Windows local verification is complete; this is a demonstration release, not a production accuracy claim.
 **Next work:** Address the graph latency target; consider an archive browser beyond the implemented CLI search; validate Linux/remote CI and a compatible optional cached model on fresh held-out data before making broader claims.
 
 ## 1. Active specification
+
+The October 19 [hackathon roadmap](hackathon-roadmap.md) is a separate prioritized proposal. It does not add implemented capabilities or override the ten versioned contracts below.
 
 The ten Markdown files in docs v2 are the complete active contract. They supersede historical docs v1; filenames retain -v2 for continuity. Do not read a shorter v2 document as an implicit supplement to v1.
 
@@ -179,3 +182,13 @@ Full evaluation protocol, raw metrics, limitations and reproduction commands are
 - Added setup/check and separate backend/frontend BAT entry points. The main launcher checks port availability before starting services, waits for API health and frontend HTTP readiness, then opens the workbench at port 3000. Individual service starts also check their own port; occupied ports produce clear instructions before another backend can overwrite the session token file.
 - GET / on the backend now serves an API landing page linking the configured frontend origin, API docs and health. It exposes no session token and does not change protected API authorization. Service terminal messages distinguish the workbench address from API documentation.
 - Verified 125 backend tests, Ruff lint/format, mypy and generated-contract consistency; exercised readiness against both running services and confirmed duplicate-start guards for both ports. The landing page test covers a custom frontend port and continued authorization enforcement. Frontend runtime code is unchanged; the existing three browser journeys remain the UI verification record. Existing running services require a restart to load the new backend root route.
+
+
+### October 19, 2026 — Investigation UI redesign and hackathon roadmap
+
+- Reworked the local session entry and investigation workspace with a Chakra SVG mark, local typography, teal/charcoal surfaces, clearer case hierarchy, four compact signal cards, collapsible assessment details, and responsive graph/map/media layouts. Scenario studio is explicitly opened from the header; default privacy masking remains visible through a persistent toggle.
+- Added campaign search over displayed titles/languages/origin and All cases / Warnings / Unverified filters. Warnings means current backend alert eligibility; queue filters do not recompute scores or change the selected case.
+- Added a deterministic Investigation brief, derived only from the selected snapshot, linking to the strongest measured co-post edge, earliest observed seed, media reports and independent claim review. Brief-to-tab navigation moves keyboard focus to the destination tab. This is presentation logic, not new ML inference or claim attribution.
+- Updated design/appflow and completed T-5.10/T-5.11. Added hackathon-roadmap.md as a proposal outside the ten versioned contracts, ranking narrative evolution, historical as-of analysis and benign-coordination challenges first. None of those proposed analytical features is implied to be implemented.
+- Verification: frontend typecheck, Prettier checks and optimized production build pass. All three Edge browser journeys pass (2.2 minutes), covering search/filter behavior, brief links, score explanations, graph/map/media, claim review, integrity-verified ZIP/PDF download, injection/reset, origin preservation, reconnection and suppressed natural discussion. The affected full investigation/export journey passed again (37.9 seconds) after the keyboard-focus follow-up. The main journey confirms no page errors, no external requests and no horizontal overflow at 390 px.
+- Visual QA: inspected actual production graph, geographic context, image comparison, natural-discussion and narrow layouts, plus the session entry and refreshed desktop preview. Captures live under .runtime/ui-redesign-*.png; test artifacts remain local and ignored. Checks used a separate .runtime/ui-preview backend store, leaving the normal local data store unchanged. Backend analytical code, schema and dependencies did not change; existing graph-latency and model/connector/evaluation limitations still apply.

@@ -475,10 +475,11 @@ export interface NarrativeCluster {
 export type PlatformType = "x_twitter" | "telegram" | "reddit" | "youtube" | "instagram" | "simulator";
 
 export interface ScenarioSwitchRequest {
-  scenario_id: "cmp_electoral_01" | "cmp_geo_astroturf_02" | "cmp_organic_03" | "all";
+  scenario_id: string;
   reset_state: boolean;
   seed: number;
   speed_multiplier: number;
+  playback_mode: "TIMED" | "BATCH";
 }
 
 export interface ScenarioSwitchResponse {

@@ -1,5 +1,9 @@
 import type { GraphEdge, NarrativeCampaignDetail } from "@/types/chakravyuh";
 import {
+  InvestigationBrief,
+  type InvestigationView,
+} from "../investigation-brief";
+import {
   label,
   privateText,
   restricted,
@@ -12,15 +16,29 @@ type Props = {
   edge: GraphEdge | null;
   privacy: boolean;
   onClear: () => void;
+  onNode: (id: string) => void;
+  onEdge: (edge: GraphEdge) => void;
+  onView: (view: InvestigationView) => void;
 };
-export function Inspector({ detail, selected, edge, privacy, onClear }: Props) {
+export function Inspector({
+  detail,
+  selected,
+  edge,
+  privacy,
+  onClear,
+  onNode,
+  onEdge,
+  onView,
+}: Props) {
   const node = detail.nodes.find((node) => node.id === selected);
   return (
-    <aside className="inspector">
-      <div className="panel-heading">
-        <span className="eyebrow">EVIDENCE INSPECTOR</span>
-        {(node || edge) && <button onClick={onClear}>Clear</button>}
-      </div>
+    <aside className={`inspector ${node || edge ? "has-selection" : ""}`}>
+      {(node || edge) && (
+        <div className="panel-heading">
+          <span className="eyebrow">EVIDENCE INSPECTOR</span>
+          {(node || edge) && <button onClick={onClear}>Clear</button>}
+        </div>
+      )}
       {edge ? (
         <>
           <h2>{edge.interaction_type.replaceAll("_", " ")}</h2>
@@ -148,10 +166,13 @@ export function Inspector({ detail, selected, edge, privacy, onClear }: Props) {
           </ul>
         </>
       ) : (
-        <div className="empty">
-          Select a node or edge, or use the searchable account list to inspect
-          its observations and contributions.
-        </div>
+        <InvestigationBrief
+          detail={detail}
+          privacy={privacy}
+          onNode={onNode}
+          onEdge={onEdge}
+          onView={onView}
+        />
       )}
     </aside>
   );

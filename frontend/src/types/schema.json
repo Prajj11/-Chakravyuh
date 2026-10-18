@@ -3009,18 +3009,23 @@
     "ScenarioSwitchRequest": {
       "additionalProperties": false,
       "properties": {
+        "playback_mode": {
+          "default": "TIMED",
+          "enum": [
+            "TIMED",
+            "BATCH"
+          ],
+          "title": "Playback Mode",
+          "type": "string"
+        },
         "reset_state": {
           "default": true,
           "title": "Reset State",
           "type": "boolean"
         },
         "scenario_id": {
-          "enum": [
-            "cmp_electoral_01",
-            "cmp_geo_astroturf_02",
-            "cmp_organic_03",
-            "all"
-          ],
+          "maxLength": 80,
+          "minLength": 1,
           "title": "Scenario Id",
           "type": "string"
         },

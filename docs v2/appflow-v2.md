@@ -1,7 +1,7 @@
 # Application Flow and Investigation Journeys: Chakravyuh
 
 **Contract version:** 2.1.0  
-**Updated:** October 18, 2026
+**Updated:** October 19, 2026
 
 [backendschema-v2.md](backendschema-v2.md) defines payloads/endpoints; [trd-v2.md](trd-v2.md) defines score and alert gates. Values shown during a run must be computed, not copied from this document.
 
@@ -23,9 +23,13 @@ Claim review is a separate human action. Later enrichment/reference review creat
 
 ### Replay
 
-Analyst chooses one of cmp_electoral_01, cmp_geo_astroturf_02, cmp_organic_03 or all, plus seed/speed. POST /api/v1/simulate/scenario returns 202 JobAccepted. Poll /api/v1/jobs/{job_id} until complete, then load campaign summaries/details. Do not assume the job response is already a campaign.
+Analyst opens Scenario studio from the header, then chooses one of cmp_electoral_01, cmp_geo_astroturf_02, cmp_organic_03 or all, plus seed/speed. POST /api/v1/simulate/scenario returns 202 JobAccepted. Poll /api/v1/jobs/{job_id} until complete, then load campaign summaries/details. Do not assume the job response is already a campaign.
 
 Replay supplies multiple waves and historical input events as specified in the implementation plan. Each event is captured by ingestion and all outcomes are calculated. SYNTHETIC_REPLAY remains visible across views and export. Collection wall-clock time and simulated event time are distinct.
+
+The expanded catalogue adds 25 individually selectable fictional cases (300 posts each) and an `expanded` selection for all 7,500 posts. `all` continues to mean the original three scenarios. Choosing a new case or the pack enables Fast batch load in the UI; this sends `playback_mode=BATCH`, analyses each case through the same engines without playback delays, and emits a representative NEW_EVENT notification after each complete case. The UI refreshes coherent snapshots; the notification is not the complete event stream. `JOB_UPDATED` marks final completion. Batch warnings reflect the completed case and do not reconstruct earliest-warning timing. TIMED remains the API default and is available by disabling fast load. Speed is disabled in batch mode because it has no effect.
+
+The pack supplies no new geographic baselines or claim advisories. Each case is a collector scope, not a prescribed campaign: clustering may yield several narratives. Raw JSONL files and their manifest are documented in `sample_data/case_pack/README.md`; the runtime generator and exported seed-42 fixtures must remain identical.
 
 Reset replaces the active replay generation; concurrent old-generation mutations fail/cancel visibly. Prior evidence is retained. CTI may differ across parameter sets and available evidence; the UI never guarantees a predetermined critical result.
 
@@ -36,6 +40,10 @@ Upload optional images through POST /api/v1/media, receiving an artifact ID. Sub
 The queued job result contains UnifiedSocialEventEnriched with nested assessments and their coverage/reasons. A single injected post generally lacks enough history for bot/coordination conclusions; display insufficient data while retaining searchable evidence. Injected content never inherits synthetic references or baselines.
 
 ## 3. Triage and evidence inspection
+
+Authorize from the branded session-entry page using the per-launch local token. In the investigation queue, search by displayed narrative, language or data origin; optionally select Warnings (currently alert-eligible) or Unverified. These controls filter the queue only. The header privacy button controls low-indicator/unclassified identity masking; the default is on.
+
+The selected case opens with four signal cards and a deterministic Investigation brief. Follow Inspect strongest link to its matched-event evidence, Open account evidence to the earliest collected seed, Inspect media to the forensic panel, or Review claim evidence to the independent review tab. Clear restores the brief. Expand Why this assessment? for additive CTI weights and missing components. The brief never establishes global origin, claim truth or model-generated findings.
 
 A CTI_ALERT opens an eligible campaign snapshot. Investigator sees:
 - collection window, origin, numeric CTI and contribution/coverage breakdown;
