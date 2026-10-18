@@ -2,13 +2,13 @@
 
 **Contract version:** 2.1.0  
 **Updated:** October 18, 2026  
-**Tracking:** [x] completed, [/] in progress, [ ] pending. Documentation completion does not imply working software.
+**Tracking:** [x] implemented/verified or release review recorded, [/] in progress, [ ] pending. Explicit release gaps below remain unmet; a checked review task does not erase an unmet target.
 
 ## Phase 0: Contracts and scaffolding
 
 - [x] **T-0.1:** Reconcile all ten v2 docs to 2.1.0: enums, unknown roles, provenance, algorithms, coverage/gates, endpoints, UI, governance and full backlog.
 - [x] **T-0.2:** Initialize backend/, frontend/, sample_data/ and development configuration; retain docs v2 as active documentation.
-- [/] **T-0.3:** Implement typed schemas and central config including validators, parameter-set hashing and TypeScript mirror. Models/config/mirror and structural validators implemented; engine/context-dependent invariants remain for later slices.
+- [x] **T-0.3:** Typed schemas, context/sufficiency validators, immutable central parameter weights, parameter-set hashing and generated TypeScript/runtime-schema mirrors.
 - [x] **T-0.4:** Pin compatible runtime/dependency versions, including native Windows asyncio and CPU/offline mode; document startup.
 - [x] **T-0.5:** Portable startup, Linux/Windows CI configuration, isolated offline CLI smoke, Python typechecking, MIME-derived download names and early upload authorization. Remote CI execution remains unverified.
 
@@ -45,11 +45,11 @@
 - [x] **T-4.3:** WebSocket sequence retention/resync, polling, snapshot revision consistency and session-scoped access.
 - [x] **T-4.4:** Integrity-verified ZIP exports containing dossier, HTML/PDF, manifest, STIX and authorized derivatives.
 - [x] **T-4.5:** Consistent organic/unclassified redaction across every representation; hash derivatives and omit restricted originals.
-- [x] **T-4.6:** CORS, loopback defaults, upload size/type/dimension guards and reviewer identity from session. Local session/CORS/image guards implemented; claim-review integration and remaining media adapters pending.
+- [x] **T-4.6:** Exact loopback CORS, early authorization, bounded/chunked uploads, decoded image guards and server-derived reviewer identity. JPEG/PNG/WebP/WAV upload supported; other adapters explicitly listed below.
 
 ## Phase 5: Complete investigation frontend
 
-- [x] **T-5.1:** Next.js/Tailwind app shell, telemetry, campaign feed, origin/window badges and responsive layout. Foundation shell and live health implemented; analytical campaign feed/window/origin rendering pending.
+- [x] **T-5.1:** Live Next.js/Tailwind workbench, telemetry, campaign feed, origin/window/revision badges and responsive layout.
 - [x] **T-5.2:** Canvas graph, sync/role/time controls, hulls, cascade lens, accessible node list and account/edge drawers.
 - [x] **T-5.3:** H3 map/arcs with offline outline, source-confidence composition, sample/coverage gates and baseline explanations.
 - [x] **T-5.4:** Cross-filtered propagation timeline with coordinated, low-indicator and unclassified volume and alert markers.
@@ -61,15 +61,24 @@
 
 ## Phase 6: Tests, evaluation and release
 
-- [/] **T-6.1:** Schema/invariant tests, canonical serializer golden vectors, raw/canonical/media/audit corruption and export-failure tests. Foundation tests implemented; export-failure and engine-dependent cases pending.
-- [ ] **T-6.2:** Coordination deduplication, same timestamps, 60s boundaries, event reuse, repeated buckets and benign coordination false positives.
-- [ ] **T-6.3:** All-missing bot features, coverage boundaries, unclassified/organic/seed precedence and centrality edge cases.
-- [ ] **T-6.4:** Media malformed/unsupported states, real ELA/pHash, missing provenance and no fixture score leakage.
-- [ ] **T-6.5:** Geography zero denominators, source counts/coverage, no-baseline Z, matching scope and failed alert gates.
-- [ ] **T-6.6:** CTI weights/coverage, no-media versus failed-media, tier boundaries, suppressed critical tier, cooldown and replay clock.
-- [ ] **T-6.7:** Registry review, synthetic isolation, job lifecycle, auth/error envelopes, reset races and WebSocket recovery.
-- [ ] **T-6.8:** Holdout evaluation with disjoint accounts/templates/families/seeds; report per-mode/language F1 and false positives.
-- [ ] **T-6.9:** Backend pytest/Ruff, frontend typecheck/build and end-to-end scenario/injection/review/export journeys.
-- [ ] **T-6.10:** Visual QA of graph/map/media/timeline, multilingual PDF, redaction and offline/narrow-screen views.
-- [ ] **T-6.11:** Record measured performance, parameter/model/data hashes, known limitations and reproducible startup in memory/README.
-- [ ] **T-6.12:** Release review: every mandatory task complete or explicitly reported unmet; optional adapters do not block offline acceptance.
+- [x] **T-6.1:** Golden canonical vectors; input/artifact/audit corruption and export-blocking tests; hash-bound run metadata and immutable parameters.
+- [x] **T-6.2:** Coordination deduplication, inclusive 0/60s, disjoint pairing, repeated buckets and benign/uncoordinated controls.
+- [x] **T-6.3:** Missing bot features, exact role/coverage boundaries, seed precedence, observed bridge links and exact centrality parity/edge cases.
+- [x] **T-6.4:** Malformed/unsupported media, actual ELA and recompressed pHash matches, late collection, missing provenance and no score leakage.
+- [x] **T-6.5:** Zero denominators, source counts/coverage, missing/scoped baselines and failed geographic alert gates.
+- [x] **T-6.6:** Weight normalization, unavailable versus no-media, tier/coverage boundaries, suppression, cooldown/rearm and event clock.
+- [x] **T-6.7:** Contextual review and concurrent recalculation, synthetic isolation, auth/chunked body guards, job/reset/restart and stream sequence recovery.
+- [x] **T-6.8:** Frozen calibration followed by one held-out synthetic fallback run; split hashes, per-language metrics, false positives and missingness recorded. Optional model evaluation remains unverified.
+- [x] **T-6.9:** Windows full phase gate and three Edge browser journeys through all scenarios, injection/reset/reconnect, review and verified export. Remote/Linux CI not observed.
+- [x] **T-6.10:** Inspected graph/map/media/timeline and natural-discussion/narrow layouts; rendered and inspected all seven pages of the actual multilingual PDF. WebGL falls back explicitly on this machine; E2E confirms no external requests.
+- [x] **T-6.11:** Retained calibration/test and before/after performance reports; parameter/corpus/data hashes, startup, demo and limits documented.
+- [x] **T-6.12:** Local demonstration release reviewed; unmet requirements and unverified claims listed explicitly below.
+
+## Release gaps and limits
+
+- **Unmet:** 1,000-node graph recalculation target <800 ms. Measured cold 884 ms, warm median 834 ms, maximum 895 ms, on the declared Windows workload. Exact calculations are retained.
+- **Retained archive:** CLI literal search covers text/event/account IDs across retained generations, with origin/access-scope filters and pagination. Older injections return EVENT_RETAINED_OUTSIDE_ACTIVE_WINDOW; an archive browser/API is deferred.
+- **Unverified:** Linux startup/remote CI, optional cached-model inference/evaluation, representative multilingual/real-world accuracy and sustained throughput. CI configuration alone is not a passing run.
+- **Exploratory only:** test coordination F1 1.00 on 36 synthetic labelled cases, with 27/45 insufficient primary results; benign mobilisation alerts 0/9; ELA IoU 1.00 on one synthetic mask. See evaluation/README.md.
+- **Deferred adapters:** optional Reddit/Telegram collection, MP4/MP3 upload decoders, video/audio inference, C2PA verification and fitted Hawkes. WAV is retained with UNSUPPORTED analysis. No scores are fabricated for these capabilities.
+- External dispatch, multi-user hosting, 5,000-node browser rendering and 500 events/second are outside the local demonstration release.

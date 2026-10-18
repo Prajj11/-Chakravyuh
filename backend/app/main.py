@@ -25,7 +25,7 @@ from app.evidence.store import IntegrityMismatch
 from app.jobs.worker import Worker
 from app.pipeline import Pipeline
 from app.repositories.evidence import EvidenceRepository
-from app.repositories.state import StateRepository
+from app.repositories.state import StaleGenerationError, StateRepository
 from app.schemas.models import (
     AnalysisStatus,
     APIError,
@@ -52,7 +52,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         repository = EvidenceRepository(runtime.data_dir, parameters)
         application.state.repository = repository
         state = StateRepository(repository, scope)
-        pipeline = await asyncio.to_thread(Pipeline, state)
+        pipeline = await asyncio.to_thread(Pipeline, state, cached_model=runtime.cached_model_dir)
         worker = Worker(pipeline)
         application.state.workbench = state
         application.state.worker = worker
@@ -96,6 +96,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         request.state.request_id = uuid4().hex
+        if request.method in {"POST", "PUT"} and request.url.path.startswith("/api/v1/"):
+            # Authenticate JSON and multipart mutations before FastAPI body parsing.
+            if not secrets.compare_digest(
+                request.headers.get("authorization", ""), "Bearer " + token
+            ):
+                return error(
+                    request, 401, "SESSION_REQUIRED", "A valid local session token is required"
+                )
+            if request.headers.get("origin") not in {None, runtime.frontend_origin}:
+                return error(request, 403, "ACCESS_DENIED", "Origin is outside this local session")
         if request.method == "POST" and request.url.path == "/api/v1/media":
             # FastAPI parses multipart before dependency resolution. Authenticate here as well
             # to reject unauthorized bodies before the parser can spool them to disk.
@@ -160,6 +170,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def queue_full(request: Request, exc: OverflowError) -> JSONResponse:
         return error(
             request, 429, "QUEUE_FULL", "Local job queue is full; retry after current jobs finish"
+        )
+
+    @application.exception_handler(StaleGenerationError)
+    async def stale_generation(request: Request, exc: StaleGenerationError) -> JSONResponse:
+        return error(
+            request, 409, "GENERATION_RESET", "Replay changed; refresh the campaign before retrying"
         )
 
     @application.exception_handler(Exception)

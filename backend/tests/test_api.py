@@ -17,6 +17,17 @@ def png() -> bytes:
     return stream.getvalue()
 
 
+def test_unauthorized_json_is_rejected_before_parsing(tmp_path: Path) -> None:
+    app = create_app(Settings(data_dir=tmp_path, session_token=TOKEN))
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        response = client.post(
+            "/api/v1/events/inject",
+            content=b"{not-json",
+            headers={"Content-Type": "application/json"},
+        )
+        assert response.status_code == 401
+
+
 def test_chunked_upload_body_is_bounded_before_spooling(tmp_path: Path) -> None:
     app = create_app(Settings(data_dir=tmp_path, session_token=TOKEN, upload_limit_bytes=1024))
     with TestClient(app, base_url="http://127.0.0.1") as client:

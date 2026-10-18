@@ -164,7 +164,15 @@ export function Workbench() {
           {work.health?.active_campaigns_count ?? "—"} active narratives
         </span>
         <span>{work.health?.total_ingested_events ?? "—"} retained events</span>
-        <span>CPU · local · frozen lexical fallback</span>
+        <span>
+          CPU · local ·{" "}
+          {work.detail
+            ? work.detail.claim_verification.computation_mode ===
+              "MODEL_INFERENCE"
+              ? "cached multilingual model"
+              : "frozen lexical fallback"
+            : "text pipeline ready"}
+        </span>
         <span className="mono">
           PIPELINE {work.health?.pipeline_version ?? "2.1.0"}
         </span>
@@ -341,7 +349,17 @@ export function Workbench() {
                     >
                       {campaign.cti_assessment.threat_level ?? "INSUFFICIENT"}
                     </span>
-                    <b>{score(campaign.cti_assessment.cti_score)}</b>
+                    <b
+                      aria-label={
+                        campaign.cti_assessment.cti_score == null
+                          ? "CTI insufficient data"
+                          : undefined
+                      }
+                    >
+                      {campaign.cti_assessment.cti_score == null
+                        ? "—"
+                        : score(campaign.cti_assessment.cti_score)}
+                    </b>
                   </div>
                   <h3>
                     {detail?.campaign_id === campaign.campaign_id
@@ -466,6 +484,9 @@ export function Workbench() {
                     cursor={cursor}
                     onCursor={setCursor}
                     highlight={highlight}
+                    markers={work.markers.filter(
+                      (marker) => marker.campaignId === detail.campaign_id,
+                    )}
                   />
                   <section className="observations">
                     <div className="panel-heading">

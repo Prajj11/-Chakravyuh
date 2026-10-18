@@ -127,6 +127,8 @@ Account IDs are platform-qualified; never automatically merge matching handles a
 
 Run Louvain on the undirected weighted projection of interactions plus q_uv sync edges, resolution=1.0, seed=42. Sum parallel contributions for community detection; retain edge types separately in output. Compute normalized betweenness on the interaction projection; empty/single-node graphs have centrality 0 and deterministic communities.
 
+The release uses NetworkX 3.5 Louvain and Rustworkx 0.17.1 exact sequential directed Brandes betweenness (normalized, endpoints excluded). Deterministic node/edge ordering and sequential accumulation preserve reproducibility. Random-graph parity tests compare against NetworkX exact centrality to absolute tolerance 1e-12. This is an equivalent execution backend, not sampled centrality or a changed role threshold. Implementation versions are retained in the method bundle.
+
 Assign one primary role in this order:
 
 1. EARLIEST_OBSERVED_SEED: earliest observed author in the campaign; ties by platform-qualified account ID. No out-degree cutoff may replace an earlier author with a later popular one. Display cascade reach separately. This role is observational and does not imply suspiciousness.

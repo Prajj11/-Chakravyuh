@@ -11,6 +11,7 @@ from app.ingestion.contracts import CaptureManifest
 from app.jobs.worker import Worker
 from app.nlp_engine.review import review_claim
 from app.pipeline import summary
+from app.reporting.exporter import PrivacyTransform
 from app.repositories.state import StatePartition, StateRepository
 from app.schemas.models import (
     ClaimReviewRequest,
@@ -41,8 +42,13 @@ def mount_routes(
         response_model=list[NarrativeCampaignSummary],
         dependencies=[Depends(session)],
     )
-    def campaigns(request: Request) -> list[NarrativeCampaignSummary]:
-        return [summary(detail) for detail in state(request).list_campaigns()]
+    def campaigns(request: Request, redact_pii: bool = True) -> list[NarrativeCampaignSummary]:
+        return [
+            NarrativeCampaignSummary.model_validate(
+                PrivacyTransform(detail, redact_pii).apply(summary(detail).model_dump(mode="json"))
+            )
+            for detail in state(request).list_campaigns()
+        ]
 
     @application.get(
         "/api/v1/campaigns/{campaign_id}",
@@ -114,6 +120,7 @@ def mount_routes(
             )
             generation = workbench.generation(partition)
             with workbench.mutation(partition, generation):
+                detail = workbench.get_campaign(campaign_id)
                 assessment = review_claim(workbench, detail, body, actor)
                 updated = detail.model_copy(
                     update={

@@ -49,6 +49,8 @@ Bind local services to loopback by default. Protect mutation, claim-review, expo
 
 Limit uploads to 25 MiB; verify decoded content and MIME, not just extensions. MVP supported images: JPEG, PNG, WebP. Video MP4 and audio WAV/MP3 can be retained but return UNSUPPORTED when adapters are absent. Reject decompression bombs/oversized dimensions, malformed files and unsafe paths. Never execute uploaded content. Uploaded URLs are not arbitrary fetch instructions; connector downloads follow source allowlists and exclude local/private network targets.
 
+Release adapter coverage: the HTTP upload accepts JPEG/PNG/WebP and structurally validated WAV. MP4/MP3 upload decoders remain unimplemented; retained video/audio fixtures may report UNSUPPORTED. Do not imply all listed containers can currently be uploaded. Audio/video inference and C2PA verification are unavailable.
+
 Default UI anonymization and exported redaction cover ORGANIC_USER and UNCLASSIFIED accounts. Apply masking consistently to post text mentions, labels, account metadata, STIX and all reports. Raw evidence is restricted; sanitized copies are separately hashed derivatives. Display privacy controls before download. Do not export originals inside a purportedly redacted package.
 
 Local UI/WebSocket warnings are automatic. No automatic takedowns, external incident dispatch or official submission. Those integrations are deferred; if added, require a concrete review/confirmation step before sending outside the workbench. Creating a local downloadable dossier does not send it to another organization.

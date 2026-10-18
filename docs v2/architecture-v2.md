@@ -40,6 +40,8 @@ L3 Image forensics   L4 Repeated co-posts, bot features, burst index
 
 L3 may execute independently in a worker. L4 consumes L2 narrative/text-link evidence; it cannot infer same-narrative relations before L2. L5 depends on L4. L6 requires L4 campaign coordination for mismatch alerts. CTI recomputes versioned snapshots when optional media/geographic results arrive; unavailable results remain explicit.
 
+The implemented local worker serializes queued CPU mutations through one executor; reads serve complete SQLite snapshots. Contextual reviews re-read the current revision under the mutation lock, and analytical publication merges any review arriving during calculation. Exact betweenness uses parity-tested sequential Rustworkx Brandes; NetworkX retains Louvain and graph construction. A retained method bundle and audit-anchored run manifest bind each new calculation to its inputs and implementation versions. See evaluation/README.md for measured limits and the unmet 800 ms graph target.
+
 ## 2. Seven layer boundaries
 
 | Layer / module | Inputs | Outputs and responsibilities |

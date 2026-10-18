@@ -44,6 +44,10 @@ test("scenario → graph / map / media → claim review → verified export", as
   });
   await connect(page);
   await load(page, "cmp_electoral_01");
+  await expect(page.getByLabel("Recent local warning markers")).toBeVisible();
+  await expect(page.getByLabel("Recent local warning markers")).toContainText(
+    "12:",
+  );
   await expect(
     page.getByRole("heading", { name: "Coordination graph", exact: true }),
   ).toBeVisible();
@@ -127,6 +131,11 @@ test("injected origin survives replay reset and reconnect restores snapshots", a
     .getByRole("button", { name: "Queue injection", exact: true })
     .click();
   await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 30000 });
+  const injectedCount = await page
+    .locator(".campaign-card")
+    .filter({ hasText: "USER INJECTED" })
+    .count();
+  expect(injectedCount).toBeGreaterThan(0);
   await load(page, "cmp_geo_astroturf_02");
   await page.getByRole("tab", { name: "Geography", exact: true }).click();
   await expect(
@@ -148,7 +157,7 @@ test("injected origin survives replay reset and reconnect restores snapshots", a
   });
   await expect(
     page.locator(".campaign-card").filter({ hasText: "USER INJECTED" }),
-  ).toHaveCount(1);
+  ).toHaveCount(injectedCount);
   await page.evaluate(() => {
     for (const key of Object.keys(localStorage))
       if (/token/i.test(key))
@@ -167,5 +176,40 @@ test("injected origin survives replay reset and reconnect restores snapshots", a
   ).toBeVisible();
   await expect(
     page.locator(".campaign-card").filter({ hasText: "USER INJECTED" }),
-  ).toHaveCount(1);
+  ).toHaveCount(injectedCount);
+});
+
+test("natural discussion stays suppressed and a dropped stream reconnects", async ({
+  page,
+}, info) => {
+  await page.addInitScript(() => {
+    const NativeSocket = window.WebSocket;
+    window.WebSocket = class extends NativeSocket {
+      constructor(url: string | URL, protocols?: string | string[]) {
+        super(url, protocols);
+        (window as Window & { journeySocket?: WebSocket }).journeySocket = this;
+      }
+    };
+  });
+  let connections = 0;
+  page.on("websocket", () => connections++);
+  await connect(page);
+  await page.evaluate(() => {
+    (window as Window & { journeySocket?: WebSocket }).journeySocket?.close(
+      4000,
+      "Journey test: connection interruption",
+    );
+  });
+  await expect(page.getByText(/Reconnecting in/)).toBeVisible();
+  await expect(
+    page.getByText("Stream connected", { exact: true }),
+  ).toBeVisible();
+  expect(connections).toBeGreaterThanOrEqual(2);
+  await load(page, "cmp_organic_03");
+  await expect(page.getByText(/Alert suppressed:/)).toBeVisible();
+  await expect(page.getByLabel("Recent local warning markers")).toHaveCount(0);
+  await page.screenshot({
+    path: info.outputPath("natural-discussion.png"),
+    fullPage: true,
+  });
 });

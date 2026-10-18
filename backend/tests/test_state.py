@@ -33,6 +33,13 @@ def test_reset_preserves_evidence_and_other_partitions(
     job = state.create_job(replay, 0, EventInjectRequest(text="queued operation"))
     assert state.reset_replay("replay") == 1
     assert state.list_events(replay) == []
+    # Retained evidence remains searchable after its active generation is reset.
+    assert repository.search_events("Exact text", "test", origin=DataOrigin.SYNTHETIC_REPLAY) == [b]
+    assert repository.search_events("Exact text", "other") == []
+    assert repository.search_events("' OR 1=1 --", "test") == []
+    page = repository.search_events("", "test", limit=1)
+    next_page = repository.search_events("", "test", limit=1, offset=1)
+    assert len(page) == len(next_page) == 1 and page != next_page
     assert state.list_events(public) == [a]
     assert state.get_job(job.job_id).error_code == "GENERATION_RESET"
     with pytest.raises(StaleGenerationError):

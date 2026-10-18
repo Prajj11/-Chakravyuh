@@ -2,6 +2,7 @@ import base64
 import json
 import time
 import wave
+from datetime import UTC, datetime
 from io import BytesIO
 from pathlib import Path
 from zipfile import ZipFile
@@ -18,6 +19,30 @@ from app.schemas.models import JobNotification
 
 TOKEN = "integration-test-session-" + "x" * 40
 HEADERS = {"Authorization": "Bearer " + TOKEN}
+
+
+def test_old_injection_is_retained_without_rewriting_active_window(tmp_path: Path) -> None:
+    app = create_app(Settings(data_dir=tmp_path, session_token=TOKEN))
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        for timestamp in ("2026-10-18T12:00:00Z", "2026-10-16T12:00:00Z"):
+            accepted = client.post(
+                "/api/v1/events/inject",
+                headers=HEADERS,
+                json={"text": "An independent observation", "timestamp_utc": timestamp},
+            ).json()
+            job = wait_job(client, accepted)
+        assert job["status"] == "FAILED"
+        assert job["error_code"] == "EVENT_RETAINED_OUTSIDE_ACTIVE_WINDOW"
+        state = app.state.workbench
+        events = state.list_events(state.partitions()[0])
+        assert len(events) == 2
+        assert min(event.timestamp_utc for event in events) == datetime(
+            2026, 10, 16, 12, tzinfo=UTC
+        )
+        archived = state.evidence.search_events("independent", "local")
+        assert len(archived) == 2
+        assert archived[0].timestamp_utc == datetime(2026, 10, 16, 12, tzinfo=UTC)
+        state.evidence.verify("local")
 
 
 def wait_job(
@@ -54,6 +79,8 @@ def test_injection_review_isolation_redacted_export_and_corruption(tmp_path: Pat
                 headers=HEADERS,
                 json={
                     "handle": "@PrivateParticipant",
+                    "source_lat": 26.9,
+                    "source_lon": 80.9,
                     "text": "परीक्षण: Lucknow community observation by @PrivateParticipant.",
                     "language": "hi",
                     "timestamp_utc": f"2026-10-18T12:0{index * 3}:00Z",
@@ -64,6 +91,10 @@ def test_injection_review_isolation_redacted_export_and_corruption(tmp_path: Pat
         campaign_id = job["result"]["assigned_campaign_id"]
         detail = client.get(f"/api/v1/campaigns/{campaign_id}", headers=HEADERS).json()
         assert detail["data_origin"] == "USER_INJECTED"
+        feed = client.get("/api/v1/campaigns", headers=HEADERS)
+        assert "PrivateParticipant" not in feed.text
+        unmasked = client.get("/api/v1/campaigns?redact_pii=false", headers=HEADERS)
+        assert "PrivateParticipant" in unmasked.text
         assert detail["claim_verification"]["candidate_reference"] is None
         assert (
             client.put(
@@ -92,6 +123,11 @@ def test_injection_review_isolation_redacted_export_and_corruption(tmp_path: Pat
                 assert not name.startswith("originals/")
                 assert b"PrivateParticipant" not in archive.read(name)
             stix = stix2.parse(archive.read("stix.json").decode(), allow_custom=True)
+            observations = json.loads(archive.read("observations.json"))
+            for post in observations["sample_posts"]:
+                if post["account"]["handle"].startswith("Participant_"):
+                    assert post["geospatial"]["source_lat"] is None
+                    assert post["geospatial"]["source_h3_index"] is None
             for obj in stix.objects:
                 if obj.type == "artifact":
                     assert b"PrivateParticipant" not in base64.b64decode(obj.payload_bin)

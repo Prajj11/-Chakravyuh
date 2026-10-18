@@ -1,0 +1,151 @@
+{
+  "graph_backend": "rustworkx 0.17.1 exact sequential Brandes; NetworkX 3.5 Louvain",
+  "version": "local-benchmark-v1",
+  "generated_at_utc": "2026-10-18T15:07:17.858391+00:00",
+  "hardware": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD",
+    "logical_cpus": 16
+  },
+  "python": "3.12.10",
+  "parameter_set_id": "475d31789d485a11d2128556a8bfbf16122e3d730a95f707091be36078747d8a",
+  "embedding_mode": "HEURISTIC_INDICATOR",
+  "pipeline_initialization_ms": 36.95200000220211,
+  "batch": {
+    "events": 100,
+    "media": "one retained JPEG",
+    "history": "none"
+  },
+  "scoring": {
+    "cold": {
+      "samples_ms": [
+        491.1515999992844
+      ],
+      "sample_count": 1,
+      "median_ms": 491.1515999992844,
+      "p95_ms": 491.1515999992844,
+      "maximum_ms": 491.1515999992844
+    },
+    "warm": {
+      "samples_ms": [
+        415.13660000055097,
+        424.9318000001949,
+        427.7269000012893,
+        513.0996000007144,
+        405.5397999982233
+      ],
+      "sample_count": 5,
+      "median_ms": 424.9318000001949,
+      "p95_ms": 513.0996000007144,
+      "maximum_ms": 513.0996000007144
+    }
+  },
+  "export": {
+    "cold": {
+      "samples_ms": [
+        876.985799994145
+      ],
+      "sample_count": 1,
+      "median_ms": 876.985799994145,
+      "p95_ms": 876.985799994145,
+      "maximum_ms": 876.985799994145
+    },
+    "warm": {
+      "samples_ms": [
+        723.1990000000224,
+        766.4291000037338,
+        700.0398999953177,
+        698.0619999958435,
+        718.7568000008469
+      ],
+      "sample_count": 5,
+      "median_ms": 718.7568000008469,
+      "p95_ms": 766.4291000037338,
+      "maximum_ms": 766.4291000037338
+    }
+  },
+  "rest_detail": {
+    "transport": "in-process ASGI TestClient; excludes TCP/browser overhead",
+    "cold": {
+      "samples_ms": [
+        101.77459999977145
+      ],
+      "sample_count": 1,
+      "median_ms": 101.77459999977145,
+      "p95_ms": 101.77459999977145,
+      "maximum_ms": 101.77459999977145
+    },
+    "warm": {
+      "samples_ms": [
+        19.596399994043168,
+        21.208500002103392,
+        20.43489999778103,
+        21.602900000289083,
+        22.54509999329457,
+        27.931000004173256,
+        22.09469999797875,
+        23.99400000285823,
+        23.43809999729274,
+        25.37750000192318,
+        21.607199996651616,
+        21.85769999778131,
+        21.142199999303557,
+        21.9102000046405,
+        21.219999995082617,
+        20.3789000006509,
+        21.44390000466956,
+        20.50749999762047,
+        22.125499999674503,
+        20.354599997517653,
+        21.459000003233086,
+        23.41119999618968,
+        22.165100002894178,
+        18.577000002551358,
+        20.465300003706943,
+        22.51799999794457,
+        21.595600002910942,
+        22.100800000771414,
+        22.15980000619311,
+        26.200399996014312
+      ],
+      "sample_count": 30,
+      "median_ms": 21.732449997216463,
+      "p95_ms": 26.200399996014312,
+      "maximum_ms": 27.931000004173256
+    }
+  },
+  "graph_1000": {
+    "topology": "1000 nodes / 999 directed reply edges; exact normalized betweenness + Louvain",
+    "cold": {
+      "samples_ms": [
+        884.0362999981153
+      ],
+      "sample_count": 1,
+      "median_ms": 884.0362999981153,
+      "p95_ms": 884.0362999981153,
+      "maximum_ms": 884.0362999981153
+    },
+    "warm": {
+      "samples_ms": [
+        833.7164999975357,
+        894.8067999954219,
+        779.3478000021423
+      ],
+      "sample_count": 3,
+      "median_ms": 833.7164999975357,
+      "p95_ms": 894.8067999954219,
+      "maximum_ms": 894.8067999954219
+    }
+  },
+  "targets_ms": {
+    "rest_p95": 200,
+    "scoring_100": 2000,
+    "graph_1000": 800,
+    "export_100": 2000
+  },
+  "limitations": [
+    "Local synthetic workloads only; no throughput, GPU or 5000-node browser claim.",
+    "Cold means first operation in this process; warm reuses loaded models/fonts and OS caches.",
+    "Fixture capture and model initialization are reported/excluded from operation timing."
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "version": "local-benchmark-v1",
+  "generated_at_utc": "2026-10-18T14:57:52.795265+00:00",
+  "hardware": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD",
+    "logical_cpus": 16
+  },
+  "python": "3.12.10",
+  "parameter_set_id": "475d31789d485a11d2128556a8bfbf16122e3d730a95f707091be36078747d8a",
+  "embedding_mode": "HEURISTIC_INDICATOR",
+  "pipeline_initialization_ms": 27.01849999721162,
+  "batch": {
+    "events": 100,
+    "media": "one retained JPEG",
+    "history": "none"
+  },
+  "scoring": {
+    "cold": {
+      "samples_ms": [
+        718.771599997126
+      ],
+      "sample_count": 1,
+      "median_ms": 718.771599997126,
+      "p95_ms": 718.771599997126,
+      "maximum_ms": 718.771599997126
+    },
+    "warm": {
+      "samples_ms": [
+        591.8835999982548,
+        561.9261000028928,
+        541.9387999936589,
+        527.1523000046727,
+        586.2179000032484
+      ],
+      "sample_count": 5,
+      "median_ms": 561.9261000028928,
+      "p95_ms": 591.8835999982548,
+      "maximum_ms": 591.8835999982548
+    }
+  },
+  "export": {
+    "cold": {
+      "samples_ms": [
+        3161.6322999980184
+      ],
+      "sample_count": 1,
+      "median_ms": 3161.6322999980184,
+      "p95_ms": 3161.6322999980184,
+      "maximum_ms": 3161.6322999980184
+    },
+    "warm": {
+      "samples_ms": [
+        3269.7107000058168,
+        2831.2565999949584,
+        3074.0218999999342,
+        3047.120900002483,
+        2944.5850999982213
+      ],
+      "sample_count": 5,
+      "median_ms": 3047.120900002483,
+      "p95_ms": 3269.7107000058168,
+      "maximum_ms": 3269.7107000058168
+    }
+  },
+  "rest_detail": {
+    "transport": "in-process ASGI TestClient; excludes TCP/browser overhead",
+    "cold": {
+      "samples_ms": [
+        102.92299999855459
+      ],
+      "sample_count": 1,
+      "median_ms": 102.92299999855459,
+      "p95_ms": 102.92299999855459,
+      "maximum_ms": 102.92299999855459
+    },
+    "warm": {
+      "samples_ms": [
+        20.784299995284528,
+        19.350599999597762,
+        20.96509999682894,
+        19.715399997949135,
+        20.701900000858586,
+        19.71880000201054,
+        20.733400000608526,
+        22.023399993486237,
+        20.919700000376906,
+        19.392400005017407,
+        18.222499995317776,
+        20.295399997849017,
+        19.0124000000651,
+        20.43499999854248,
+        20.23370000097202,
+        19.954399998823646,
+        20.94000000215601,
+        18.47529999940889,
+        25.707600005262066,
+        21.144300000742078,
+        19.64120000047842,
+        22.003699996275827,
+        23.550300000351854,
+        24.157499996363185,
+        26.610600005369633,
+        25.819599999522325,
+        24.192700002458878,
+        21.520300004340243,
+        24.725299997953698,
+        21.25530000193976
+      ],
+      "sample_count": 30,
+      "median_ms": 20.851999997830717,
+      "p95_ms": 25.819599999522325,
+      "maximum_ms": 26.610600005369633
+    }
+  },
+  "graph_1000": {
+    "topology": "1000 nodes / 999 directed reply edges; exact normalized betweenness + Louvain",
+    "cold": {
+      "samples_ms": [
+        2283.021800001734
+      ],
+      "sample_count": 1,
+      "median_ms": 2283.021800001734,
+      "p95_ms": 2283.021800001734,
+      "maximum_ms": 2283.021800001734
+    },
+    "warm": {
+      "samples_ms": [
+        2225.910200002545,
+        2242.9876000023796,
+        2295.7824000041
+      ],
+      "sample_count": 3,
+      "median_ms": 2242.9876000023796,
+      "p95_ms": 2295.7824000041,
+      "maximum_ms": 2295.7824000041
+    }
+  },
+  "targets_ms": {
+    "rest_p95": 200,
+    "scoring_100": 2000,
+    "graph_1000": 800,
+    "export_100": 2000
+  },
+  "limitations": [
+    "Local synthetic workloads only; no throughput, GPU or 5000-node browser claim.",
+    "Cold means first operation in this process; warm reuses loaded models/fonts and OS caches.",
+    "Fixture capture and model initialization are reported/excluded from operation timing."
+  ]
+}

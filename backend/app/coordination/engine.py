@@ -70,20 +70,27 @@ class CoordinationEngine:
         b: UnifiedSocialEvent,
         similarity: Similarity,
         phashes: dict[str, str],
+        media_hashes: dict[str, tuple[str, ...]] | None = None,
     ) -> bool:
         if {normalize_url(url) for url in a.urls} & {normalize_url(url) for url in b.urls}:
             return True
-        for left in a.media_attachments:
-            for right in b.media_attachments:
-                if left.sha256_hash and right.sha256_hash:
-                    if left.sha256_hash == right.sha256_hash:
-                        return True
-                    if left.sha256_hash in phashes and right.sha256_hash in phashes:
-                        distance = (
-                            int(phashes[left.sha256_hash], 16) ^ int(phashes[right.sha256_hash], 16)
-                        ).bit_count()
-                        if distance <= self.p.PHASH_MAX_DISTANCE:
-                            return True
+        hashes_a = {media.sha256_hash for media in a.media_attachments if media.sha256_hash} | set(
+            (media_hashes or {}).get(a.event_id, ())
+        )
+        hashes_b = {media.sha256_hash for media in b.media_attachments if media.sha256_hash} | set(
+            (media_hashes or {}).get(b.event_id, ())
+        )
+        if hashes_a & hashes_b:
+            return True
+        for left in hashes_a:
+            for right in hashes_b:
+                if (
+                    left in phashes
+                    and right in phashes
+                    and (int(phashes[left], 16) ^ int(phashes[right], 16)).bit_count()
+                    <= self.p.PHASH_MAX_DISTANCE
+                ):
+                    return True
         return similarity(a, b) >= self.p.SEMANTIC_CLUSTER_SIMILARITY
 
     def analyze(
@@ -92,6 +99,7 @@ class CoordinationEngine:
         *,
         similarity: Similarity,
         phashes: dict[str, str] | None = None,
+        media_hashes: dict[str, tuple[str, ...]] | None = None,
         account_hourly_baselines: dict[str, tuple[int, ...]] | None = None,
     ) -> CoordinationResult:
         p = self.p
@@ -116,7 +124,7 @@ class CoordinationEngine:
                 for b in authors[right]:
                     delta = abs((a.timestamp_utc - b.timestamp_utc).total_seconds())
                     if delta <= p.TEMPORAL_CO_POST_WINDOW_SEC and self.linked(
-                        a, b, similarity, phashes or {}
+                        a, b, similarity, phashes or {}, media_hashes
                     ):
                         candidates.append(
                             (delta, min(a.timestamp_utc, b.timestamp_utc), a.event_id, b.event_id)

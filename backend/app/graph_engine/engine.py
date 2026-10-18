@@ -9,6 +9,7 @@ import numpy as np
 
 from app.config import Parameters
 from app.coordination.engine import CoordinationResult
+from app.graph_engine.centrality import exact_betweenness
 from app.schemas.models import (
     AccountRole,
     AnalysisStatus,
@@ -38,6 +39,7 @@ class GraphEngine:
         if not events:
             return GraphResult([], [], [])
         p = self.p
+        parameter_id = p.parameter_set_id
         by_id = {event.event_id: event for event in events}
         authors: dict[str, list[UnifiedSocialEvent]] = defaultdict(list)
         for event in by_id.values():
@@ -74,7 +76,7 @@ class GraphEngine:
                 GraphEdge(
                     computation_mode=ComputationMode.COMPUTED_PIPELINE,
                     analysis_status=AnalysisStatus.AVAILABLE,
-                    parameter_set_id=p.parameter_set_id,
+                    parameter_set_id=parameter_id,
                     coverage_ratio=1,
                     evidence_reasons=[
                         "Observed source-to-amplifier interaction; unresolved parents are omitted."
@@ -101,7 +103,7 @@ class GraphEngine:
                 GraphEdge(
                     computation_mode=ComputationMode.COMPUTED_PIPELINE,
                     analysis_status=AnalysisStatus.AVAILABLE,
-                    parameter_set_id=p.parameter_set_id,
+                    parameter_set_id=parameter_id,
                     coverage_ratio=1,
                     evidence_reasons=[
                         "Disjoint repeated matches; deltas (seconds): "
@@ -130,7 +132,7 @@ class GraphEngine:
         membership = {
             author: index for index, community in enumerate(communities) for author in community
         }
-        centrality = nx.betweenness_centrality(interaction, normalized=True, weight=None)
+        centrality = exact_betweenness(interaction)
         percentile = float(np.percentile(list(centrality.values()), p.BRIDGE_CENTRALITY_PERCENTILE))
         low = {author for author in authors if self.low_indicator(author, coordination)}
         low_communities = set()
@@ -178,7 +180,7 @@ class GraphEngine:
                 GraphNode(
                     computation_mode=ComputationMode.COMPUTED_PIPELINE,
                     analysis_status=AnalysisStatus.AVAILABLE,
-                    parameter_set_id=p.parameter_set_id,
+                    parameter_set_id=parameter_id,
                     coverage_ratio=bot.coverage_ratio,
                     missing_signals=bot.missing_signals,
                     evidence_reasons=[

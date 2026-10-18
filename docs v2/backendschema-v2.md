@@ -525,7 +525,11 @@ All paths are authoritative. Heavy work is queued; mutation endpoints return HTT
 
 Errors use APIError: 400 invalid context, 401/403 access failure, 404 unknown resource, 409 conflicting reset/claim review, 413 size, 415 media type, 422 validation, 429 limit, 500 unexpected failure. Adapt FastAPI validation errors into this envelope. Known job execution failures live in JobStatusResponse with safe error codes.
 
+GET /campaigns defaults to redact_pii=true for restricted identity strings in summary titles/claims/reasons. An authenticated analyst may explicitly request redact_pii=false. Detail endpoints retain evidence; the frontend applies its participant privacy setting to displayed detail text, labels and metadata.
+
 WebSocket retains the most recent 1,000 messages per session. On an expired sequence, send SCENARIO_RESET with current campaign IDs and require a REST resync. Serialize resets against queued mutations; jobs from the old generation are cancelled/failed explicitly. Poll every 3 seconds after disconnect, reconnect at 1/2/4/8 seconds capped at 30 seconds.
+
+NEW_EVENT timestamps use observation event time; CTI_ALERT timestamps use the analytical partition watermark. Job/control notifications use wall-clock time. The token is sent in WebSocket subprotocols (`chakravyuh.v1`, session token), never a URL parameter. An injected observation older than the active window remains retained; its job ends with EVENT_RETAINED_OUTSIDE_ACTIVE_WINDOW because no active campaign enrichment can be returned. Archive search UI/API remains a release gap.
 
 ## 4. Persistence and export contracts
 
@@ -538,15 +542,20 @@ Use SQLite for metadata, event membership, jobs, claim reviews, and append-only 
 | accounts | (platform,account_id) PK; immutable snapshots linked through events |
 | campaigns | campaign_id PK; typed summary JSON; revision; latest assessment hash |
 | analytical_runs | run_id PK; input hashes; parameter_set_id; model revisions; typed report JSON; report hash |
+| analytical_run_manifests | run_id PK; content-addressed immutable manifest binding run identity, origin/access scope, inputs, parameter/model revisions and report hash; manifest digest anchored in ANALYZE audit |
 | evidence_artifacts | artifact_id PK; exact hash; opaque ref; MIME type; size; origin; access scope |
 | audit_entries | entry_id PK; previous_entry_sha256; entry_sha256; typed entry JSON; sequence |
 | jobs | job_id PK; generation; type; status; typed request/result JSON; error code |
 | claim_references/reviews | reference_id/review_id PK; snapshot refs/hashes; reviewer; timestamps; campaign_id |
 | geo_baseline_buckets | (origin,collector_scope,h3_resolution,h3_index,hour_utc) PK; count; collection_coverage |
 
+The implemented baseline key also includes topic_family_id; active events, memberships, jobs and campaigns are access-scope/generation-qualified. Late media collection appends records rather than changing canonical events. Method reference artifacts retain corpus, aliases, harm phrases, gazetteer, topic dictionary and implementation versions. Pre-upgrade analytical runs are registered once as legacy: their files are rehashed, but missing historical lineage manifests are disclosed rather than retroactively invented.
+
 Use TEXT containing validated JSON in SQLite; do not paste PostgreSQL JSONB DDL into SQLite. In-memory and durable adapters obey identical typed contracts. Duplicate ingestion is idempotent; evidence identity never depends on campaign membership.
 
 Bundle format is ZIP containing dossier.json, report.html, report.pdf, stix.json, manifest.json, and authorized evidence artifacts/derivatives. A format-specific export still includes a manifest and disclaimer in its downloadable ZIP. Verify exact raw bytes, canonical event serialization, media bytes, report artifacts, and audit links before export; mismatch fails the job with EVIDENCE_INTEGRITY_MISMATCH. Unavailable evidence is listed as unavailable, never as verified.
+
+Full bundles additionally contain parameters.json and observations.json. Every verification rehashes all registered files; a bounded cache only avoids duplicate reads inside that one verification call. The audit manifest is the retained prefix before the current export; the export action is recorded in the local ledger to avoid a circular manifest hash.
 
 Redaction applies consistently to all rendered text, graph labels, timelines, STIX, and embedded metadata. Default masks ORGANIC_USER and UNCLASSIFIED participants. Raw originals stay in restricted storage and are omitted from a redacted bundle; hash and label any sanitized copies as REDACTED_DERIVATIVE with original hash linkage. Redaction is a configurable privacy aid, not a legal compliance guarantee.
 

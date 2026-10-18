@@ -2,8 +2,8 @@
 
 **Contract version:** 2.1.0  
 **Updated:** October 18, 2026  
-**Current state:** Evidence foundation and frontend preview implemented; analytical pipeline and complete MVP remain pending.
-**Next task:** T-1.3 / T-1.4 raw replay fixtures, followed by narrative analytics; finish context-dependent T-0.3 validators as services arrive.
+**Current state:** Offline investigation workbench implemented through Phase 6, with recorded synthetic evaluation and explicit release gaps. Windows local verification is complete; this is a demonstration release, not a production accuracy claim.
+**Next work:** Address the graph latency target; consider an archive browser beyond the implemented CLI search; validate Linux/remote CI and a compatible optional cached model on fresh held-out data before making broader claims.
 
 ## 1. Active specification
 
@@ -19,7 +19,7 @@ The ten Markdown files in docs v2 are the complete active contract. They superse
 | UI behavior and investigation flows | design-v2.md, appflow-v2.md |
 | Execution and actual progress | implementationplan-v2.md, tasks-v2.md, this file |
 
-On disagreement, resolve the owning specification and update dependent documents. No software has been built or evaluated by this documentation revision.
+On disagreement, resolve the owning specification and update dependent documents. The chronological entries below distinguish earlier foundation checkpoints from the current implemented and evaluated release.
 
 ## 2. Core interpretation
 
@@ -146,3 +146,28 @@ The documentation revision checked all ten file versions, 18 relative links, Pyt
 - Added generated runtime JSON schemas and Zod boundary validation, strict shared TypeScript types, in-memory session authorization, sequence-aware WebSocket reconnect/backoff and three-second REST polling. Default participant masking is used in labels/mentions. Queued scenarios automatically select their computed result on completion.
 - Windows gates pass: 87 backend tests; Ruff/format/mypy/contracts; frontend strict typecheck, formatting, production build and npm audit (zero findings); offline smoke; two Playwright journeys (44.1s on the final run). Browser journeys cover graph/map/media/review/export manifest checks, injection surviving reset, new-session resync and 390px layout. Screenshots inspected for graph, map, geographic mismatch, media, timeline and narrow layout. E2E CI is configured for Linux Chromium and Windows Edge; remote CI is not claimed.
 - Measured demo outputs at seed 42 during browser QA: electoral CTI approximately 87.5, sync 0.680; geo CTI approximately 95.4, sync 0.896, GMR 0.818, Z 38.83 with 240 covered hours. These are computed observations, not acceptance constants. Natural-discussion and held-out control evaluation remain for Phase 6.
+
+### October 18, 2026 — Phase 6 verification and demonstration release
+
+- Closed engine/API boundary coverage: inclusive timing and sufficiency thresholds, role priority, exact centrality, recompressed pHash content linkage, late media enrichment, zero/missing geography, unavailable CTI inputs, corruption/export blocking, chunked body limits and early authorization. Review publication re-reads the latest locked snapshot and preserves a review arriving during computation. Parameter weight dictionaries reject mutation.
+- Added audit-anchored immutable analytical run manifests binding origin/access scope, input hashes, parameters, implementation revisions and report hash. Method reference artifacts retain frozen corpus, aliases, harm phrases, gazetteer, topic dictionary and library versions. Existing runs are disclosed as legacy rather than backfilled with invented historical anchors. Verification rehashes all files; a bounded cache lasts for only one verification call.
+- Cached MiniLM wiring now selects compatible local CPU weights when available and records file-derived revision; invalid/unavailable caches fall back explicitly. Weights are not installed here, so MODEL_INFERENCE accuracy/execution remains unverified. Late collected media feeds reports and coordination without changing original events. NEW_EVENT/CTI_ALERT use observation/watermark event time; job/control notices use wall-clock time. Alert markers are actual stream notifications rather than inferred from CTI tier.
+- Default feed summaries mask restricted identity text at the server, selected views also mask display-name mentions, and dossier derivatives additionally remove restricted source GPS/H3/region. Explicit authorized unredacted summaries remain available with redact_pii=false. Default UI privacy does not remove retained evidence.
+- Replaced NetworkX exact betweenness execution with mathematically equivalent sequential Rustworkx 0.17.1 Brandes, deterministic node/edge ordering and 15 random-graph parity cases against NetworkX (absolute 1e-12). NetworkX 3.5 Louvain seed/resolution and analytical thresholds remain unchanged. Bounded verification reads and compiled privacy matching reduce export overhead.
+- Frozen calibration before one held-out fallback test; no threshold changes or test rescoring. Train/calibration/test use disjoint topic families, account IDs, templates and seeds, 45 cases each. Test F1/precision/recall 1.00 on 36 labelled cases (18 TP, 0 FP, 0 FN); 27/45 primary results are insufficient. Benign mobilisation is coordination-positive and alert-negative, with 0/9 gated alerts. Each language has 12 labelled cases, F1 1.00, 9/15 insufficient results and 0/3 benign alerts. Calibration F1 0.8571 (6 FP) is retained. These bilingual synthetic templates do not validate broad multilingual accuracy or intent inference.
+- ELA mask IoU 1.00 on one reserved synthetic mask, one region. This is exploratory localization, not a representative forgery benchmark. Reports preserve source/mask hashes and explicitly show unsupported model-mode evaluation. Evaluation integrity verified 1,260 events, 3,784 artifacts and 1,261 audit entries.
+- Performance v2 on Windows 11 / AMD64 Family 25 Model 116 Stepping 1 / 16 logical CPUs / Python 3.12.10: 100-event/one-JPEG scoring cold 491 ms, warm median 425 ms (5 runs); verified export cold 877 ms, warm median 719 ms (5); in-process ASGI detail cold 102 ms, warm P95 26 ms (30). No TCP/browser overhead is included. Initialization 37 ms is separate; fixture capture is excluded. Graph chain 1,000 nodes/999 edges cold 884 ms, warm median 834 ms, maximum 895 ms (3): **800 ms target unmet**. Unmodified performance-v1/v2 reports retain before/after samples. No 5,000-node/500-event-per-second claim.
+- Local checks: 124 pytest cases; Ruff lint/format, mypy (44 app sources), generated TypeScript/runtime schemas, frontend strict TypeScript/format/production build, dependency consistency and offline smoke. Three Edge journeys passed (1.8 minutes): all scenarios; graph/map/media; claim review and ZIP manifest validation; injected origin surviving reset/reload; forced socket interruption and reconnect; natural-discussion alert suppression; 390px layout and no external requests in the main journey. start.bat --setup reinstalled locked dependencies and --check passed; changed dependency inputs invalidate its setup stamp. npm audit reported zero vulnerabilities. All seven pages of the actual multilingual PDF were rendered and visually inspected; font layout and margins are correct. CI remains configured, not remotely observed.
+- Remaining explicit gaps: graph target, deferred archive search UI/API for older evidence, Linux/remote CI confirmation, optional model validation and real-world evaluation. Older injections are retained with EVENT_RETAINED_OUTSIDE_ACTIVE_WINDOW and remain searchable through the CLI across retained generations. CLI search is literal/case-sensitive with origin/access-scope filters and bounded pagination; tests cover reset, older observations and scope isolation. Optional public connectors, MP4/MP3 upload decoders, audio/video inference, C2PA and fitted Hawkes remain unavailable. Local session is not multi-user production authentication.
+
+| Frozen identity | SHA-256 / revision |
+|---|---|
+| Parameter set (2.1.0.1) | `475d31789d485a11d2128556a8bfbf16122e3d730a95f707091be36078747d8a` |
+| Training dataset | `46ece118e1e716ed7d5bca8eeaceb0d9ae104c6981e227eecd5c9ab7a24fa020` |
+| Calibration dataset | `8f42d839fad617662e70bbaedeb535f90988823fd97bc30620b85cc4702fd24d` |
+| Test dataset | `ed4ffbe90b8977a6eb69c4bc409e183114ec5018ece2f4c4e3fd6c448903375d` |
+| Frozen training corpus | `c97b681643532b135cffeff439d118092293265bc7dab58e5e71d4858ec43568` |
+| TF-IDF revision | `tfidf-v1:1b285a21a7b4db67a6f94ed0c1828992acb792c86a0eb9b7c29d4c65ef54ac4b` |
+| ELA evaluation mask | `fdc53f916bebeb2d57f32b030ac6329c334ed170f78e67500cf3a2b1b0f7072d` |
+
+Full evaluation protocol, raw metrics, limitations and reproduction commands are in [evaluation/README.md](../evaluation/README.md). README now describes the implemented workbench, Windows/Linux entry points, optional weights, a five-minute demonstration and actual release gaps.

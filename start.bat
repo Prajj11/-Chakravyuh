@@ -18,6 +18,8 @@ if not "%~1"=="" (
 
 if not exist ".venv\Scripts\python.exe" goto prepare
 if not exist "frontend\node_modules\next\dist\bin\next" goto prepare
+".venv\Scripts\python.exe" scripts/dependency_stamp.py >nul 2>&1
+if errorlevel 1 goto prepare
 ".venv\Scripts\python.exe" -c "import app.config, fastapi, uvicorn" >nul 2>&1
 if errorlevel 1 goto prepare
 goto check
@@ -35,6 +37,8 @@ if not exist "frontend\node_modules\next\dist\bin\next" (
     echo Frontend dependencies are missing. Run start.bat --setup.
     goto failed
 )
+".venv\Scripts\python.exe" scripts/dependency_stamp.py
+if errorlevel 1 goto failed
 ".venv\Scripts\python.exe" -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 'Python 3.11+ is required.')"
 if errorlevel 1 goto failed
 ".venv\Scripts\python.exe" -m pip check
@@ -88,7 +92,7 @@ if errorlevel 1 (
     echo npm is missing from PATH. Reinstall Node.js, then reopen this launcher.
     exit /b 1
 )
-node -e "const [major, minor] = process.versions.node.split('.').map(Number); if (major < 20 || (major === 20 && minor < 9)) { console.error('Node.js 20.9+ is required; Node.js 24 is tested in CI.'); process.exit(1); }"
+node -e "const [major, minor] = process.versions.node.split('.').map(Number); if (major < 20 || (major === 20 && minor < 9)) { console.error('Node.js 20.9+ is required; Node.js 24 is recommended.'); process.exit(1); }"
 exit /b %errorlevel%
 
 :setup
@@ -111,7 +115,7 @@ if errorlevel 1 (
     echo Install Python 3.12 and add it to PATH, then reopen this launcher.
     exit /b 1
 )
-python -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 'Python 3.11+ is required; Python 3.12 is tested in CI.')"
+python -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 'Python 3.11+ is required; Python 3.12 is recommended.')"
 if errorlevel 1 exit /b 1
 python -m venv .venv
 if errorlevel 1 exit /b 1
@@ -123,7 +127,9 @@ pushd frontend
 call npm.cmd ci --no-audit --no-fund
 set "INSTALL_STATUS=%errorlevel%"
 popd
-exit /b %INSTALL_STATUS%
+if not "%INSTALL_STATUS%"=="0" exit /b %INSTALL_STATUS%
+".venv\Scripts\python.exe" scripts/dependency_stamp.py --write
+exit /b %errorlevel%
 
 :failed
 echo.

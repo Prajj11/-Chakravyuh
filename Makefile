@@ -4,7 +4,7 @@ else
 PYTHON := .venv/bin/python
 endif
 
-.PHONY: setup dev test check smoke demo
+.PHONY: setup dev test check smoke demo e2e
 
 setup:
 ifeq ($(OS),Windows_NT)
@@ -23,15 +23,11 @@ endif
 test:
 	$(PYTHON) -m pytest backend/tests -q
 
-check: test
-	$(PYTHON) -m ruff check backend scripts/smoke.py
-	$(PYTHON) -m ruff format --check backend scripts/smoke.py
-	$(PYTHON) -m mypy backend/app --ignore-missing-imports
-	$(PYTHON) backend/scripts/generate_types.py --check
-	cd frontend && npm run typecheck
-	cd frontend && npm run format:check
-	cd frontend && npm run build
-	$(PYTHON) scripts/smoke.py
+check:
+	$(PYTHON) scripts/check.py
+
+e2e:
+	cd frontend && npm run test:e2e
 
 smoke:
 	$(PYTHON) scripts/smoke.py

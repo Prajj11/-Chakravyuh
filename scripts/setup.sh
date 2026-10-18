@@ -15,7 +15,7 @@ if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
   printf 'Install Node.js 24 (with npm), then run this command again.\n' >&2
   exit 1
 fi
-node -e 'const [major, minor] = process.versions.node.split(".").map(Number); if (major < 20 || (major === 20 && minor < 9)) { console.error("Node.js 20.9+ is required; Node.js 24 is tested in CI."); process.exit(1); }'
+node -e 'const [major, minor] = process.versions.node.split(".").map(Number); if (major < 20 || (major === 20 && minor < 9)) { console.error("Node.js 20.9+ is required; Node.js 24 is recommended."); process.exit(1); }'
 
 if [[ ! -x .venv/bin/python ]]; then
   if [[ "$MODE" == --check ]]; then
@@ -31,7 +31,7 @@ if [[ ! -x .venv/bin/python ]]; then
     printf 'Install Python 3.12 (including its venv module), then run this command again.\n' >&2
     exit 1
   fi
-  "$PYTHON_BOOTSTRAP" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else "Python 3.11+ is required; Python 3.12 is tested in CI.")'
+  "$PYTHON_BOOTSTRAP" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else "Python 3.11+ is required; Python 3.12 is recommended.")'
   "$PYTHON_BOOTSTRAP" -m venv .venv
 fi
 PYTHON_BIN="$ROOT_DIR/.venv/bin/python"

@@ -1,5 +1,6 @@
 """Exercise installed CLI ingestion, idempotency and evidence verification offline."""
 
+import json
 import os
 import subprocess
 import sys
@@ -45,6 +46,21 @@ def main() -> None:
         if events[0] != events[1]:
             raise RuntimeError(
                 "Repeated CLI ingestion must return the retained immutable event"
+            )
+        search = subprocess.run(
+            [sys.executable, "-m", "app.cli", "search", "--query", events[0].event_id],
+            cwd=root,
+            env=environment,
+            check=True,
+            capture_output=True,
+        )
+        found = [
+            UnifiedSocialEvent.model_validate(value)
+            for value in json.loads(search.stdout)
+        ]
+        if found != [events[0]]:
+            raise RuntimeError(
+                "CLI retained-evidence search must preserve the exact event"
             )
         subprocess.run(
             [sys.executable, "-m", "app.cli", "verify"],

@@ -19,6 +19,7 @@ const project = (lat: number, lon: number): [number, number] => [
 ];
 export function GeoPanel({ detail, selected, onSelect }: Props) {
   const [webgl, setWebgl] = useState(false);
+  const [mapError, setMapError] = useState("");
   const reports = detail.geo_anomalies;
   const current =
     reports.find((report) => report.h3_index === selected) ?? reports[0];
@@ -29,7 +30,12 @@ export function GeoPanel({ detail, selected, onSelect }: Props) {
           <span className="eyebrow">SOURCE ≠ MENTIONED SUBJECT</span>
           <h2>Geographic context</h2>
         </div>
-        <button onClick={() => setWebgl(!webgl)}>
+        <button
+          onClick={() => {
+            setMapError("");
+            setWebgl(!webgl);
+          }}
+        >
           {webgl ? "Use offline coordinate view" : "Use local WebGL map"}
         </button>
       </div>
@@ -40,7 +46,12 @@ export function GeoPanel({ detail, selected, onSelect }: Props) {
         <WebGLMap
           reports={reports}
           onSelect={onSelect}
-          onFailure={() => setWebgl(false)}
+          onFailure={() => {
+            setWebgl(false);
+            setMapError(
+              "Local WebGL rendering is unavailable on this device. The offline coordinate view remains available.",
+            );
+          }}
         />
       ) : (
         <svg
@@ -157,6 +168,11 @@ export function GeoPanel({ detail, selected, onSelect }: Props) {
             );
           })}
         </svg>
+      )}
+      {mapError && (
+        <p role="status" className="notice">
+          {mapError}
+        </p>
       )}
       {!reports.length && (
         <div className="empty">

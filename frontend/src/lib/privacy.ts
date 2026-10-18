@@ -23,6 +23,9 @@ export function privateText(
       node.handle,
       node.handle.replace(/^@/, ""),
       node.id,
+      ...detail.sample_posts
+        .filter((event) => event.account.account_id === node.id)
+        .map((event) => event.account.display_name ?? ""),
     ].sort((a, b) => b.length - a.length)) {
       if (value)
         result = result.replace(

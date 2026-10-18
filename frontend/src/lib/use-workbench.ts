@@ -28,6 +28,9 @@ export function useWorkbench() {
   const [busy, setBusy] = useState("");
   const [lastJob, setLastJob] = useState<JobStatusResponse | null>(null);
   const [notice, setNotice] = useState("");
+  const [markers, setMarkers] = useState<
+    Array<{ campaignId: string; time: string; cti: number }>
+  >([]);
   const selectedRef = useRef(selected);
   selectedRef.current = selected;
   const serial = useRef(0);
@@ -115,10 +118,29 @@ export function useWorkbench() {
           )
             return;
           sequence = message.sequence;
-          if (message.message_type === "SCENARIO_RESET")
+          if (message.message_type === "SCENARIO_RESET") {
             setNotice("Replay/stream reset: resynchronizing snapshots");
-          if (message.message_type === "CTI_ALERT")
+            setMarkers((previous) =>
+              previous.filter((marker) =>
+                message.payload.loaded_campaign_ids.includes(marker.campaignId),
+              ),
+            );
+          }
+          if (message.message_type === "CTI_ALERT") {
             setNotice(`Gated warning: ${message.campaign_id}`);
+            const cti = message.payload.assessment.cti_score;
+            if (cti != null)
+              setMarkers((previous) =>
+                [
+                  ...previous,
+                  {
+                    campaignId: message.payload.campaign_id,
+                    time: message.timestamp_utc,
+                    cti,
+                  },
+                ].slice(-1000),
+              );
+          }
           if (!pending)
             pending = setTimeout(() => {
               pending = undefined;
@@ -132,6 +154,10 @@ export function useWorkbench() {
       socket.onclose = (event) => {
         if (stopped) return;
         if (event.code === 4401 || event.code === 4403) {
+          setToken("");
+          setCampaigns([]);
+          setDetail(null);
+          setSelected("");
           setStream("Session expired: reconnect with current local token");
           return;
         }
@@ -216,6 +242,7 @@ export function useWorkbench() {
     busy,
     lastJob,
     notice,
+    markers,
     authorize,
     refresh,
     run,

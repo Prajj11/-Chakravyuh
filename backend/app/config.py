@@ -1,7 +1,7 @@
 """Central versioned analytical defaults, independent of machine/session configuration."""
 
 from pathlib import Path
-from typing import Literal, Self
+from typing import Literal, Never, Self
 from urllib.parse import urlsplit
 
 from pydantic import Field, SecretStr, model_validator
@@ -9,6 +9,22 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.evidence.canonical import canonical_bytes, sha256
 from app.schemas.models import ContractModel
+
+
+class FrozenWeights(dict[str, float]):
+    """A serializable read-only mapping; parameters cannot drift after registration."""
+
+    def _immutable(self, *args: object, **kwargs: object) -> Never:
+        raise TypeError("Parameter weights are immutable; create a new parameter set")
+
+    __setitem__ = _immutable
+    __delitem__ = _immutable
+    update = _immutable
+    clear = _immutable
+    pop = _immutable
+    popitem = _immutable
+    setdefault = _immutable
+    __ior__ = _immutable
 
 
 class Parameters(ContractModel):
@@ -94,12 +110,24 @@ class Parameters(ContractModel):
 
     @model_validator(mode="after")
     def valid_weights(self) -> Self:
+        expected_bot = {
+            "sync_tightness",
+            "creation_batch_density",
+            "amplification_ratio",
+            "posting_rate_burst",
+            "handle_entropy",
+        }
+        expected_cti = {"sync", "bot_density", "media_forensics", "geo_anomaly", "harm_severity"}
+        if set(self.BOT_FEATURE_WEIGHTS) != expected_bot or set(self.CTI_WEIGHTS) != expected_cti:
+            raise ValueError("Analytical weight keys must match the versioned feature definitions")
         for weights in (self.BOT_FEATURE_WEIGHTS, self.CTI_WEIGHTS):
             if (
                 any(not 0 <= w <= 1 for w in weights.values())
                 or abs(sum(weights.values()) - 1) > 1e-9
             ):
                 raise ValueError("Analytical weights must be finite, positive and sum to one")
+        object.__setattr__(self, "BOT_FEATURE_WEIGHTS", FrozenWeights(self.BOT_FEATURE_WEIGHTS))
+        object.__setattr__(self, "CTI_WEIGHTS", FrozenWeights(self.CTI_WEIGHTS))
         return self
 
     @property
@@ -114,6 +142,7 @@ class Settings(BaseSettings):
     session_token: SecretStr | None = None
     upload_limit_bytes: int = Field(default=25 * 1024 * 1024, gt=0, le=25 * 1024 * 1024)
     image_max_pixels: int = Field(default=24_000_000, gt=0)
+    cached_model_dir: Path | None = None
 
     @model_validator(mode="after")
     def secure_token(self) -> Self:

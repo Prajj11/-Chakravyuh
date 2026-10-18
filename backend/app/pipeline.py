@@ -1,23 +1,26 @@
 """Shared observed-input pipeline for replay, user injection and optional public adapters."""
 
+import json
 from collections import Counter
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from functools import partial
+from importlib.metadata import version
+from pathlib import Path
 from uuid import uuid4
 
 import h3
 import numpy as np
 
 from app.coordination.engine import CoordinationEngine
-from app.evidence.canonical import sha256
-from app.geo_engine.engine import GeoEngine, topic_family
+from app.evidence.canonical import canonical_bytes, sha256
+from app.geo_engine.engine import TOPIC_DICTIONARY, GeoEngine, topic_family
 from app.graph_engine.engine import GraphEngine
 from app.ingestion.contracts import SourceEvent
 from app.ingestion.service import IngestionService
 from app.ingestion.simulator import fixture_root, load_claim_references, load_coverage, load_history
 from app.media_forensics.engine import MediaEngine
-from app.nlp_engine.engine import NarrativeEngine, Vector
+from app.nlp_engine.engine import ALIASES, NarrativeEngine, Vector
 from app.reporting.cti import AlertState, compute_cti
 from app.repositories.state import GeoBaselineBucket, StatePartition, StateRepository
 from app.schemas.models import (
@@ -40,16 +43,42 @@ from app.schemas.models import (
 
 
 class Pipeline:
-    def __init__(self, state: StateRepository) -> None:
+    def __init__(self, state: StateRepository, *, cached_model: Path | None = None) -> None:
         self.state = state
         self.repo = state.evidence
         self.p = self.repo.parameters
         self.ingestor = IngestionService(self.repo)
-        self.nlp = NarrativeEngine(self.p)
+        self.nlp = NarrativeEngine(self.p, cached_model=cached_model)
         self.coordination = CoordinationEngine(self.p)
         self.graph = GraphEngine(self.p)
         self.geo = GeoEngine(self.p)
         self.media = MediaEngine(self.repo, state.scope)
+        self.method_bytes = canonical_bytes(
+            {
+                "implementations": {
+                    name: version(name)
+                    for name in (
+                        "scikit-learn",
+                        "networkx",
+                        "rustworkx",
+                        "opencv-python-headless",
+                        "ImageHash",
+                    )
+                },
+                "aliases": ALIASES,
+                "topics": TOPIC_DICTIONARY,
+                "training_corpus": (
+                    fixture_root() / "registries" / "training_corpus.txt"
+                ).read_text(encoding="utf-8"),
+                "harm": json.loads(
+                    (fixture_root() / "registries" / "harm_lexicon.json").read_text(
+                        encoding="utf-8"
+                    )
+                ),
+                "gazetteer": self.geo.places,
+            }
+        )
+        self.method_hash = sha256(self.method_bytes)
         self.alerts: dict[str, AlertState] = {}
         self.media_cache: dict[tuple[str, tuple[str, ...]], ForensicMediaReport] = {}
         for reference in load_claim_references():
@@ -166,13 +195,19 @@ class Pipeline:
         pending_alerts = []
         for cluster in clusters:
             members = [event for event in events if event.event_id in cluster.event_ids]
+            with self.repo._lock:
+                late_refs = {
+                    event.event_id: tuple(
+                        row[0]
+                        for row in self.repo._db.execute(
+                            "SELECT artifact_id FROM media_collections WHERE event_id=?",
+                            (event.event_id,),
+                        ).fetchall()
+                    )
+                    for event in members
+                }
             vectors = self.nlp.embed([event.text for event in members])
             indices = {event.event_id: index for index, event in enumerate(members)}
-            coordination = self.coordination.analyze(
-                members,
-                similarity=partial(vector_similarity, vectors, indices),
-            )
-            graph = self.graph.build(members, coordination)
             media_ids = tuple(
                 sorted(
                     {
@@ -181,6 +216,7 @@ class Pipeline:
                         for media in event.media_attachments
                         if media.evidence_ref
                     }
+                    | {ref for refs in late_refs.values() for ref in refs}
                 )
             )
             media_reports = []
@@ -190,6 +226,23 @@ class Pipeline:
                 if key not in self.media_cache:
                     self.media_cache[key] = self.media.verify(media_id, comparison_ids=media_ids)
                 media_reports.append(self.media_cache[key])
+            phashes = {
+                sha256(self.repo.artifact(report.media_id, self.state.scope)[0]): report.phash
+                for report in media_reports
+                if report.phash is not None
+            }
+            coordination = self.coordination.analyze(
+                members,
+                similarity=partial(vector_similarity, vectors, indices),
+                phashes=phashes,
+                media_hashes={
+                    event_id: tuple(
+                        sha256(self.repo.artifact(ref, self.state.scope)[0]) for ref in refs
+                    )
+                    for event_id, refs in late_refs.items()
+                },
+            )
+            graph = self.graph.build(members, coordination)
             geo = self.geo.analyze(
                 members,
                 all_events=events,
@@ -269,7 +322,31 @@ class Pipeline:
             )
             details.append(detail)
         with self.state.mutation(partition, generation):
+            current = {detail.campaign_id: detail for detail in self.state.list_campaigns()}
+            committed = []
+            for detail in details:
+                latest = self.state.list_claim_reviews(detail.campaign_id)
+                previous = current.get(detail.campaign_id)
+                detail = detail.model_copy(
+                    update={
+                        "snapshot_revision": max(
+                            detail.snapshot_revision,
+                            previous.snapshot_revision + 1 if previous else 1,
+                        ),
+                        "claim_verification": latest[-1] if latest else detail.claim_verification,
+                    }
+                )
+                committed.append(detail)
+            details = committed
             with self.repo.transaction() as db:
+                self.repo.put_artifact(
+                    db,
+                    self.method_bytes,
+                    "REFERENCE",
+                    "application/json",
+                    partition.data_origin,
+                    self.state.scope,
+                )
                 db.execute(
                     "DELETE FROM campaigns WHERE scope=? AND partition_id=? AND generation=?",
                     (self.state.scope, partition.key, generation),
@@ -277,8 +354,16 @@ class Pipeline:
             for detail in details:
                 self.repo.record_analysis(
                     detail,
-                    [event.canonical_event_sha256 for event in detail.sample_posts],
-                    {self.nlp.model_id: self.nlp.revision},
+                    [event.canonical_event_sha256 for event in detail.sample_posts]
+                    + [self.method_hash]
+                    + [
+                        sha256(self.repo.artifact(report.media_id, self.state.scope)[0])
+                        for report in detail.media_reports
+                    ],
+                    {
+                        self.nlp.model_id: self.nlp.revision,
+                        "method_registry_bundle": self.method_hash,
+                    },
                     partition.data_origin,
                     self.state.scope,
                 )
@@ -292,7 +377,9 @@ class Pipeline:
                         detail.snapshot_revision,
                     )
                 alert_state = self.alerts.setdefault(detail.campaign_id, AlertState())
-                if alert_state.observe(detail.cti_assessment, detail.last_updated_utc, self.p):
+                if alert_state.observe(
+                    detail.cti_assessment, max(event.timestamp_utc for event in events), self.p
+                ):
                     pending_alerts.append(
                         CampaignAlert(
                             campaign_id=detail.campaign_id, assessment=detail.cti_assessment

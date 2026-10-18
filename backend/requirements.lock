@@ -42,6 +42,7 @@ PyWavelets==1.10.0
 reportlab==4.4.4
 requests==2.34.2
 ruff==0.17.1
+rustworkx==0.17.1
 scikit-learn==1.7.2
 scipy==1.15.3
 simplejson==4.2.0

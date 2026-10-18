@@ -80,6 +80,7 @@ class NarrativeEngine:
         *,
         corpus: Path | None = None,
         cached_model: Path | None = None,
+        auto_cached_model: bool = True,
     ) -> None:
         self.p = parameters
         path = corpus or fixture_root() / "registries" / "training_corpus.txt"
@@ -93,27 +94,52 @@ class NarrativeEngine:
             "Lexical overlap is not general multilingual semantic understanding.",
             "Vocabulary is frozen on the recorded baseline corpus.",
         ]
+        default_cache = fixture_root().parent / "models" / "paraphrase-multilingual-MiniLM-L12-v2"
+        cached_model = cached_model or (
+            default_cache if auto_cached_model and default_cache.is_dir() else None
+        )
         if cached_model is not None:
-            # Explicit local path only; never download or execute user-uploaded checkpoints.
-            if not cached_model.is_dir():
-                raise ValueError("Cached model directory is unavailable")
-            from sentence_transformers import SentenceTransformer
+            # Only a trusted configured local cache; uploads never select a checkpoint.
+            try:
+                if not cached_model.is_dir():
+                    raise ValueError("Cached model directory is unavailable")
+                from sentence_transformers import SentenceTransformer
 
-            self.model = SentenceTransformer(
-                str(cached_model), device="cpu", local_files_only=True, trust_remote_code=False
-            )
-            files = sorted(file for file in cached_model.rglob("*") if file.is_file())
-            self.revision = sha256(
-                canonical_bytes(
-                    [
-                        (str(file.relative_to(cached_model)), sha256(file.read_bytes()))
-                        for file in files
-                    ]
+                model = SentenceTransformer(
+                    str(cached_model), device="cpu", local_files_only=True, trust_remote_code=False
                 )
-            )
-            self.model_id = "paraphrase-multilingual-MiniLM-L12-v2"
-            self.mode = ComputationMode.MODEL_INFERENCE
-            self.limitations = ["Local embedding similarity requires contextual human review."]
+                warmup = np.asarray(
+                    model.encode(
+                        ["local model readiness"],
+                        normalize_embeddings=True,
+                        show_progress_bar=False,
+                    ),
+                    dtype=np.float64,
+                )
+                if warmup.shape != (1, 384) or not np.isfinite(warmup).all() or not warmup.any():
+                    raise ValueError(
+                        "Cached model must emit finite nonzero 384-dimensional vectors"
+                    )
+                files = sorted(file for file in cached_model.rglob("*") if file.is_file())
+                revision = sha256(
+                    canonical_bytes(
+                        [
+                            (str(file.relative_to(cached_model)), sha256(file.read_bytes()))
+                            for file in files
+                        ]
+                    )
+                )
+            except (ImportError, OSError, ValueError, RuntimeError) as exc:
+                self.limitations.append(
+                    f"Cached multilingual model unavailable ({type(exc).__name__}); "
+                    "frozen fallback is active."
+                )
+            else:
+                self.model = model
+                self.revision = revision
+                self.model_id = "paraphrase-multilingual-MiniLM-L12-v2"
+                self.mode = ComputationMode.MODEL_INFERENCE
+                self.limitations = ["Local embedding similarity requires contextual human review."]
         texts = [
             normalize_text(line) for line in training.decode("utf-8").splitlines() if line.strip()
         ]
@@ -247,7 +273,12 @@ class NarrativeEngine:
             parameter_set_id=self.p.parameter_set_id,
             coverage_ratio=1 if candidate else 0,
             missing_signals=[] if candidate else ["context_valid_reference"],
-            evidence_reasons=[reason],
+            evidence_reasons=[
+                reason,
+                f"Embedding: {self.model_id} @ {self.revision}.",
+                f"Frozen baseline corpus SHA-256: {self.corpus_hash}.",
+                *self.limitations,
+            ],
             candidate_reference=candidate,
             similarity_to_known_claim=similarity,
         )

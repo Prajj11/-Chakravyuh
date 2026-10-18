@@ -36,6 +36,10 @@ P = ParamSpec("P")
 R = TypeVar("R")
 
 
+class EventOutsideActiveWindow(ValueError):
+    """The observation was retained, but is older than the active narrative window."""
+
+
 class Stream:
     def __init__(self) -> None:
         self.sequence = 0
@@ -43,14 +47,19 @@ class Stream:
         self.listeners: set[asyncio.Queue[WebSocketStreamMessage]] = set()
 
     def publish(
-        self, kind: str, payload: object, headline: str, campaign_id: str | None = None
+        self,
+        kind: str,
+        payload: object,
+        headline: str,
+        campaign_id: str | None = None,
+        event_time: datetime | None = None,
     ) -> WebSocketStreamMessage:
         self.sequence += 1
         message = WebSocketStreamMessage.model_validate(
             {
                 "sequence": self.sequence,
                 "message_type": kind,
-                "timestamp_utc": datetime.now(UTC),
+                "timestamp_utc": event_time or datetime.now(UTC),
                 "campaign_id": campaign_id,
                 "headline": headline,
                 "payload": payload,
@@ -227,7 +236,11 @@ class Worker:
                     # Reads use coherent snapshots; event messages carry typed enrichment.
                     for alert in replay_alerts:
                         self.stream.publish(
-                            "CTI_ALERT", alert, "Gated campaign warning", alert.campaign_id
+                            "CTI_ALERT",
+                            alert,
+                            "Gated campaign warning",
+                            alert.campaign_id,
+                            self.pipeline.alerts[alert.campaign_id].watermark,
                         )
                     for source in batch:
                         details = self.state.list_campaigns()
@@ -240,6 +253,7 @@ class Worker:
                             enriched,
                             "Observed replay event",
                             enriched.assigned_campaign_id,
+                            event.timestamp_utc,
                         )
                 result = ScenarioSwitchResponse(
                     scenario_id=request.scenario_id,
@@ -257,10 +271,15 @@ class Worker:
                     enriched,
                     "Injected observation analyzed",
                     enriched.assigned_campaign_id,
+                    enriched.event.timestamp_utc,
                 )
                 for alert in alerts:
                     self.stream.publish(
-                        "CTI_ALERT", alert, "Gated campaign warning", alert.campaign_id
+                        "CTI_ALERT",
+                        alert,
+                        "Gated campaign warning",
+                        alert.campaign_id,
+                        self.pipeline.alerts[alert.campaign_id].watermark,
                     )
                 result = enriched
             elif isinstance(request, ForensicsVerifyRequest):
@@ -289,6 +308,8 @@ class Worker:
                 if isinstance(exc, StaleGenerationError)
                 else "EVIDENCE_INTEGRITY_MISMATCH"
                 if isinstance(exc, IntegrityMismatch)
+                else "EVENT_RETAINED_OUTSIDE_ACTIVE_WINDOW"
+                if isinstance(exc, EventOutsideActiveWindow)
                 else "INVALID_CONTEXT"
             )
             response = JobStatusResponse(
@@ -348,4 +369,8 @@ class Worker:
         )
         event = self.pipeline.activate(source, partition, generation)
         details, alerts = self.pipeline.refresh(partition, generation)
+        if not any(
+            post.event_id == event.event_id for detail in details for post in detail.sample_posts
+        ):
+            raise EventOutsideActiveWindow()
         return self.pipeline.enriched(event, details, alerts), alerts

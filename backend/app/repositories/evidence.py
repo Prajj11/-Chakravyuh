@@ -42,6 +42,12 @@ CREATE TABLE IF NOT EXISTS analytical_runs (
  input_hashes TEXT NOT NULL, parameter_set_id TEXT NOT NULL,
  model_revisions TEXT NOT NULL, report_ref TEXT NOT NULL, report_hash TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS analytical_run_manifests (
+ run_id TEXT PRIMARY KEY REFERENCES analytical_runs(run_id),
+ manifest_ref TEXT NOT NULL, manifest_sha256 TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS legacy_analytical_runs (run_id TEXT PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS evidence_migrations (name TEXT PRIMARY KEY);
 """
 
 
@@ -57,6 +63,18 @@ class EvidenceRepository:
         self._db.execute("PRAGMA journal_mode=WAL")
         self._db.execute("PRAGMA busy_timeout=5000")
         self._db.executescript(DDL)
+        if (
+            self._db.execute(
+                "SELECT 1 FROM evidence_migrations WHERE name='analysis-manifest-v1'"
+            ).fetchone()
+            is None
+        ):
+            self._db.execute(
+                "INSERT OR IGNORE INTO legacy_analytical_runs SELECT run_id FROM analytical_runs"
+            )
+            self._db.execute(
+                "INSERT OR IGNORE INTO evidence_migrations VALUES ('analysis-manifest-v1')"
+            )
         self._db.execute(
             "INSERT OR IGNORE INTO parameter_sets VALUES (?,?)",
             (parameters.parameter_set_id, canonical_bytes(parameters).decode("utf-8")),
@@ -68,6 +86,9 @@ class EvidenceRepository:
             "audit_entries",
             "media_collections",
             "analytical_runs",
+            "analytical_run_manifests",
+            "legacy_analytical_runs",
+            "evidence_migrations",
         ):
             for action in ("UPDATE", "DELETE"):
                 self._db.execute(
@@ -168,6 +189,38 @@ class EvidenceRepository:
                 raise KeyError("Unknown event")
             return UnifiedSocialEvent.model_validate_json(row[0])
 
+    def search_events(
+        self,
+        query: str,
+        scope: str,
+        *,
+        origin: DataOrigin | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[UnifiedSocialEvent]:
+        """Literal, case-sensitive retained-evidence search, independent of active generations."""
+        if not 1 <= limit <= 1000 or offset < 0:
+            raise ValueError("Search limit must be 1–1000 and offset nonnegative")
+        with self._lock:
+            rows = self._db.execute(
+                "SELECT event_json FROM events WHERE scope=? AND (? IS NULL OR origin=?) "
+                "AND (instr(json_extract(event_json, '$.text'), ?) > 0 "
+                "OR instr(event_id, ?) > 0 "
+                "OR instr(json_extract(event_json, '$.account.account_id'), ?) > 0) "
+                "ORDER BY json_extract(event_json, '$.timestamp_utc'), event_id LIMIT ? OFFSET ?",
+                (
+                    scope,
+                    origin.value if origin else None,
+                    origin.value if origin else None,
+                    query,
+                    query,
+                    query,
+                    limit,
+                    offset,
+                ),
+            ).fetchall()
+            return [UnifiedSocialEvent.model_validate_json(row[0]) for row in rows]
+
     def event_count(self, scope: str) -> int:
         with self._lock:
             return self._db.execute(
@@ -260,12 +313,44 @@ class EvidenceRepository:
                     digest,
                 ),
             )
+            manifest = {
+                "run_id": run_id,
+                "origin": origin.value,
+                "scope": scope,
+                "input_hashes": input_hashes,
+                "parameter_set_id": self.parameters.parameter_set_id,
+                "model_revisions": model_revisions,
+                "report_ref": artifact_id,
+                "report_hash": digest,
+            }
+            manifest_ref, manifest_hash = self.put_artifact(
+                db,
+                canonical_bytes(manifest),
+                "ANALYSIS_MANIFEST",
+                "application/json",
+                origin,
+                scope,
+            )
+            db.execute(
+                "INSERT INTO analytical_run_manifests VALUES (?,?,?)",
+                (run_id, manifest_ref, manifest_hash),
+            )
             self.append_audit(
-                db, action="ANALYZE", origin=origin, actor_id="pipeline", artifact_sha256=[digest]
+                db,
+                action="ANALYZE",
+                origin=origin,
+                actor_id="pipeline",
+                artifact_sha256=[digest, manifest_hash],
             )
             return run_id
 
     def verify(self, scope: str) -> dict[str, int]:
+        try:
+            return self._verify(scope)
+        except (ValueError, KeyError, TypeError) as exc:
+            raise IntegrityMismatch("Retained evidence metadata is invalid") from exc
+
+    def _verify(self, scope: str) -> dict[str, int]:
         with self.transaction() as db:
             for row in db.execute("SELECT * FROM parameter_sets"):
                 if sha256(row["parameter_json"].encode("utf-8")) != row["parameter_set_id"]:
@@ -273,22 +358,88 @@ class EvidenceRepository:
             artifacts = db.execute(
                 "SELECT * FROM evidence_artifacts WHERE scope=?", (scope,)
             ).fetchall()
+            by_ref = {row["artifact_id"]: row for row in artifacts}
+            cache: dict[str, bytes] = {}
+            cache_size = 0
+
+            def read_hash(digest: str) -> bytes:
+                nonlocal cache_size
+                data = cache.get(digest)
+                if data is None:
+                    data = self.store.read(digest)
+                    if len(data) <= 256 * 1024 and cache_size + len(data) <= 16 * 1024 * 1024:
+                        cache[digest] = data
+                        cache_size += len(data)
+                return data
+
+            def read_ref(ref: str, kind: str) -> bytes:
+                row = by_ref.get(ref)
+                if row is None or row["kind"] != kind:
+                    raise IntegrityMismatch("Evidence reference or hash domain differs")
+                return read_hash(row["sha256"])
+
             for row in artifacts:
-                self.store.read(row["sha256"])
+                read_hash(row["sha256"])
+            expected_manifests: set[str] = set()
+            legacy_runs = 0
+            for run in db.execute(
+                "SELECT * FROM analytical_runs WHERE scope=?", (scope,)
+            ).fetchall():
+                report_data = read_ref(run["report_ref"], "ANALYSIS")
+                if sha256(report_data) != run["report_hash"]:
+                    raise IntegrityMismatch("Analytical report linkage differs")
+                inputs = json.loads(run["input_hashes"])
+                for digest in inputs:
+                    if (
+                        db.execute(
+                            "SELECT 1 FROM evidence_artifacts WHERE sha256=? "
+                            "AND scope=? AND origin=?",
+                            (digest, scope, run["origin"]),
+                        ).fetchone()
+                        is None
+                    ):
+                        raise IntegrityMismatch("Analysis input lineage differs")
+                manifest = db.execute(
+                    "SELECT * FROM analytical_run_manifests WHERE run_id=?", (run["run_id"],)
+                ).fetchone()
+                if manifest is None:
+                    if (
+                        db.execute(
+                            "SELECT 1 FROM legacy_analytical_runs WHERE run_id=?", (run["run_id"],)
+                        ).fetchone()
+                        is None
+                    ):
+                        raise IntegrityMismatch("Analytical run manifest is missing")
+                    legacy_runs += 1
+                    continue
+                data = read_ref(manifest["manifest_ref"], "ANALYSIS_MANIFEST")
+                expected = {
+                    "run_id": run["run_id"],
+                    "origin": run["origin"],
+                    "scope": scope,
+                    "input_hashes": inputs,
+                    "parameter_set_id": run["parameter_set_id"],
+                    "model_revisions": json.loads(run["model_revisions"]),
+                    "report_ref": run["report_ref"],
+                    "report_hash": run["report_hash"],
+                }
+                if data != canonical_bytes(expected) or sha256(data) != manifest["manifest_sha256"]:
+                    raise IntegrityMismatch("Analytical run manifest differs from metadata")
+                expected_manifests.add(manifest["manifest_sha256"])
             events = db.execute("SELECT * FROM events WHERE scope=?", (scope,)).fetchall()
             for row in events:
                 event = UnifiedSocialEvent.model_validate_json(row["event_json"])
                 serialized = canonical_bytes(event.model_dump(exclude={"canonical_event_sha256"}))
                 if sha256(serialized) != event.canonical_event_sha256:
                     raise IntegrityMismatch("Canonical event no longer matches its model")
-                retained, _, _ = self.artifact(row["canonical_ref"], scope)
+                retained = read_ref(row["canonical_ref"], "CANONICAL_EVENT")
                 if (
                     retained != serialized
                     or row["canonical_event_sha256"] != event.canonical_event_sha256
                 ):
                     raise IntegrityMismatch("Canonical serialization differs from retained event")
-                raw, _, _ = self.artifact(event.raw_payload_ref, scope)
-                manifest_data, _, _ = self.artifact(event.raw_capture_manifest_ref, scope)
+                raw = read_ref(event.raw_payload_ref, "RAW_PAYLOAD")
+                manifest_data = read_ref(event.raw_capture_manifest_ref, "CAPTURE_MANIFEST")
                 from app.ingestion.contracts import CaptureManifest
 
                 manifest = CaptureManifest.model_validate_json(manifest_data)
@@ -297,7 +448,13 @@ class EvidenceRepository:
                     or manifest.raw_payload_sha256 != event.raw_payload_sha256
                 ):
                     raise IntegrityMismatch("Raw capture linkage differs")
+                for media in event.media_attachments:
+                    if media.evidence_ref is not None:
+                        data = read_ref(media.evidence_ref, "MEDIA")
+                        if sha256(data) != media.sha256_hash:
+                            raise IntegrityMismatch("Collected media linkage differs")
             previous = None
+            anchored_manifests: set[str] = set()
             audits = db.execute("SELECT * FROM audit_entries ORDER BY sequence").fetchall()
             for sequence, row in enumerate(audits, start=1):
                 entry = AuditTrailEntry.model_validate_json(row["entry_json"])
@@ -311,8 +468,15 @@ class EvidenceRepository:
                 ):
                     raise IntegrityMismatch("Audit hash chain differs")
                 previous = digest
-            return {
+                if entry.action == "ANALYZE":
+                    anchored_manifests.update(entry.artifact_sha256)
+            if not expected_manifests.issubset(anchored_manifests):
+                raise IntegrityMismatch("Analytical manifest is not anchored in the audit chain")
+            result = {
                 "artifacts": len(artifacts),
                 "events": len(events),
                 "audit_entries": len(audits),
             }
+            if legacy_runs:
+                result["legacy_runs_without_lineage_manifest"] = legacy_runs
+            return result

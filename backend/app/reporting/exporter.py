@@ -52,16 +52,28 @@ class PrivacyTransform:
                 ):
                     if original:
                         self.mapping[original] = alias
+        ordered = sorted(self.mapping.items(), key=lambda pair: -len(pair[0]))
+        self.replacements = {
+            f"p{index}": replacement for index, (_, replacement) in enumerate(ordered)
+        }
+        self.pattern = (
+            re.compile(
+                r"(?<!\w)(?:"
+                + "|".join(
+                    f"(?P<p{index}>{re.escape(original)})"
+                    for index, (original, _) in enumerate(ordered)
+                )
+                + r")(?!\w)",
+                re.IGNORECASE,
+            )
+            if ordered
+            else None
+        )
 
     def text(self, value: str) -> str:
-        for original, replacement in sorted(self.mapping.items(), key=lambda pair: -len(pair[0])):
-            value = re.sub(
-                r"(?<!\w)" + re.escape(original) + r"(?!\w)",
-                replacement,
-                value,
-                flags=re.IGNORECASE,
-            )
-        return value
+        if self.pattern is None:
+            return value
+        return self.pattern.sub(lambda match: self.replacements[match.lastgroup or ""], value)
 
     def apply(self, value: JSONValue) -> JSONValue:
         if isinstance(value, str):
@@ -85,6 +97,9 @@ class PrivacyTransform:
                     "is_verified",
                 ):
                     post["account"][key] = None
+                for key in ("source_lat", "source_lon", "source_h3_index", "source_region_name"):
+                    post["geospatial"][key] = None
+                post["geospatial"]["source_location_confidence"] = "UNAVAILABLE"
         for node in body["nodes"]:
             if node["id"] in self.masked:
                 node["region"], node["account_created_at"] = None, None
@@ -108,7 +123,10 @@ class Exporter:
         expected = sha256(canonical_bytes(detail))
         with self.repo._lock:
             rows = self.repo._db.execute(
-                "SELECT assessment_hash FROM campaigns WHERE scope=? AND campaign_id=?",
+                "SELECT c.assessment_hash FROM campaigns c JOIN state_generations s "
+                "ON c.scope=s.scope AND c.partition_id=s.partition_id "
+                "AND c.generation=s.generation "
+                "WHERE c.scope=? AND c.campaign_id=?",
                 (self.state.scope, campaign_id),
             ).fetchall()
             retained = self.repo._db.execute(
@@ -217,12 +235,18 @@ class Exporter:
         )
         # All representations derive from this one privacy transform.
         files["dossier.json"] = canonical_bytes(bundle)
+        files["parameters.json"] = canonical_bytes(self.repo.parameters)
         files["observations.json"] = canonical_bytes(safe)
         disclaimer = (
             bundle.integrity_disclaimer
             + " Audit manifest is the retained prefix before this export; "
             "the export action remains in the local ledger."
         )
+        if verification.get("legacy_runs_without_lineage_manifest", 0):
+            disclaimer += (
+                " Legacy report files were rehashed, "
+                "but their pre-upgrade lineage metadata lacks an anchored run manifest."
+            )
         lines = [
             "CHAKRAVYUH - TAMPER-EVIDENT INVESTIGATIVE DOSSIER",
             transform.text(detail.title),
@@ -233,7 +257,8 @@ class Exporter:
             f"CTI: {display_score(detail.cti_assessment.cti_score)} | "
             f"Synchronization: {display_score(detail.coordination_assessment.sync_score)}",
             f"Posts: {detail.total_posts} | Accounts: {detail.total_accounts}",
-            "Method: frozen lexical fallback; ELA/pHash compression indicators. "
+            f"Narrative mode: {detail.claim_verification.computation_mode.value}; "
+            "image method: ELA/pHash compression indicators when available. "
             "Null means unavailable.",
             "Claim review: " + transform.text(detail.claim_verification.analyst_note),
             disclaimer,
