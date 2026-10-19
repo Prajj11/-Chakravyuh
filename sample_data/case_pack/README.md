@@ -24,6 +24,12 @@ fallback can split a case into language/content variants. The queue's narrative 
 therefore exceed 25. All raw posts remain available through the computed snapshots within
 their respective 24-hour narrative windows.
 
+The Windows validation run processed all 7,500 posts in **261.4 seconds** and produced
+**98 detected narratives** using the current lexical fallback at seed 42. This is one local
+validation measurement, not a throughput guarantee; model configuration and hardware can
+change both timing and clustering. Allow several minutes for the complete pack, or select
+one 300-post case for a shorter demonstration.
+
 ## What is included
 
 | City | Exercise |

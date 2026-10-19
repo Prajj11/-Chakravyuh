@@ -39,6 +39,8 @@ The October 19 visual revision adds a branded session-entry page, a searchable i
 
 Scenario studio is collapsed by default and opened from the header. Privacy masking remains directly available in the header. Collection-window attribution limits and additive CTI contributions expand on demand; component coverage and alert eligibility/suppression remain visible. The media summary is the maximum available measured indicator, not a probability or a new aggregate detector; per-report method and availability remain in Media.
 
+The scenario selector includes the original three scenarios, their existing `all` group, the expanded 25-case / 7,500-post group, and 25 city/title options. Expanded selections enable Fast batch load by default. The speed control is disabled in this mode, and adjacent copy explains that intermediate warning times are not replayed. Users can disable batch loading to choose timed playback. Menu entries are generated with the seed-42 dataset export so the UI and backend allowlist stay aligned.
+
 With no selected account or edge, the right column contains an Investigation brief derived only from the current snapshot: eligible co-post pair count, strongest measured co-post link, earliest observed seed, computed media report count and claim review status. Actions open the corresponding existing evidence inspector or tab. This is a deterministic presentation aid, not an LLM inference or a new attribution engine. On smaller screens the brief follows the workbench and a selected evidence inspector uses the existing overlay treatment.
 
 ## 3. Palette and typography

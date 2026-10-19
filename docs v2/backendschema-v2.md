@@ -410,6 +410,11 @@ class ScenarioSwitchRequest(ContractModel):
     seed: int = 42
     speed_multiplier: float = Field(default=1, gt=0, le=100)
     playback_mode: Literal["TIMED", "BATCH"] = "TIMED"
+    # Cross-field validation allowlists the three legacy IDs, "all", "expanded",
+    # and the 25 demo_* IDs in app/ingestion/case_catalogue.py; all others return 422.
+    # "all" keeps its original three-scenario meaning. BATCH skips playback waits,
+    # computes a coherent snapshot per case and sends one representative NEW_EVENT
+    # notification per completed case. It does not reconstruct early-warning timing.
 
 class ScenarioSwitchResponse(ContractModel):
     scenario_id: str

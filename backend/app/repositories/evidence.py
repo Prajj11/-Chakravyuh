@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS evidence_artifacts (
  artifact_id TEXT PRIMARY KEY, sha256 TEXT NOT NULL, kind TEXT NOT NULL,
  mime_type TEXT NOT NULL, size INTEGER NOT NULL, origin TEXT NOT NULL, scope TEXT NOT NULL
 );
+CREATE INDEX IF NOT EXISTS evidence_artifacts_lookup
+ ON evidence_artifacts(sha256, kind, origin, scope);
 CREATE TABLE IF NOT EXISTS events (
  event_id TEXT PRIMARY KEY, collector_id TEXT NOT NULL, raw_payload_sha256 TEXT NOT NULL,
  source_event_key TEXT NOT NULL, origin TEXT NOT NULL, scope TEXT NOT NULL,

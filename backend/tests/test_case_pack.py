@@ -86,7 +86,7 @@ def test_all_7500_posts_reach_dashboard_snapshots(tmp_path: Path) -> None:
         accepted = client.post("/api/v1/simulate/scenario", json=request, headers=headers)
         assert accepted.status_code == 202
         job = {}
-        deadline = time.monotonic() + 300
+        deadline = time.monotonic() + 600
         while time.monotonic() < deadline:
             job = client.get(accepted.json()["status_url"], headers=headers).json()
             if job["status"] in {"SUCCEEDED", "FAILED"}:

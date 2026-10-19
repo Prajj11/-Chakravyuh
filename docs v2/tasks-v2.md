@@ -7,6 +7,15 @@
 
 ## Phase 0: Contracts and scaffolding
 
+### Organizer-only migration priority (October 19)
+
+- [x] Inspect supplied `datasets/` files and record hashes/readiness in [organizer-dataset-audit.md](organizer-dataset-audit.md): two keyword lists, no training records or labels.
+- [x] Clarify authorized collection scope: user confirmed public collection using the supplied terms is allowed; the two TXT lists are the complete organizer input.
+- [x] Collect and verify an unlabelled public keyword corpus: 10,084 Hacker News records / 5,821 authors / 617 raw responses verified; 187 explicit Bihar mentions. Four focused tests, Ruff and mypy passed. See `datasets/public-corpus-report.md`; this does not establish Bihar-focused detection accuracy.
+- [ ] Implement competition workflow separation from synthetic replay, evidence stores, training vocabulary and claim fixtures; preserve a backup of development cases.
+- [ ] Map the actual records to ingestion with provenance and missing-field reporting; adapt dashboard coverage.
+- [ ] Train supported tasks and evaluate on held-out organizer data when records and suitable labels are available. No organizer-data training has occurred yet.
+
 - [x] **T-0.1:** Reconcile all ten v2 docs to 2.1.0: enums, unknown roles, provenance, algorithms, coverage/gates, endpoints, UI, governance and full backlog.
 - [x] **T-0.2:** Initialize backend/, frontend/, sample_data/ and development configuration; retain docs v2 as active documentation.
 - [x] **T-0.3:** Typed schemas, context/sufficiency validators, immutable central parameter weights, parameter-set hashing and generated TypeScript/runtime-schema mirrors.
@@ -79,7 +88,14 @@ Additional hackathon features are ranked in [hackathon-roadmap.md](hackathon-roa
 - [x] **T-6.11:** Retained calibration/test and before/after performance reports; parameter/corpus/data hashes, startup, demo and limits documented.
 - [x] **T-6.12:** Local demonstration release reviewed; unmet requirements and unverified claims listed explicitly below.
 
-## Release gaps and limits
+## Dataset extension — October 19
+
+- [x] **T-7.1:** Generate 25 diverse synthetic source cases with 7,500 posts, 1,500 distinct accounts, 25 cities and English/Hindi/Hinglish content; export reproducible JSONL and a per-file SHA-256 manifest.
+- [x] **T-7.2:** Register individual cases and the expanded group in Scenario studio; add explicit TIMED/BATCH playback semantics, backend allowlisting, generated wire contracts and an aligned generated frontend catalogue. Preserve the three original scenarios and `all` semantics.
+- [x] **T-7.3:** Validate every raw row, deterministic seeds, parent ordering, missing locations, provenance and the complete 7,500-post path into dashboard snapshots. No generation labels or expected scores feed analytics.
+- [x] **T-7.4:** Verify the production UI's 25 options, default batch selection, disabled speed control, single-case loading, search, return to timed mode and 390 px overflow check; inspect desktop/mobile captures. Full regression results are recorded in memory.
+
+## Remaining release gaps and limits
 
 - **Unmet:** 1,000-node graph recalculation target <800 ms. Measured cold 884 ms, warm median 834 ms, maximum 895 ms, on the declared Windows workload. Exact calculations are retained.
 - **Retained archive:** CLI literal search covers text/event/account IDs across retained generations, with origin/access-scope filters and pagination. Older injections return EVENT_RETAINED_OUTSIDE_ACTIVE_WINDOW; an archive browser/API is deferred.

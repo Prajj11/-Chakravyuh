@@ -9,6 +9,7 @@ __pycache__/
 !.env.example
 *.egg-info/
 .runtime/
+datasets/public_hn/
 node_modules/
 .next/
 *.tsbuildinfo
