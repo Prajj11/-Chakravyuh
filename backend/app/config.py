@@ -139,6 +139,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="CHAKRAVYUH_", env_file=".env", extra="forbid")
     data_dir: Path = Path(__file__).resolve().parents[2] / ".runtime"
     frontend_origin: str = "http://127.0.0.1:3000"
+    # Accepted for legacy .env files; local access no longer uses this value.
     session_token: SecretStr | None = None
     upload_limit_bytes: int = Field(default=25 * 1024 * 1024, gt=0, le=25 * 1024 * 1024)
     image_max_pixels: int = Field(default=24_000_000, gt=0)
@@ -149,7 +150,7 @@ class Settings(BaseSettings):
     alert_webhook_secret: SecretStr | None = None
 
     @model_validator(mode="after")
-    def secure_token(self) -> Self:
+    def valid_frontend_origin(self) -> Self:
         origin = urlsplit(self.frontend_origin)
         if (
             origin.scheme != "http"
@@ -163,6 +164,4 @@ class Settings(BaseSettings):
             raise ValueError("Frontend origin must be an exact loopback HTTP origin")
         if origin.port is not None and not 1 <= origin.port <= 65535:
             raise ValueError("Invalid frontend origin port")
-        if self.session_token is not None and len(self.session_token.get_secret_value()) < 32:
-            raise ValueError("Local session token must have at least 32 characters")
         return self

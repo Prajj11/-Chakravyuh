@@ -19,7 +19,7 @@ const deliverySchema = z.object({
   counts: z.record(z.string(), z.number()),
 });
 
-export function CollectionStatus({ token }: { token: string }) {
+export function CollectionStatus() {
   const [feeds, setFeeds] = useState<z.infer<typeof feedsSchema>>({});
   const [delivery, setDelivery] = useState<z.infer<
     typeof deliverySchema
@@ -30,8 +30,8 @@ export function CollectionStatus({ token }: { token: string }) {
     const update = async () => {
       try {
         const [feeds, delivery] = await Promise.all([
-          request("/api/v1/collectors", token, feedsSchema),
-          request("/api/v1/alerts/delivery", token, deliverySchema),
+          request("/api/v1/collectors", feedsSchema),
+          request("/api/v1/alerts/delivery", deliverySchema),
         ]);
         if (active) {
           setFeeds(feeds);
@@ -51,7 +51,7 @@ export function CollectionStatus({ token }: { token: string }) {
       active = false;
       clearInterval(timer);
     };
-  }, [token]);
+  }, []);
   return (
     <details className="collection-status">
       <summary>

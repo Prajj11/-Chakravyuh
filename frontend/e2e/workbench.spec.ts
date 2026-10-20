@@ -1,15 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
-import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 async function connect(page: Page) {
   await page.goto("/");
-  await page
-    .getByLabel("Local session token")
-    .fill(readFileSync(process.env.PW_TOKEN_FILE!, "utf8").trim());
-  await page
-    .getByRole("button", { name: "Connect session", exact: true })
-    .click();
   await expect(
     page.getByText("Stream connected", { exact: true }),
   ).toBeVisible();
@@ -203,14 +196,8 @@ test("injected origin survives replay reset and reconnect restores snapshots", a
       if (/token/i.test(key))
         throw new Error("Session token persisted in browser storage");
   });
-  // A new browser session authorizes again, then resynchronizes persisted snapshots.
+  // Reload opens the workbench directly and resynchronizes persisted snapshots.
   await page.reload();
-  await page
-    .getByLabel("Local session token")
-    .fill(readFileSync(process.env.PW_TOKEN_FILE!, "utf8").trim());
-  await page
-    .getByRole("button", { name: "Connect session", exact: true })
-    .click();
   await expect(
     page.getByText("Stream connected", { exact: true }),
   ).toBeVisible();

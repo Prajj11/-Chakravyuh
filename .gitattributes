@@ -8,3 +8,4 @@
 *.zip binary
 *.woff2 binary
 *.ttf binary
+frontend/node_modules/@next/swc-win32-x64-msvc/next-swc.win32-x64-msvc.node filter=lfs diff=lfs merge=lfs -text

@@ -20,7 +20,7 @@ def review_claim(
     actor: str,
 ) -> ClaimVerificationAssessment:
     if not actor.startswith("local-analyst:") or not request.analyst_note.strip():
-        raise ValueError("Authenticated reviewer and contextual note are required")
+        raise ValueError("Local reviewer and contextual note are required")
     reference = next(
         (
             item
@@ -56,7 +56,7 @@ def review_claim(
             "analyst_note": request.analyst_note.strip(),
             "candidate_reference": reference,
             "evidence_reasons": [
-                "Authenticated analyst reviewed date, region, actors and media context.",
+                "Local analyst reviewed date, region, actors and media context.",
                 "The recorded note explains the contextual decision.",
             ],
         }

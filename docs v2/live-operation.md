@@ -9,8 +9,7 @@ into proof that a claim is false.
 1. Stop existing backend/frontend consoles with Ctrl+C.
 2. Double-click `start-live.bat`. On first launch it copies
    `live-feeds.example.json` to the git-ignored `live-feeds.local.json`.
-3. Open http://127.0.0.1:3000 and connect with the current token from
-   `.runtime/local-session-token`.
+3. Open http://127.0.0.1:3000. The dashboard opens directly without token authentication.
 4. Expand **Public collection** to see polling state, last success, observation count,
    and webhook delivery counts. Public campaigns enter the normal campaign feed.
 5. Edit `live-feeds.local.json` and restart to change topics. Default: one Hacker News
@@ -44,6 +43,9 @@ For example, add this object to the configuration array:
 
 Set that environment variable locally before launching. Never put the credential itself
 in the JSON or commit it. HTTP errors cause exponential backoff, capped at one hour.
+`start-live.bat` also loads `.runtime/connector-env.bat` when present, for local `set`
+commands containing connector credentials. This file is git-ignored and stores values
+as local plain text. Update it when rotating a key. A YouTube feed still needs a video ID.
 The interface reports failure type without exposing secret-bearing exception text.
 Redirects are rejected. Responses are bounded to 5 MB per page.
 

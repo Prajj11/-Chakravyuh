@@ -40,11 +40,9 @@ export function Modal({
   );
 }
 export function InjectDialog({
-  token,
   run,
   onClose,
 }: {
-  token: string;
   run: Run;
   onClose: () => void;
 }) {
@@ -72,7 +70,7 @@ export function InjectDialog({
       if (file) {
         if (file.size > 25 * 1024 * 1024)
           throw new Error("File exceeds 25 MiB");
-        ids.push((await upload(file, token)).media_artifact_id);
+        ids.push((await upload(file)).media_artifact_id);
       }
       await run(
         "/api/v1/events/inject",

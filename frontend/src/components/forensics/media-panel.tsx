@@ -6,8 +6,8 @@ import type {
   ForensicMediaReport,
   NarrativeCampaignDetail,
 } from "@/types/chakravyuh";
-type Props = { detail: NarrativeCampaignDetail; token: string };
-export function MediaPanel({ detail, token }: Props) {
+type Props = { detail: NarrativeCampaignDetail };
+export function MediaPanel({ detail }: Props) {
   const [selected, setSelected] = useState(""),
     [split, setSplit] = useState(50),
     [boxes, setBoxes] = useState(true);
@@ -26,14 +26,12 @@ export function MediaPanel({ detail, token }: Props) {
     if (report?.analysis_status === "AVAILABLE") {
       const load = async () => {
         try {
-          const original = URL.createObjectURL(
-            await artifact(report.media_id, token),
-          );
+          const original = URL.createObjectURL(await artifact(report.media_id));
           urls.push(original);
           if (active) setOriginal(original);
           if (report.heatmap_artifact_ref) {
             const overlay = URL.createObjectURL(
-              await artifact(report.heatmap_artifact_ref, token),
+              await artifact(report.heatmap_artifact_ref),
             );
             urls.push(overlay);
             if (active) setHeat(overlay);
@@ -51,12 +49,7 @@ export function MediaPanel({ detail, token }: Props) {
       active = false;
       urls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [
-    report?.media_id,
-    report?.analysis_status,
-    report?.heatmap_artifact_ref,
-    token,
-  ]);
+  }, [report?.media_id, report?.analysis_status, report?.heatmap_artifact_ref]);
   if (!detail.media_reports.length)
     return (
       <section>

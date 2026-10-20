@@ -74,7 +74,7 @@ def test_all_7500_posts_reach_dashboard_snapshots(tmp_path: Path) -> None:
     started = time.monotonic()
     with TestClient(app, base_url="http://127.0.0.1") as client:
         request = {"scenario_id": "expanded", "playback_mode": "BATCH", "seed": 42}
-        assert client.post("/api/v1/simulate/scenario", json=request).status_code == 401
+        assert client.get("/api/v1/campaigns").status_code == 200
         assert (
             client.post(
                 "/api/v1/simulate/scenario",

@@ -1,6 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
+if exist "%~dp0.runtime\connector-env.bat" call "%~dp0.runtime\connector-env.bat"
 if not exist "live-feeds.local.json" (
   copy /y "live-feeds.example.json" "live-feeds.local.json" >nul
 )

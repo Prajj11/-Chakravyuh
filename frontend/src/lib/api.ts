@@ -14,12 +14,10 @@ import type {
 export const API = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8001";
 export async function request<T>(
   path: string,
-  token: string,
   schema: z.ZodType<T>,
   init?: RequestInit,
 ): Promise<T> {
   const headers = new Headers(init?.headers);
-  if (token) headers.set("Authorization", `Bearer ${token}`);
   if (init?.body && !(init.body instanceof FormData))
     headers.set("Content-Type", "application/json");
   const response = await fetch(API + path, {
@@ -50,25 +48,21 @@ export async function request<T>(
 export const getHealth = () =>
   request(
     "/api/v1/health",
-    "",
     contract<HealthStatusResponse>("HealthStatusResponse"),
   );
-export const getCampaigns = (token: string) =>
+export const getCampaigns = () =>
   request(
     "/api/v1/campaigns",
-    token,
     z.array(contract<NarrativeCampaignSummary>("NarrativeCampaignSummary")),
   );
-export const getCampaign = (id: string, token: string) =>
+export const getCampaign = (id: string) =>
   request(
     `/api/v1/campaigns/${encodeURIComponent(id)}`,
-    token,
     contract<NarrativeCampaignDetail>("NarrativeCampaignDetail"),
   );
-export const getJob = async (id: string, token: string) => {
+export const getJob = async (id: string) => {
   const job = await request(
     `/api/v1/jobs/${id}`,
-    token,
     contract<JobStatusResponse>("JobStatusResponse"),
   );
   if (job.status === "SUCCEEDED") {
@@ -82,37 +76,33 @@ export const getJob = async (id: string, token: string) => {
   }
   return job;
 };
-export const queueJob = (path: string, body: unknown, token: string) =>
-  request(path, token, contract<JobAccepted>("JobAccepted"), {
+export const queueJob = (path: string, body: unknown) =>
+  request(path, contract<JobAccepted>("JobAccepted"), {
     method: "POST",
     body: JSON.stringify(body),
   });
-export const review = (id: string, body: unknown, token: string) =>
+export const review = (id: string, body: unknown) =>
   request(
     `/api/v1/campaigns/${id}/claim-review`,
-    token,
     contract<ClaimVerificationAssessment>("ClaimVerificationAssessment"),
     { method: "PUT", body: JSON.stringify(body) },
   );
-export async function upload(file: File, token: string) {
+export async function upload(file: File) {
   const form = new FormData();
   form.set("file", file);
   return request(
     "/api/v1/media",
-    token,
     contract<MediaUploadResponse>("MediaUploadResponse"),
     { method: "POST", body: form },
   );
 }
-export async function artifact(idOrPath: string, token: string): Promise<Blob> {
+export async function artifact(idOrPath: string): Promise<Blob> {
   const path = idOrPath.startsWith("/")
     ? idOrPath
     : `/api/v1/artifacts/${idOrPath}/download`;
   if (!/^\/api\/v1\/artifacts\/[a-f0-9]+\/download$/.test(path))
     throw new Error("Invalid artifact path");
-  const response = await fetch(API + path, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await fetch(API + path, { cache: "no-store" });
   if (!response.ok)
     throw new Error(`Artifact unavailable (${response.status})`);
   return response.blob();
