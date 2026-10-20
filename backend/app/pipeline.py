@@ -43,7 +43,13 @@ from app.schemas.models import (
 
 
 class Pipeline:
-    def __init__(self, state: StateRepository, *, cached_model: Path | None = None) -> None:
+    def __init__(
+        self,
+        state: StateRepository,
+        *,
+        cached_model: Path | None = None,
+        image_model: Path | None = None,
+    ) -> None:
         self.state = state
         self.repo = state.evidence
         self.p = self.repo.parameters
@@ -52,7 +58,7 @@ class Pipeline:
         self.coordination = CoordinationEngine(self.p)
         self.graph = GraphEngine(self.p)
         self.geo = GeoEngine(self.p)
-        self.media = MediaEngine(self.repo, state.scope)
+        self.media = MediaEngine(self.repo, state.scope, image_model)
         self.method_bytes = canonical_bytes(
             {
                 "implementations": {

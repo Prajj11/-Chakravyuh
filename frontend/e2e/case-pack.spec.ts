@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { readFileSync } from "node:fs";
 
 test("diverse case catalogue loads a real computed case in batch mode", async ({
   page,
@@ -30,12 +29,6 @@ test("diverse case catalogue loads a real computed case in batch mode", async ({
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
-  await page
-    .getByLabel("Local session token")
-    .fill(readFileSync(process.env.PW_TOKEN_FILE!, "utf8").trim());
-  await page
-    .getByRole("button", { name: "Connect session", exact: true })
-    .click();
   await expect(
     page.getByText("Stream connected", { exact: true }),
   ).toBeVisible();
@@ -52,7 +45,9 @@ test("diverse case catalogue loads a real computed case in batch mode", async ({
   ).toBeVisible();
   const batch = page.getByLabel("Fast batch load (skip playback delays)");
   await expect(batch).toBeChecked();
-  await expect(page.getByRole("combobox", { name: "Speed", exact: true })).toBeDisabled();
+  await expect(
+    page.getByRole("combobox", { name: "Speed", exact: true }),
+  ).toBeDisabled();
   await scenario.selectOption("demo_flood_photo");
   await page
     .getByRole("button", { name: "Load raw scenario", exact: true })
@@ -93,6 +88,8 @@ test("diverse case catalogue loads a real computed case in batch mode", async ({
   });
   await scenario.selectOption("cmp_electoral_01");
   await expect(batch).not.toBeChecked();
-  await expect(page.getByRole("combobox", { name: "Speed", exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole("combobox", { name: "Speed", exact: true }),
+  ).toBeEnabled();
   expect(errors).toEqual([]);
 });

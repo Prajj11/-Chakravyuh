@@ -6,8 +6,8 @@ import type {
   ForensicMediaReport,
   NarrativeCampaignDetail,
 } from "@/types/chakravyuh";
-type Props = { detail: NarrativeCampaignDetail; token: string };
-export function MediaPanel({ detail, token }: Props) {
+type Props = { detail: NarrativeCampaignDetail };
+export function MediaPanel({ detail }: Props) {
   const [selected, setSelected] = useState(""),
     [split, setSplit] = useState(50),
     [boxes, setBoxes] = useState(true);
@@ -26,14 +26,12 @@ export function MediaPanel({ detail, token }: Props) {
     if (report?.analysis_status === "AVAILABLE") {
       const load = async () => {
         try {
-          const original = URL.createObjectURL(
-            await artifact(report.media_id, token),
-          );
+          const original = URL.createObjectURL(await artifact(report.media_id));
           urls.push(original);
           if (active) setOriginal(original);
           if (report.heatmap_artifact_ref) {
             const overlay = URL.createObjectURL(
-              await artifact(report.heatmap_artifact_ref, token),
+              await artifact(report.heatmap_artifact_ref),
             );
             urls.push(overlay);
             if (active) setHeat(overlay);
@@ -51,12 +49,7 @@ export function MediaPanel({ detail, token }: Props) {
       active = false;
       urls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [
-    report?.media_id,
-    report?.analysis_status,
-    report?.heatmap_artifact_ref,
-    token,
-  ]);
+  }, [report?.media_id, report?.analysis_status, report?.heatmap_artifact_ref]);
   if (!detail.media_reports.length)
     return (
       <section>
@@ -173,7 +166,11 @@ export function MediaPanel({ detail, token }: Props) {
               ? "Unsupported"
               : score(report.deepfake_visual_score)}
           </strong>
-          <span>No calibrated inference adapter</span>
+          <span>
+            {report.model_id
+              ? `${report.model_id} · uncalibrated model score`
+              : "No evaluated model installed"}
+          </span>
         </div>
       </div>
       <div className="badge-row">
@@ -208,6 +205,19 @@ export function MediaPanel({ detail, token }: Props) {
         <dd className="hash">{report.parameter_set_id}</dd>
       </dl>
       <Reasons report={report} />
+      {report.media_type !== "image" &&
+        Object.keys(report.feature_contributions).length > 0 && (
+          <dl className="facts">
+            {Object.entries(report.feature_contributions).map(
+              ([name, value]) => (
+                <div key={name}>
+                  <dt>{name.replaceAll("_", " ")}</dt>
+                  <dd>{value.toFixed(3)}</dd>
+                </div>
+              ),
+            )}
+          </dl>
+        )}
       <table>
         <caption>Computed related-media candidates</caption>
         <thead>

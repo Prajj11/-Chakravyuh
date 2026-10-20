@@ -23,8 +23,8 @@ def test_parameter_hash_is_stable_and_changes_with_defaults() -> None:
     assert defaults.parameter_set_id != changed.parameter_set_id
     with pytest.raises(ValidationError):
         Parameters(TEMPORAL_DECAY_TAU_SEC=0)
-    with pytest.raises(ValidationError):
-        Settings(session_token="short")
+    # Legacy token settings are accepted but no longer control local access.
+    Settings(session_token="short")
     with pytest.raises(ValidationError):
         Settings(frontend_origin="*")
     with pytest.raises(ValidationError):

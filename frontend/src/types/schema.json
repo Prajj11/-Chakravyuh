@@ -2996,6 +2996,7 @@
     },
     "PlatformType": {
       "enum": [
+        "hacker_news",
         "x_twitter",
         "telegram",
         "reddit",

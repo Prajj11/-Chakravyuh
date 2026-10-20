@@ -8,11 +8,10 @@ import type {
 } from "@/types/chakravyuh";
 type Props = {
   detail: NarrativeCampaignDetail;
-  token: string;
   privacy: boolean;
   onRefresh: () => Promise<void>;
 };
-export function ClaimPanel({ detail, token, privacy, onRefresh }: Props) {
+export function ClaimPanel({ detail, privacy, onRefresh }: Props) {
   const [status, setStatus] =
       useState<ClaimVerificationStatus>("CONTEXT_MISSING"),
     [note, setNote] = useState(""),
@@ -26,13 +25,13 @@ export function ClaimPanel({ detail, token, privacy, onRefresh }: Props) {
     if (!reference) return;
     setBusy(true);
     try {
-      await review(
-        detail.campaign_id,
-        { reference_id: reference.reference_id, status, analyst_note: note },
-        token,
-      );
+      await review(detail.campaign_id, {
+        reference_id: reference.reference_id,
+        status,
+        analyst_note: note,
+      });
       setMessage(
-        "Contextual review saved with authenticated reviewer and audit entry.",
+        "Contextual review saved with local reviewer and audit entry.",
       );
       await onRefresh();
     } catch (e) {
@@ -92,7 +91,7 @@ export function ClaimPanel({ detail, token, privacy, onRefresh }: Props) {
             onClick={async () => {
               try {
                 setSnapshot(
-                  await (await artifact(reference.snapshot_ref, token)).text(),
+                  await (await artifact(reference.snapshot_ref)).text(),
                 );
               } catch (e) {
                 setMessage(

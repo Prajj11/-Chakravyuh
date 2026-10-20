@@ -1,0 +1,73 @@
+{
+  "task": "liar_false_or_pants_fire_vs_true_or_mostly_true",
+  "threshold_selected_on": "calibration",
+  "threshold": 0.23,
+  "model_sha256": "f3feabeedc7817c14ae7a0284d0e3e8aebbedc40dc67da20c9f41bbca7d4d7d8",
+  "dataset_sha256": {
+    "train": "c2ba83f51030939539a9e85d4fb2db92149ee5836e96cf0581dbc0aa40629711",
+    "calibration": "513c171fee66b2b75b87c988c93e9c4649e51bf8dd8494ab2abb3f01af758690",
+    "test": "2c593d2e1176b57afec3c489ca888f829932fae035b5e7ecb5070d7b70160ed8"
+  },
+  "test": {
+    "n": 692,
+    "precision": 0.4721311475409836,
+    "recall": 0.9632107023411371,
+    "f1": 0.6336633663366337,
+    "brier": 0.2166301641078752,
+    "average_precision": 0.6287352740995646,
+    "confusion_matrix_labels_0_1": [
+      [
+        71,
+        322
+      ],
+      [
+        11,
+        288
+      ]
+    ]
+  },
+  "test_constant_positive_baseline": {
+    "n": 692,
+    "precision": 0.4320809248554913,
+    "recall": 1.0,
+    "f1": 0.6034308779011099,
+    "brier": 0.5679190751445087,
+    "average_precision": 0.4320809248554913,
+    "confusion_matrix_labels_0_1": [
+      [
+        0,
+        393
+      ],
+      [
+        0,
+        299
+      ]
+    ]
+  },
+  "by_language": {
+    "en": {
+      "n": 692,
+      "precision": 0.4721311475409836,
+      "recall": 0.9632107023411371,
+      "f1": 0.6336633663366337,
+      "brier": 0.2166301641078752,
+      "average_precision": 0.6287352740995646,
+      "confusion_matrix_labels_0_1": [
+        [
+          71,
+          322
+        ],
+        [
+          11,
+          288
+        ]
+      ]
+    }
+  },
+  "limitations": [
+    "Measures only the supplied binary text label, not coordinated campaign detection.",
+    "Labels and provenance require independent review of the dataset owner's assertions.",
+    "Not a calibrated probability of truth or account automation.",
+    "No deployment claim; domain shift and near-duplicate leakage require further review."
+  ]
+}

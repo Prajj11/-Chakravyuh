@@ -18,13 +18,12 @@ import type {
 } from "@/types/chakravyuh";
 
 export function useWorkbench() {
-  const [token, setToken] = useState("");
   const [health, setHealth] = useState<HealthStatusResponse | null>(null);
   const [campaigns, setCampaigns] = useState<NarrativeCampaignSummary[]>([]);
   const [selected, setSelected] = useState("");
   const [detail, setDetail] = useState<NarrativeCampaignDetail | null>(null);
   const [error, setError] = useState("");
-  const [stream, setStream] = useState("Session disconnected");
+  const [stream, setStream] = useState("Connecting stream");
   const [busy, setBusy] = useState("");
   const [lastJob, setLastJob] = useState<JobStatusResponse | null>(null);
   const [notice, setNotice] = useState("");
@@ -47,8 +46,7 @@ export function useWorkbench() {
     try {
       const current = await getHealth();
       setHealth(current);
-      if (!token) return;
-      const list = await getCampaigns(token);
+      const list = await getCampaigns();
       if (revision !== serial.current) return;
       setCampaigns(list);
       const id = list.some((c) => c.campaign_id === selectedRef.current)
@@ -62,7 +60,7 @@ export function useWorkbench() {
         setDetail(null);
         return;
       }
-      const snapshot = await getCampaign(id, token);
+      const snapshot = await getCampaign(id);
       if (revision === serial.current && selectedRef.current === id) {
         setDetail((prev) =>
           prev?.campaign_id === id &&
@@ -78,7 +76,7 @@ export function useWorkbench() {
           e instanceof Error ? e.message : "Unable to refresh snapshots",
         );
     }
-  }, [token]);
+  }, []);
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
   useEffect(() => {
@@ -91,7 +89,6 @@ export function useWorkbench() {
     void refreshRef.current();
   }, [selected]);
   useEffect(() => {
-    if (!token) return;
     let stopped = false,
       sequence = 0,
       attempt = 0;
@@ -103,7 +100,7 @@ export function useWorkbench() {
       setStream("Connecting stream");
       socket = new WebSocket(
         `${API.replace(/^http/, "ws")}/ws/stream?last_sequence=${sequence}`,
-        ["chakravyuh.v1", token],
+        ["chakravyuh.v1"],
       );
       socket.onopen = () => {
         attempt = 0;
@@ -151,16 +148,8 @@ export function useWorkbench() {
           void refreshRef.current();
         }
       };
-      socket.onclose = (event) => {
+      socket.onclose = () => {
         if (stopped) return;
-        if (event.code === 4401 || event.code === 4403) {
-          setToken("");
-          setCampaigns([]);
-          setDetail(null);
-          setSelected("");
-          setStream("Session expired: reconnect with current local token");
-          return;
-        }
         const wait = Math.min(2 ** attempt++, 30);
         setStream(`Reconnecting in ${wait}s · REST polling every 3s`);
         retry = setTimeout(connect, wait * 1000);
@@ -175,24 +164,19 @@ export function useWorkbench() {
       clearTimeout(retry);
       clearTimeout(pending);
     };
-  }, [token]);
-  const authorize = async (value: string) => {
-    await getCampaigns(value);
-    setToken(value);
-    setError("");
-  };
+  }, []);
   const run = async (path: string, body: unknown, label: string) => {
     setBusy(`${label}: queued`);
     setError("");
     setLastJob(null);
     try {
-      const accepted = await queueJob(path, body, token);
+      const accepted = await queueJob(path, body);
       for (;;) {
         if (!mounted.current)
           throw new Error(
             "View closed; the queued job continues in the backend.",
           );
-        const job = await getJob(accepted.job_id, token);
+        const job = await getJob(accepted.job_id);
         setLastJob(job);
         setBusy(`${label}: ${job.status.toLowerCase()}`);
         if (job.status === "FAILED") throw new Error(job.error_code);
@@ -221,7 +205,7 @@ export function useWorkbench() {
     }
   };
   const download = async (path: string) => {
-    const blob = await artifact(path, token),
+    const blob = await artifact(path),
       url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -230,7 +214,6 @@ export function useWorkbench() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   return {
-    token,
     health,
     campaigns,
     selected,
@@ -243,7 +226,6 @@ export function useWorkbench() {
     lastJob,
     notice,
     markers,
-    authorize,
     refresh,
     run,
     download,

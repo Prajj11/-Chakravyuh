@@ -1,7 +1,6 @@
 """Typed authenticated API and sequence-recoverable local WebSocket transport."""
 
 import asyncio
-import secrets
 from collections.abc import Callable
 
 from fastapi import Depends, FastAPI, Request, WebSocket, WebSocketDisconnect
@@ -29,13 +28,21 @@ from app.schemas.models import (
 
 
 def mount_routes(
-    application: FastAPI, session: Callable[[Request], str], token: str, frontend_origin: str
+    application: FastAPI, session: Callable[[Request], str], frontend_origin: str
 ) -> None:
     def state(request: Request) -> StateRepository:
         return request.app.state.workbench
 
     def worker(request: Request) -> Worker:
         return request.app.state.worker
+
+    @application.get("/api/v1/collectors", dependencies=[Depends(session)])
+    def collectors(request: Request) -> dict:
+        return request.app.state.monitor.status
+
+    @application.get("/api/v1/alerts/delivery", dependencies=[Depends(session)])
+    def deliveries(request: Request) -> dict:
+        return request.app.state.delivery.status()
 
     @application.get(
         "/api/v1/campaigns",
@@ -147,13 +154,6 @@ def mount_routes(
     @application.websocket("/ws/stream")
     async def websocket(websocket: WebSocket) -> None:
         protocols = websocket.scope.get("subprotocols", [])
-        if (
-            len(protocols) != 2
-            or protocols[0] != "chakravyuh.v1"
-            or not secrets.compare_digest(protocols[1], token)
-        ):
-            await websocket.close(code=4401)
-            return
         if websocket.headers.get("origin") not in {None, frontend_origin}:
             await websocket.close(code=4403)
             return
@@ -164,7 +164,9 @@ def mount_routes(
         except ValueError:
             await websocket.close(code=4400)
             return
-        await websocket.accept(subprotocol="chakravyuh.v1")
+        await websocket.accept(
+            subprotocol="chakravyuh.v1" if "chakravyuh.v1" in protocols else None
+        )
         stream = websocket.app.state.worker.stream
         listener: asyncio.Queue[WebSocketStreamMessage] = asyncio.Queue(maxsize=1000)
         # No await between recovery and subscription, so an update cannot fall in a gap.

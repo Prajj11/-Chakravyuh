@@ -10,7 +10,6 @@ const python =
   process.env.PW_PYTHON ?? (existsSync(localPython) ? localPython : "python");
 process.env.PW_PYTHON = python;
 const runtime = resolve(root, ".runtime/e2e");
-process.env.PW_TOKEN_FILE ??= resolve(runtime, "local-session-token");
 export default defineConfig({
   testDir: "./e2e",
   timeout: 180000,

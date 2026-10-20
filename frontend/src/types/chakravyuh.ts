@@ -472,7 +472,7 @@ export interface NarrativeCluster {
   last_updated_utc: string;
 }
 
-export type PlatformType = "x_twitter" | "telegram" | "reddit" | "youtube" | "instagram" | "simulator";
+export type PlatformType = "hacker_news" | "x_twitter" | "telegram" | "reddit" | "youtube" | "instagram" | "simulator";
 
 export interface ScenarioSwitchRequest {
   scenario_id: string;

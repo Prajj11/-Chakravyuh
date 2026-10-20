@@ -6,6 +6,12 @@ Chakravyuh is an open-source, forensics-grade intelligence workbench built for c
 
 The complete active technical specification is documented in [`docs v2`](docs%20v2/).
 
+**Public collection extension:** use `start-live.bat` for opt-in API polling. Read
+[live operation and validation status](docs%20v2/live-operation.md) for platform setup,
+webhook alerts, bounded audio/video diagnostics, optional local image models, and the
+separate real-labelled LIAR benchmark. This remains a partially validated investigation
+prototype; these additions do not establish production accuracy or full deepfake coverage.
+
 ---
 
 ## 🎯 What is Chakravyuh?
@@ -60,7 +66,9 @@ Chakravyuh synthesizes raw data streams into multi-dimensional intelligence acro
 ### 2. 🖼️ Multi-Layer Media Forensics
 - **Error Level Analysis (ELA):** Performs authentic JPEG recompression difference mapping to expose digital splicing, cloning, and manipulated regions.
 - **Perceptual Hashing (64-bit pHash):** Tracks near-duplicate visual memes, rescaled images, and crop modifications across channels.
-- **Metadata & Provenance Inspection:** Extracts EXIF telemetry and queries C2PA Content Credentials (`VALID`, `INVALID`, `MISSING`, or `UNSUPPORTED`).
+- **Metadata & Provenance Inspection:** Checks EXIF presence. C2PA verification is not implemented and reports `NOT_CHECKED`.
+- **Audio/Video Diagnostics:** Bounded WAV signal analysis and MP4 frame sampling; these do not establish manipulation or detect audio/video deepfakes.
+- **Optional Image Classifier:** Supports a locally supplied safetensors classifier with hashed model provenance. No evaluated deepfake weights are bundled.
 - **Visual Anomaly Inspection:** Highlights detected manipulation zones with interactive heatmaps and bounding boxes in the analyst UI.
 
 ### 3. 🌐 Geospatial Astroturfing & Anomaly Engine
@@ -142,8 +150,7 @@ Chakravyuh is engineered with an uncompromising focus on local computational eff
    *(Note: Python 3.14 is not currently supported as precompiled binary wheels for dependencies such as NumPy 2.2 are not yet published for it).*
 2. Wait for the backend and frontend terminals to become ready. The launcher opens
    [the workbench](http://127.0.0.1:3000) automatically. You can also open that address manually.
-3. Read `.runtime/local-session-token` locally and paste it into **Local session token**.
-   Click **Connect session**. The field clears; the token stays in memory for this page session.
+3. The investigation dashboard opens directly. No token or login is required.
 4. Select a replay scenario and click **Load raw scenario**. Default 100× replay completes
    the longest scenario in about a minute, plus calculation time.
 
@@ -248,10 +255,9 @@ npm run dev
 ```
 
 For a production preview, run `npm run build` and `npm run start` in `frontend`.
-The per-launch token is never served over HTTP or put in a WebSocket URL. Protected routes
-require `Authorization: Bearer <token>`; the browser sends WebSocket credentials as subprotocols.
-The UI does not persist the token in browser storage. This is a single local analyst session,
-not a hosted multi-user authentication system.
+The dashboard, REST API and WebSocket stream open directly without token authentication.
+Services bind to localhost and enforce the configured browser origin. Reviews are attributed
+to the shared local analyst; there is no per-person authenticated identity.
 
 Optional model inference requires installing `./backend[nlp]` and retaining compatible weights
 in `models/paraphrase-multilingual-MiniLM-L12-v2`, or setting `CHAKRAVYUH_CACHED_MODEL_DIR`.
@@ -270,8 +276,7 @@ npm run test:e2e
 ```
 
 Browser tests start the backend and production frontend if their ports are free. Their default
-data directory is `.runtime/e2e`. If reusing a manually running backend, set `PW_TOKEN_FILE` to
-its token file before the browser command. Windows uses installed Edge; on Linux first run
+data directory is `.runtime/e2e`. Windows uses installed Edge; on Linux first run
 `npx playwright install --with-deps chromium`. `make check`, `make smoke` and `make demo`
 are also available. `scripts/check.py` includes pytest, Ruff lint/format, mypy, generated
 contract consistency, frontend strict TypeScript/format/build and offline smoke.

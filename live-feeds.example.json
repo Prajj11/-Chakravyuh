@@ -1,0 +1,9 @@
+[
+  {
+    "id": "public-cybersecurity",
+    "platform": "hacker_news",
+    "query": "phishing",
+    "interval_seconds": 60,
+    "max_pages": 1
+  }
+]

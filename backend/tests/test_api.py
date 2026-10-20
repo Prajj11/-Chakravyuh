@@ -4,11 +4,37 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
+from starlette.websockets import WebSocketDisconnect
 
 from app.config import Settings
 from app.main import create_app
 
 TOKEN = "test-session-token-32-characters-minimum"
+
+
+def test_direct_local_access_without_token(tmp_path: Path) -> None:
+    app = create_app(Settings(data_dir=tmp_path))
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        assert not (tmp_path / "local-session-token").exists()
+        assert client.get("/api/v1/campaigns").status_code == 200
+        assert client.get("/api/v1/collectors").status_code == 200
+        upload = client.post("/api/v1/media", files={"file": ("image.png", png(), "image/png")})
+        assert upload.status_code == 201
+        artifact_id = upload.json()["media_artifact_id"]
+        assert client.get(f"/api/v1/artifacts/{artifact_id}/download").content == png()
+        accepted = client.post(
+            "/api/v1/events/inject",
+            json={"handle": "@local", "text": "Direct local observation"},
+        )
+        assert accepted.status_code == 202
+        with client.websocket_connect("ws://127.0.0.1/ws/stream") as socket:
+            assert socket.accepted_subprotocol is None
+        with pytest.raises(WebSocketDisconnect) as rejected:
+            with client.websocket_connect(
+                "ws://127.0.0.1/ws/stream", headers={"Origin": "https://outside.example"}
+            ):
+                pass
+        assert rejected.value.code == 4403
 
 
 def png() -> bytes:
@@ -29,10 +55,10 @@ def test_api_home_points_to_configured_workbench(tmp_path: Path) -> None:
         assert "href='http://127.0.0.1:3456'" in home.text
         assert "href='/docs'" in home.text
         assert TOKEN not in home.text
-        assert client.get("/api/v1/campaigns").status_code == 401
+        assert client.get("/api/v1/campaigns").status_code == 200
 
 
-def test_unauthorized_json_is_rejected_before_parsing(tmp_path: Path) -> None:
+def test_tokenless_json_still_requires_a_valid_body(tmp_path: Path) -> None:
     app = create_app(Settings(data_dir=tmp_path, session_token=TOKEN))
     with TestClient(app, base_url="http://127.0.0.1") as client:
         response = client.post(
@@ -40,7 +66,7 @@ def test_unauthorized_json_is_rejected_before_parsing(tmp_path: Path) -> None:
             content=b"{not-json",
             headers={"Content-Type": "application/json"},
         )
-        assert response.status_code == 401
+        assert response.status_code == 422
 
 
 def test_chunked_upload_body_is_bounded_before_spooling(tmp_path: Path) -> None:
@@ -72,8 +98,12 @@ def test_health_auth_upload_download_and_cors(tmp_path: Path) -> None:
         assert health.status_code == 200
         assert health.json()["layer_status"]["coordination"] == "AVAILABLE"
         assert TOKEN not in health.text
-        assert client.get("/api/v1/campaigns").json()["code"] == "SESSION_REQUIRED"
+        assert client.get("/api/v1/campaigns").json() == []
+        assert client.get("/api/v1/collectors").status_code == 200
+        assert client.get("/api/v1/alerts/delivery").status_code == 200
         client.headers["Authorization"] = f"Bearer {TOKEN}"
+        assert client.get("/api/v1/collectors").json() == {}
+        assert client.get("/api/v1/alerts/delivery").json() == {"enabled": False, "counts": {}}
         assert client.get("/api/v1/campaigns").json() == []
         assert (
             client.get(
@@ -92,7 +122,7 @@ def test_health_auth_upload_download_and_cors(tmp_path: Path) -> None:
         assert download.headers["content-disposition"].endswith('.png"')
         assert download.headers["x-content-type-options"] == "nosniff"
         client.headers.pop("Authorization")
-        assert client.get(f"/api/v1/artifacts/{artifact_id}/download").status_code == 401
+        assert client.get(f"/api/v1/artifacts/{artifact_id}/download").status_code == 200
         assert client.get("/unknown").json()["code"] == "NOT_FOUND"
         allowed = client.options(
             "/api/v1/media",
@@ -101,21 +131,22 @@ def test_health_auth_upload_download_and_cors(tmp_path: Path) -> None:
         assert allowed.headers["access-control-allow-origin"] == "http://127.0.0.1:3000"
 
 
-def test_unauthorized_upload_rejected_before_multipart_parsing(tmp_path: Path) -> None:
+def test_foreign_origin_upload_rejected_before_multipart_parsing(tmp_path: Path) -> None:
     with TestClient(
         create_app(Settings(data_dir=tmp_path, session_token=TOKEN)), base_url="http://127.0.0.1"
     ) as client:
-        # A malformed body would fail parsing; early auth must win without spooling it to disk.
+        # Reject foreign-site mutations before parsing multipart bytes.
         result = client.post(
             "/api/v1/media",
             content=b"invalid multipart",
             headers={
                 "Content-Type": "multipart/form-data; boundary=missing",
                 "Content-Length": "99999999",
+                "Origin": "https://outside.example",
             },
         )
-        assert result.status_code == 401
-        assert result.json()["code"] == "SESSION_REQUIRED"
+        assert result.status_code == 403
+        assert result.json()["code"] == "ACCESS_DENIED"
 
 
 @pytest.mark.parametrize("data,mime", [(b"not an image", "image/jpeg"), (png(), "image/jpeg")])
