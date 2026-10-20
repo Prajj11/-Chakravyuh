@@ -295,6 +295,20 @@ i {
   margin-top: 20px;
   margin-bottom: 0;
 }
+.collection-status {
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--color-line);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.collection-status summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.collection-status p {
+  margin: 10px 0 0;
+  max-width: 100ch;
+}
 .replay-controls {
   display: flex;
   gap: 15px;

@@ -73,7 +73,11 @@ def test_health_auth_upload_download_and_cors(tmp_path: Path) -> None:
         assert health.json()["layer_status"]["coordination"] == "AVAILABLE"
         assert TOKEN not in health.text
         assert client.get("/api/v1/campaigns").json()["code"] == "SESSION_REQUIRED"
+        assert client.get("/api/v1/collectors").status_code == 401
+        assert client.get("/api/v1/alerts/delivery").status_code == 401
         client.headers["Authorization"] = f"Bearer {TOKEN}"
+        assert client.get("/api/v1/collectors").json() == {}
+        assert client.get("/api/v1/alerts/delivery").json() == {"enabled": False, "counts": {}}
         assert client.get("/api/v1/campaigns").json() == []
         assert (
             client.get(

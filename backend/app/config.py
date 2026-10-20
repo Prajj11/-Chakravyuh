@@ -143,6 +143,10 @@ class Settings(BaseSettings):
     upload_limit_bytes: int = Field(default=25 * 1024 * 1024, gt=0, le=25 * 1024 * 1024)
     image_max_pixels: int = Field(default=24_000_000, gt=0)
     cached_model_dir: Path | None = None
+    image_model_dir: Path | None = None
+    live_feeds_file: Path | None = None
+    alert_webhook_url: SecretStr | None = None
+    alert_webhook_secret: SecretStr | None = None
 
     @model_validator(mode="after")
     def secure_token(self) -> Self:

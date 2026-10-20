@@ -190,7 +190,7 @@ export function InjectDialog({
           Retained media (JPEG/PNG/WebP/WAV · ≤25 MiB)
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp,audio/wav"
+            accept="image/jpeg,image/png,image/webp,audio/wav,video/mp4"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
         </label>

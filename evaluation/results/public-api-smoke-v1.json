@@ -1,0 +1,16 @@
+{
+  "collector": {
+    "public-validation": {
+      "platform": "hacker_news",
+      "state": "POLLING",
+      "coverage": "BOUNDED_NEWEST_RESULTS",
+      "events_seen": 100,
+      "last_success": "2026-10-20T06:09:25.109676+00:00",
+      "error": null
+    }
+  },
+  "campaigns": 9,
+  "ingested": 100,
+  "live_layer": "AVAILABLE",
+  "scope": "Single real HTTP polling and dashboard API smoke; not accuracy or throughput validation"
+}

@@ -29,6 +29,7 @@ import { Assessment } from "./alerts/assessment";
 import { BrandMark, SignalIllustration } from "./brand-mark";
 import demoCases from "@/lib/scenario-catalogue.json";
 import { CampaignFeed } from "./campaign-feed";
+import { CollectionStatus } from "./collection-status";
 import { ExportDialog, InjectDialog, Modal } from "./alerts/dialogs";
 const tabs = ["Graph", "Geography", "Media", "Claims"] as const;
 const tabIcons = {
@@ -281,6 +282,7 @@ export function Workbench() {
         </main>
       ) : (
         <>
+          <CollectionStatus token={work.token} />
           <div
             className="replay-controls"
             id="scenario-studio"

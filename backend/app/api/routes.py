@@ -37,6 +37,14 @@ def mount_routes(
     def worker(request: Request) -> Worker:
         return request.app.state.worker
 
+    @application.get("/api/v1/collectors", dependencies=[Depends(session)])
+    def collectors(request: Request) -> dict:
+        return request.app.state.monitor.status
+
+    @application.get("/api/v1/alerts/delivery", dependencies=[Depends(session)])
+    def deliveries(request: Request) -> dict:
+        return request.app.state.delivery.status()
+
     @application.get(
         "/api/v1/campaigns",
         response_model=list[NarrativeCampaignSummary],

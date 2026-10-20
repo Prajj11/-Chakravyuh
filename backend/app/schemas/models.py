@@ -35,6 +35,7 @@ class ContractModel(BaseModel):
 
 
 class PlatformType(StrEnum):
+    HACKER_NEWS = "hacker_news"
     X_TWITTER = "x_twitter"
     TELEGRAM = "telegram"
     REDDIT = "reddit"

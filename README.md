@@ -6,6 +6,12 @@ Chakravyuh is an open-source, forensics-grade intelligence workbench built for c
 
 The complete active technical specification is documented in [`docs v2`](docs%20v2/).
 
+**Public collection extension:** use `start-live.bat` for opt-in API polling. Read
+[live operation and validation status](docs%20v2/live-operation.md) for platform setup,
+webhook alerts, bounded audio/video diagnostics, optional local image models, and the
+separate real-labelled LIAR benchmark. This remains a partially validated investigation
+prototype; these additions do not establish production accuracy or full deepfake coverage.
+
 ---
 
 ## 🎯 What is Chakravyuh?
@@ -60,7 +66,9 @@ Chakravyuh synthesizes raw data streams into multi-dimensional intelligence acro
 ### 2. 🖼️ Multi-Layer Media Forensics
 - **Error Level Analysis (ELA):** Performs authentic JPEG recompression difference mapping to expose digital splicing, cloning, and manipulated regions.
 - **Perceptual Hashing (64-bit pHash):** Tracks near-duplicate visual memes, rescaled images, and crop modifications across channels.
-- **Metadata & Provenance Inspection:** Extracts EXIF telemetry and queries C2PA Content Credentials (`VALID`, `INVALID`, `MISSING`, or `UNSUPPORTED`).
+- **Metadata & Provenance Inspection:** Checks EXIF presence. C2PA verification is not implemented and reports `NOT_CHECKED`.
+- **Audio/Video Diagnostics:** Bounded WAV signal analysis and MP4 frame sampling; these do not establish manipulation or detect audio/video deepfakes.
+- **Optional Image Classifier:** Supports a locally supplied safetensors classifier with hashed model provenance. No evaluated deepfake weights are bundled.
 - **Visual Anomaly Inspection:** Highlights detected manipulation zones with interactive heatmaps and bounding boxes in the analyst UI.
 
 ### 3. 🌐 Geospatial Astroturfing & Anomaly Engine

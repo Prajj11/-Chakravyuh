@@ -1,6 +1,7 @@
 """Exact bytes, 64-bit DCT pHash and Q90 ELA; no inferred deepfake probabilities."""
 
 from io import BytesIO
+from pathlib import Path
 from typing import Literal
 
 import cv2
@@ -20,10 +21,18 @@ from app.schemas.models import (
 
 
 class MediaEngine:
-    def __init__(self, repository: EvidenceRepository, scope: str = "local") -> None:
+    def __init__(
+        self,
+        repository: EvidenceRepository,
+        scope: str = "local",
+        model_dir: Path | None = None,
+    ) -> None:
         self.repository = repository
         self.scope = scope
         self.p = repository.parameters
+        from app.media_forensics.classifier import ImageClassifier
+
+        self.classifier = ImageClassifier(model_dir) if model_dir else None
 
     def verify(
         self, artifact_id: str, *, comparison_ids: tuple[str, ...] = ()
@@ -55,6 +64,19 @@ class MediaEngine:
         heatmap_ref = None
         contributions: dict[str, float] = {}
         duplicate_count = 0
+        model_score = None
+        if mime in {"audio/wav", "video/mp4"}:
+            from app.media_forensics.av import inspect_bytes
+
+            try:
+                contributions = inspect_bytes(data, mime)
+                reasons = [
+                    "Bounded audio signal or sampled video-frame diagnostics were computed.",
+                    "Audio/video authenticity is unsupported without an evaluated deepfake model.",
+                    "Clipping, repeated frames and recompression do not establish manipulation.",
+                ]
+            except ValueError:
+                reasons = ["Signal diagnostics unavailable for this container or resource limit."]
         if mime in {"image/jpeg", "image/png", "image/webp"}:
             try:
                 with Image.open(BytesIO(data)) as image:
@@ -139,6 +161,12 @@ class MediaEngine:
                     "not proof of manipulation or a deepfake probability.",
                     "EXIF absence is not proof of stripping; C2PA has not been checked.",
                 ]
+                if self.classifier:
+                    model_score = self.classifier.score(rgb)
+                    reasons.append(
+                        f"Local {self.classifier.task} classifier output is an uncalibrated "
+                        "model score; it does not establish authenticity or factual truth."
+                    )
             except (
                 UnidentifiedImageError,
                 OSError,
@@ -156,11 +184,21 @@ class MediaEngine:
                     {},
                 )
         report = ForensicMediaReport(
-            computation_mode=ComputationMode.COMPUTED_ELA_PHASH,
+            computation_mode=(
+                ComputationMode.MODEL_INFERENCE
+                if model_score is not None
+                else ComputationMode.HEURISTIC_INDICATOR
+                if media_type != "image"
+                else ComputationMode.COMPUTED_ELA_PHASH
+            ),
             analysis_status=status,
             parameter_set_id=self.p.parameter_set_id,
             coverage_ratio=1 if status == AnalysisStatus.AVAILABLE else 0,
-            missing_signals=["deepfake_model", "c2pa_adapter"]
+            missing_signals=(
+                ["model_calibration", "c2pa_adapter"]
+                if model_score is not None
+                else ["deepfake_model", "c2pa_adapter"]
+            )
             if status == AnalysisStatus.AVAILABLE
             else ["supported_decodable_media_adapter"],
             evidence_reasons=reasons,
@@ -171,13 +209,21 @@ class MediaEngine:
             duplicate_matches_count=int(duplicate_count),
             manipulation_indicator_score=score,
             ela_anomaly_score=score,
+            deepfake_visual_score=model_score,
+            model_id=self.classifier.model_id
+            if self.classifier and model_score is not None
+            else None,
+            model_revision=self.classifier.revision
+            if self.classifier and model_score is not None
+            else None,
             exif_present=exif,
             heatmap_regions=regions,
             heatmap_artifact_ref=heatmap_ref,
         )
-        self.repository.record_analysis(
-            report, [sha256(data)], {"ela": "rgb-q90-v1", "phash": "dct64-v1"}, origin, self.scope
-        )
+        versions = {"ela": "rgb-q90-v1", "phash": "dct64-v1"}
+        if self.classifier:
+            versions["image_classifier"] = self.classifier.revision
+        self.repository.record_analysis(report, [sha256(data)], versions, origin, self.scope)
         return report
 
 
