@@ -1,8 +1,8 @@
 """Opt-in public API polling. Raw responses remain evidence; secrets never enter manifests."""
 
 import asyncio
-import html
 import json
+import logging
 import math
 import os
 import re
@@ -13,10 +13,11 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from app.evidence.canonical import canonical_bytes, sha256
 from app.ingestion.contracts import SourceEvent
+from app.ingestion.public_dataset import matches, normalized, plain_text
 from app.jobs.worker import Worker
 from app.reporting.delivery import AlertDelivery
 from app.repositories.state import StatePartition
@@ -26,6 +27,7 @@ from app.schemas.models import (
     DataOrigin,
     InteractionType,
     PlatformType,
+    UnifiedSocialEvent,
 )
 
 
@@ -37,6 +39,14 @@ class Feed(BaseModel):
     interval_seconds: int = Field(default=60, ge=30, le=86400)
     max_pages: int = Field(default=2, ge=1, le=10)
     credential_env: str | None = None
+
+    @field_validator("query")
+    @classmethod
+    def nonempty_query(cls, value: str) -> str:
+        value = value.strip()
+        if not value.strip('"').strip():
+            raise ValueError("A nonempty collection query is required")
+        return value
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -63,11 +73,20 @@ def fetch(feed: Feed) -> list[tuple[bytes, list[tuple[SourceEvent, str]]]]:
         raise ValueError("Required API credential environment variable is missing")
     pages = []
     cursor = ""
+    seen_cursors: set[str] = set()
     for page in range(feed.max_pages):
         headers = {}
         if feed.platform == "hacker_news":
             url = "https://hn.algolia.com/api/v1/search_by_date?" + urlencode(
-                {"query": feed.query, "tags": "(story,comment)", "hitsPerPage": 100, "page": page}
+                {
+                    "query": '"' + feed.query.strip().strip('"') + '"',
+                    "tags": "(story,comment)",
+                    "hitsPerPage": 100,
+                    "page": page,
+                    "typoTolerance": "false",
+                    "queryType": "prefixNone",
+                    "restrictSearchableAttributes": "title,story_text,comment_text",
+                }
             )
         elif feed.platform == "youtube":
             url = "https://www.googleapis.com/youtube/v3/commentThreads?" + urlencode(
@@ -114,8 +133,9 @@ def fetch(feed: Feed) -> list[tuple[bytes, list[tuple[SourceEvent, str]]]]:
                 if feed.platform == "reddit"
                 else payload.get("meta", {}).get("next_token", "")
             )
-            if not cursor:
+            if not cursor or cursor in seen_cursors:
                 break
+            seen_cursors.add(cursor)
     return pages
 
 
@@ -129,64 +149,88 @@ def normalize(feed: Feed, payload: dict[str, Any]) -> list[tuple[SourceEvent, st
         if feed.platform == "reddit"
         else payload.get("data", [])
     )
+    if not isinstance(rows, list):
+        raise ValueError("Platform response rows must be a list")
     output = []
+    rejected = 0
     for index, row in enumerate(rows):
-        target = None
-        interaction = InteractionType.ORIGINAL_POST
-        language = "und"
-        if feed.platform == "hacker_news":
-            key, author = str(row["objectID"]), row.get("author")
-            text = row.get("comment_text") or row.get("story_text") or row.get("title") or ""
-            text = html.unescape(re.sub(r"<[^>]*>", " ", text))
-            stamp = datetime.fromtimestamp(row["created_at_i"], UTC)
-            url = "https://news.ycombinator.com/item?id=" + key
-            pointer = f"/hits/{index}"
-            if row.get("comment_text"):
-                interaction = InteractionType.REPLY
-        elif feed.platform == "youtube":
-            comment = row["snippet"]["topLevelComment"]
-            body = comment["snippet"]
-            key, author = comment["id"], body.get("authorChannelId", {}).get("value")
-            text, stamp = body["textDisplay"], datetime.fromisoformat(body["publishedAt"])
-            url = "https://www.youtube.com/watch?" + urlencode({"v": feed.query, "lc": key})
-            pointer = f"/items/{index}/snippet/topLevelComment"
-            interaction = InteractionType.REPLY
-        elif feed.platform == "reddit":
-            body = row["data"]
-            key, author = body["name"], body.get("author")
-            text = body.get("title", "") + "\n" + body.get("selftext", "")
-            stamp = datetime.fromtimestamp(body["created_utc"], UTC)
-            url = "https://www.reddit.com" + body["permalink"]
-            pointer = f"/data/children/{index}/data"
-        else:
-            key, author = row["id"], row.get("author_id")
-            text, stamp = row["text"], datetime.fromisoformat(row["created_at"])
-            language = row.get("lang", "und")
-            target = row.get("in_reply_to_user_id")
-            interaction = InteractionType.REPLY if target else InteractionType.ORIGINAL_POST
-            url, pointer = "https://x.com/i/web/status/" + key, f"/data/{index}"
-        if not author or author == "[deleted]" or not text.strip():
+        try:
+            item = _normalize_row(feed, row, index)
+        except (KeyError, TypeError, AttributeError, ValueError, OverflowError, ValidationError):
+            rejected += 1
             continue
-        output.append(
-            (
-                SourceEvent(
-                    source_event_key=key,
-                    platform=PlatformType(feed.platform),
-                    data_origin=DataOrigin.PUBLIC_OSINT,
-                    collector_id="public-api-v1:" + feed.id,
-                    collector_scope="live:" + feed.id,
-                    source_url=url,
-                    timestamp_utc=stamp,
-                    account=AccountProfile(account_id=feed.platform + ":" + author, handle=author),
-                    text=text,
-                    language=language,
-                    interaction_type=interaction,
-                    target_account_id=feed.platform + ":" + target if target else None,
-                ),
-                pointer,
-            )
+        if item is not None:
+            output.append(item)
+    if rejected:
+        logging.getLogger(__name__).warning(
+            "Rejected %d malformed API rows for feed %s", rejected, feed.id
         )
     return output
+
+
+def _normalize_row(feed: Feed, row: dict[str, Any], index: int) -> tuple[SourceEvent, str] | None:
+    target = None
+    interaction = InteractionType.ORIGINAL_POST
+    language = "und"
+    if feed.platform == "hacker_news":
+        key, author = str(row["objectID"]), row.get("author")
+        text = "\n".join(
+            part
+            for part in (
+                plain_text(row.get("title")),
+                plain_text(row.get("story_text")),
+                plain_text(row.get("comment_text")),
+            )
+            if part
+        )
+        if not matches(text, [normalized(feed.query.strip().strip('"'))]):
+            return None
+        stamp = datetime.fromtimestamp(row["created_at_i"], UTC)
+        url = "https://news.ycombinator.com/item?id=" + key
+        pointer = f"/hits/{index}"
+        if row.get("comment_text"):
+            interaction = InteractionType.REPLY
+    elif feed.platform == "youtube":
+        comment = row["snippet"]["topLevelComment"]
+        body = comment["snippet"]
+        key, author = comment["id"], body.get("authorChannelId", {}).get("value")
+        text, stamp = body["textDisplay"], datetime.fromisoformat(body["publishedAt"])
+        url = "https://www.youtube.com/watch?" + urlencode({"v": feed.query, "lc": key})
+        pointer = f"/items/{index}/snippet/topLevelComment"
+        interaction = InteractionType.REPLY
+    elif feed.platform == "reddit":
+        body = row["data"]
+        key, author = body["name"], body.get("author")
+        text = body.get("title", "") + "\n" + body.get("selftext", "")
+        stamp = datetime.fromtimestamp(body["created_utc"], UTC)
+        url = "https://www.reddit.com" + body["permalink"]
+        pointer = f"/data/children/{index}/data"
+    else:
+        key, author = row["id"], row.get("author_id")
+        text, stamp = row["text"], datetime.fromisoformat(row["created_at"])
+        language = row.get("lang", "und")
+        target = row.get("in_reply_to_user_id")
+        interaction = InteractionType.REPLY if target else InteractionType.ORIGINAL_POST
+        url, pointer = "https://x.com/i/web/status/" + key, f"/data/{index}"
+    if not author or author == "[deleted]" or not text.strip():
+        return None
+    return (
+        SourceEvent(
+            source_event_key=key,
+            platform=PlatformType(feed.platform),
+            data_origin=DataOrigin.PUBLIC_OSINT,
+            collector_id="public-api-v1:" + feed.id,
+            collector_scope="live:" + feed.id,
+            source_url=url,
+            timestamp_utc=stamp,
+            account=AccountProfile(account_id=feed.platform + ":" + author, handle=author),
+            text=text,
+            language=language,
+            interaction_type=interaction,
+            target_account_id=feed.platform + ":" + target if target else None,
+        ),
+        pointer,
+    )
 
 
 class Monitor:
@@ -291,9 +335,25 @@ class Monitor:
                         (feed.id, fingerprint),
                     ).fetchone():
                         continue
+                    prior = db.execute(
+                        "SELECT event_json FROM events WHERE collector_id=? "
+                        "AND source_event_key=? AND origin=? AND scope=? LIMIT 1",
+                        (
+                            source.collector_id,
+                            source.source_event_key,
+                            DataOrigin.PUBLIC_OSINT.value,
+                            state.scope,
+                        ),
+                    ).fetchone()
                 with state.mutation(partition, generation):
-                    event = pipeline.ingestor.ingest(
-                        source, scope=state.scope, raw_bytes=raw, source_pointer=pointer
+                    # Ingestion may have committed before a previous refresh failed.
+                    # Reuse that capture even if counters changed in the next response.
+                    event = (
+                        UnifiedSocialEvent.model_validate_json(prior[0])
+                        if prior
+                        else pipeline.ingestor.ingest(
+                            source, scope=state.scope, raw_bytes=raw, source_pointer=pointer
+                        )
                     )
                     state.record_account(partition, generation, event.event_id)
                 fingerprints.append(fingerprint)

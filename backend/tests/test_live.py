@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 
 import pytest
 
+from app.ingestion import live
 from app.ingestion.live import Feed, Monitor, fetch, normalize
 from app.jobs.worker import Worker
 from app.pipeline import Pipeline
@@ -44,6 +45,12 @@ def test_public_capture_analysis_and_restart_dedup(repository: EvidenceRepositor
 def test_credentials_required_before_network() -> None:
     with pytest.raises(ValueError, match="credential"):
         fetch(Feed(id="yt", platform="youtube", query="video"))
+
+
+@pytest.mark.parametrize("query", ["   ", '""', '"  "'])
+def test_blank_query_cannot_collect_everything(query: str) -> None:
+    with pytest.raises(ValueError, match="nonempty"):
+        Feed(id="blank", platform="hacker_news", query=query)
 
 
 def test_youtube_does_not_merge_display_names() -> None:
@@ -107,3 +114,93 @@ def test_x_retains_direct_reply_actor() -> None:
     event, _ = normalize(feed, payload)[0]
     assert event.target_account_id == "x_twitter:43"
     assert event.interaction_type == "reply"
+
+
+def test_hn_requires_own_text_and_retains_title_and_pointer() -> None:
+    feed = Feed(id="bihar", platform="hacker_news", query="Bihar")
+    base = {"author": "reader", "created_at_i": 1_700_000_000}
+    payload = {
+        "hits": [
+            {**base, "objectID": "1", "title": "Bihari cuisine"},
+            {**base, "objectID": "2", "story_title": "Bihar", "comment_text": "unrelated"},
+            {**base, "objectID": "3", "title": "Bihar news", "story_text": "Full story"},
+            {**base, "objectID": "4", "title": "Bihar", "created_at_i": "invalid"},
+            {**base, "objectID": "5", "comment_text": "<p>Bihar &amp; floods</p>"},
+        ]
+    }
+    rows = normalize(feed, payload)
+    assert [row[0].source_event_key for row in rows] == ["3", "5"]
+    assert rows[0][0].text == "Bihar news\nFull story"
+    assert rows[1][1] == "/hits/4"
+
+
+def test_repeated_page_token_stops_requests(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = []
+    monkeypatch.setenv("TEST_REDDIT_TOKEN", "test-only")
+
+    def response(url: str, headers: dict[str, str]) -> tuple[bytes, dict]:
+        calls.append(url)
+        return b"{}", {"data": {"children": [], "after": "same-token"}}
+
+    monkeypatch.setattr(live, "get_json", response)
+    fetch(
+        Feed(
+            id="r",
+            platform="reddit",
+            query="news",
+            max_pages=10,
+            credential_env="TEST_REDDIT_TOKEN",
+        )
+    )
+    assert len(calls) == 2
+
+
+def test_hn_search_disables_fuzzy_matches(monkeypatch: pytest.MonkeyPatch) -> None:
+    from urllib.parse import parse_qs, urlsplit
+
+    def response(url: str, headers: dict[str, str]) -> tuple[bytes, dict]:
+        params = parse_qs(urlsplit(url).query)
+        assert params["typoTolerance"] == ["false"]
+        assert params["queryType"] == ["prefixNone"]
+        assert params["query"] == ['"Bihar"']
+        assert params["restrictSearchableAttributes"] == ["title,story_text,comment_text"]
+        return b"{}", {"hits": [], "nbPages": 0}
+
+    monkeypatch.setattr(live, "get_json", response)
+    assert fetch(Feed(id="bihar", platform="hacker_news", query="Bihar")) == [(b"{}", [])]
+
+
+def test_refresh_failure_reuses_first_capture(
+    repository: EvidenceRepository, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    feed = Feed(id="recovery", platform="hacker_news", query="flood")
+    payload = {
+        "hits": [
+            {
+                "objectID": "123",
+                "author": "observer",
+                "title": "flood",
+                "created_at_i": int(datetime.now(UTC).timestamp()),
+            }
+        ]
+    }
+    worker = Worker(Pipeline(StateRepository(repository)))
+    monitor = Monitor(worker, [feed])
+    original_refresh = worker.pipeline.refresh
+
+    def fail(*args: object) -> None:
+        raise RuntimeError("refresh interrupted")
+
+    try:
+        monkeypatch.setattr(worker.pipeline, "refresh", fail)
+        with pytest.raises(RuntimeError):
+            monitor.accept(feed, [(json.dumps(payload).encode(), normalize(feed, payload))])
+        monkeypatch.setattr(worker.pipeline, "refresh", original_refresh)
+        payload["hits"][0]["points"] = 20
+        assert (
+            monitor.accept(feed, [(json.dumps(payload).encode(), normalize(feed, payload))])[0] == 1
+        )
+        assert repository.event_count("local") == 1
+        repository.verify("local")
+    finally:
+        worker.executor.shutdown()

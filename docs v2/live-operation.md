@@ -16,14 +16,15 @@ into proof that a claim is false.
    keyword query, `phishing`, every 60 seconds, at most 100 newest matching results.
    This is a cybersecurity demonstration, not a Bihar-disinformation dataset.
 
-`start.bat` retains the ordinary offline configuration unless live settings are supplied
-in its environment. Both modes retain `sample_data`: it still supplies required resources.
+The current integrated `start.bat` loads `live-feeds.local.json` when available and creates
+it from the example on first launch. `start-live.bat` is a compatibility entry point for
+that same launcher. Both retain `sample_data`, which still supplies required resources.
 
 ## Supported API adapters
 
 | platform | query | credential_env | Scope and limits |
 |---|---|---|---|
-| hacker_news | Search words | omit | Algolia public search; stories/comments, no key |
+| hacker_news | One literal word or phrase | omit | Algolia public search; exact own-text matches in stories/comments, no key |
 | youtube | One video ID | YOUTUBE_API_KEY | Official API, top-level comments only |
 | reddit | One subreddit name | REDDIT_ACCESS_TOKEN | OAuth API, newest submissions only; renewable token supplied externally |
 | x_twitter | Recent-search query | X_BEARER_TOKEN | Official API; account access/quota required |
@@ -48,6 +49,13 @@ commands containing connector credentials. This file is git-ignored and stores v
 as local plain text. Update it when rotating a key. A YouTube feed still needs a video ID.
 The interface reports failure type without exposing secret-bearing exception text.
 Redirects are rejected. Responses are bounded to 5 MB per page.
+
+HN fuzzy/prefix expansion is disabled, and each result must match the phrase in its own
+title/body. Invalid individual rows are skipped with an aggregate server-log warning;
+their indices are preserved in source pointers for valid rows. Blank queries are rejected.
+Repeated pagination tokens stop a poll. Restart/retry recovery reuses first-seen evidence
+when ingestion succeeded but analysis failed. See the [October 23 audit](feature-crawler-audit-2026-10-23.md)
+for the real-network check and remaining platform limitations.
 
 Polling is a bounded sample, not an exhaustive archive or streaming firehose. Feed limits
 are 10 feeds and 10 pages per poll. Busy feeds can have gaps. First-seen post identity is

@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-23",
+  "query": "Bihar",
+  "before_fix": {
+    "returned": 100,
+    "own_text_matches": 0
+  },
+  "after_fix": {
+    "returned": 100,
+    "own_text_matches": 100,
+    "ingested": 100,
+    "repeat_ingested": 0,
+    "campaigns": 1,
+    "evidence_verified": true
+  },
+  "limitations": "One public HN poll through the pipeline; not a throughput, accuracy or authenticated-platform certification"
+}

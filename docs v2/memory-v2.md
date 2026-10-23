@@ -3,6 +3,18 @@
 **Contract version:** 2.1.0  
 **Updated:** October 19, 2026
 
+**October 23 audit:** Compared `Cluade.docx` with current source. Live public adapters,
+webhook delivery, media diagnostics and supervised evaluation were added since that older
+assessment. Fixed HN fuzzy-result pollution, lost titles, malformed-row handling, repeated
+cursors, ingestion recovery after refresh failure, and blank queries; restored the documented
+live launcher entry point. Real HN check: 100/100 Bihar matches after the fix versus 0/100
+before, 100 ingested, zero duplicate re-ingestions, evidence verified. Validation: 25 focused
+tests passed in 9.52 seconds, Ruff passed on changed Python files, and the repository's
+mypy command passed across 53 source files. Historical corpus
+verification passed for 10,084 records / 617 responses. See the
+[full feature/crawler audit](feature-crawler-audit-2026-10-23.md) for current capabilities
+and limitations; earlier release-gap entries below are chronological.
+
 **Current state:** Offline investigation workbench implemented through Phase 6, with recorded synthetic evaluation and explicit release gaps. Windows local verification is complete; this is a demonstration release, not a production accuracy claim.
 **Next work:** Prioritize the organizer-only dataset migration requested October 19. The user confirmed the two TXT files are the complete supplied input and public collection using their keywords is allowed. A standalone Hacker News collector produced 10,084 verified public records from 5,821 authors, including 187 explicit Bihar mentions; see [collection report](../datasets/public-corpus-report.md). This predominantly cybersecurity corpus is unlabelled and not yet imported into the dashboard. Bihar-focused source coverage, competition workflow isolation, actual-data model evaluation, graph latency and archive browsing remain open.
 
