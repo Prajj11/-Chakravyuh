@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-23",
+  "platform": "youtube",
+  "video_id": "ItsVeXu01nQ",
+  "source_url": "https://www.youtube.com/watch?v=ItsVeXu01nQ",
+  "public_comments_normalized": 34,
+  "ingested": 34,
+  "repeat_ingested": 0,
+  "campaigns": 1,
+  "evidence_verified": true,
+  "poll_interval_seconds": 300,
+  "scope": "One credentialed official API comment poll, source normalization, analysis and evidence verification. Not a content truthfulness or coordination accuracy evaluation.",
+  "dashboard_api_status": 200,
+  "public_campaigns_visible": 1
+}

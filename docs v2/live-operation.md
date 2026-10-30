@@ -44,6 +44,13 @@ For example, add this object to the configuration array:
 
 Set that environment variable locally before launching. Never put the credential itself
 in the JSON or commit it. HTTP errors cause exponential backoff, capped at one hour.
+
+October 23 credentialed check: YouTube public video `ItsVeXu01nQ` yielded 34 top-level
+comments, all ingested through the analysis pipeline; replay added zero duplicates and
+evidence verification passed. The public campaign was visible through the dashboard API
+(HTTP 200). The configured local feed polls every 300 seconds. The key and actual feed
+configuration remain git-ignored; restart a running backend to load changes. See
+`evaluation/results/youtube-api-smoke-2026-10-23.json` for the sanitized test result.
 `start-live.bat` also loads `.runtime/connector-env.bat` when present, for local `set`
 commands containing connector credentials. This file is git-ignored and stores values
 as local plain text. Update it when rotating a key. A YouTube feed still needs a video ID.
@@ -168,7 +175,8 @@ models and a separately frozen evaluation. No deployment accuracy is claimed.
 
 ## Remaining competition requirements
 
-- Credentialed platform adapters still need live-account verification.
+- X and Reddit adapters still need live-account verification. YouTube has a successful
+  credentialed one-video check; broader source/quota coverage remains unvalidated.
 - Telegram and full reply/repost/media acquisition are absent.
 - Trained bot detection, robust multilingual harm classification, deepfake image model
   selection/calibration, and audio/video deepfake models still require work.

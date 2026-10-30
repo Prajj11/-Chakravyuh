@@ -3,6 +3,16 @@
 **Contract version:** 2.1.0  
 **Updated:** October 19, 2026
 
+**October 23 YouTube validation:** Configured the user-supplied YouTube credential only in
+git-ignored local connector settings. Official API discovery using the supplied Bihar
+cybercrime topic selected public video `ItsVeXu01nQ`; local feed polls every 300 seconds.
+One real comment response normalized and ingested 34 public comments, repeat ingestion
+added zero events, evidence verification passed, and the dashboard campaigns API returned
+HTTP 200 with one public campaign in an isolated test store. See
+`evaluation/results/youtube-api-smoke-2026-10-23.json`. Restart is required for an existing
+backend to load the new local feed. This validates the top-level-comment adapter for one
+video, not video deepfake inference or disinformation accuracy.
+
 **October 23 audit:** Compared `Cluade.docx` with current source. Live public adapters,
 webhook delivery, media diagnostics and supervised evaluation were added since that older
 assessment. Fixed HN fuzzy-result pollution, lost titles, malformed-row handling, repeated

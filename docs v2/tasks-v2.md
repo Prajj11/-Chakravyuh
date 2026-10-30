@@ -29,7 +29,7 @@
 - [x] **T-1.3:** Generate baseline/spliced JPEG byte fixtures with separate evaluation masks; no analytical outputs in fixtures.
 - [x] **T-1.4:** Build three replay scenarios with repeated waves, missing metadata, stable actor identities and optional historical baseline events.
 - [x] **T-1.5:** Add event-time replay clock, generation-safe reset and separate origin/scope stores.
-- [/] **T-1.6 (optional live):** HN, Reddit submissions, X recent search and YouTube top-level comment adapters exist. HN real-network collection verified October 23; credentialed platforms still need live-account validation. Telegram remains absent. See `live-operation.md`.
+- [/] **T-1.6 (optional live):** HN, Reddit submissions, X recent search and YouTube top-level comment adapters exist. HN and YouTube real-network collection verified October 23: YouTube ingested 34 comments, repeat ingestion zero, evidence verified and dashboard API HTTP 200. X/Reddit still need live-account validation. Telegram remains absent. See `live-operation.md`.
 - [x] **T-1.7:** October 23 crawler fixes: exact HN own-text matching, retained titles, malformed-row isolation, repeated-cursor stop, refresh-failure deduplication recovery, blank-query rejection and restored live launcher entry point. See `feature-crawler-audit-2026-10-23.md`.
 
 ## Phase 2: Narrative and coordination analytics
